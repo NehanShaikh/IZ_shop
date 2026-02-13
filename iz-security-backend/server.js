@@ -164,8 +164,22 @@ app.post("/place-order", async (req, res) => {
 
 app.post("/upload-product", upload.single("image"), (req, res) => {
 
+  console.log("Body:", req.body);
+  console.log("File:", req.file);
+
   const { name, description, price, stock } = req.body;
-  const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+
+  if (!req.file) {
+    return res.status(400).json({ error: "Image not uploaded" });
+  }
+
+  if (!name || !price) {
+    return res.status(400).json({ error: "Name and price required" });
+  }
+
+  const imagePath = `/uploads/${req.file.filename}`;
+  const priceNum = Number(price);
+  const stockNum = Number(stock || 0);
 
   const sql = `
     INSERT INTO products 
@@ -173,12 +187,13 @@ app.post("/upload-product", upload.single("image"), (req, res) => {
     VALUES (?, ?, ?, ?, ?)
   `;
 
-  db.query(sql, [name, description, price, imagePath, stock], (err) => {
+  db.query(sql, [name, description, priceNum, imagePath, stockNum], (err) => {
     if (err) {
-      console.error(err);
-      return res.status(500).send("Error");
+      console.error("DB Insert Error:", err);
+      return res.status(500).json({ error: err.message });
     }
-    res.send("Product added with image");
+
+    res.json({ message: "Product added successfully" });
   });
 
 });
