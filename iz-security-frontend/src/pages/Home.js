@@ -1,22 +1,24 @@
+import React from "react";
+import { Link } from "react-router-dom";
+
 function Home() {
   return (
     <div className="home-container">
-
       <div className="hero-section">
 
-        {/* 🔥 Logo Instead of Text */}
+        {/* Logo */}
         <div className="hero-logo">
           <img src="/logo.png" alt="IZ Security System Logo" />
         </div>
 
         <p>Advanced CCTV • DVR • Biometric • Surveillance Solutions</p>
 
-        <a href="/products" className="hero-btn">
+        {/* Use Link instead of <a> */}
+        <Link to="/products" className="hero-btn">
           Explore Products
-        </a>
+        </Link>
 
       </div>
-
     </div>
   );
 }
