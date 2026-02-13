@@ -5,17 +5,29 @@ function MyOrders({ user }) {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-
     if (!user) return;
 
     fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`)
       .then(res => res.json())
-      .then(data => setOrders(data));
+      .then(data => {
+
+        // 🔥 Remove duplicate order IDs
+        const uniqueOrders = [];
+        const seenIds = new Set();
+
+        data.forEach(order => {
+          if (!seenIds.has(order.id)) {
+            seenIds.add(order.id);
+            uniqueOrders.push(order);
+          }
+        });
+
+        setOrders(uniqueOrders);
+      });
 
   }, [user]);
 
   const cancelOrder = async (id) => {
-
     await fetch(`https://iz-shop.onrender.com/update-order-status/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -24,17 +36,27 @@ function MyOrders({ user }) {
 
     fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`)
       .then(res => res.json())
-      .then(data => setOrders(data));
+      .then(data => {
+
+        const uniqueOrders = [];
+        const seenIds = new Set();
+
+        data.forEach(order => {
+          if (!seenIds.has(order.id)) {
+            seenIds.add(order.id);
+            uniqueOrders.push(order);
+          }
+        });
+
+        setOrders(uniqueOrders);
+      });
   };
 
-  // 🔥 Smart Product Split Function
   const splitProducts = (productsString) => {
     if (!productsString) return [];
 
     return productsString
-      // First split by newline
       .split("\n")
-      // Then split remaining comma separated items
       .flatMap(item => item.split(/,(?=\s*[A-Za-z])/))
       .map(item => item.trim())
       .filter(item => item.length > 0);
@@ -65,32 +87,11 @@ function MyOrders({ user }) {
 
             <h4>Order #{orders.length - index}</h4>
 
-            {/* Product Image */}
-            {order.image && (
-              <img
-                src={
-                  order.image.startsWith("/uploads")
-                    ? `https://iz-shop.onrender.com${order.image}`
-                    : order.image
-                }
-                alt="Product"
-                style={{
-                  width: "120px",
-                  height: "120px",
-                  objectFit: "cover",
-                  borderRadius: "8px",
-                  marginBottom: "10px"
-                }}
-              />
-            )}
-
             <div>
               <strong>Products:</strong>
               <ul style={{ marginLeft: "20px", marginTop: "5px" }}>
                 {productList.map((item, i) => (
-                  <li key={i} style={{ marginBottom: "6px" }}>
-                    {item}
-                  </li>
+                  <li key={i}>{item}</li>
                 ))}
               </ul>
             </div>
@@ -132,18 +133,6 @@ function MyOrders({ user }) {
                   Time remaining: {hoursLeft} hours
                 </p>
               </>
-            )}
-
-            {!canCancel && order.order_status === "Pending" && (
-              <p style={{ color: "gray", marginTop: "10px" }}>
-                Orders cannot be cancelled after 24 hours from purchase.
-              </p>
-            )}
-
-            {order.order_status === "Cancelled" && (
-              <p style={{ color: "red", marginTop: "10px" }}>
-                This order has been cancelled.
-              </p>
             )}
 
           </div>
