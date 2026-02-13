@@ -77,13 +77,18 @@ function Orders({ user }) {
             <p><strong>Phone:</strong> {order.phone}</p>
             <p><strong>Address:</strong> {order.address}</p>
             <div>
-            <strong>Products:</strong>
-            {order.products.split(",").map((item, index) => (
-             <p key={index} style={{ marginLeft: "10px" }}>
-              {item.trim()}
-             </p>
-             ))}
-            </div>
+  <strong>Products:</strong>
+  <ul style={{ marginLeft: "20px", marginTop: "5px" }}>
+    {order.products
+      .split(/(?<=x\d)\s*,\s*/)
+      .map((item, i) => (
+        <li key={i} style={{ marginBottom: "6px" }}>
+          {item.trim()}
+        </li>
+      ))}
+  </ul>
+</div>
+
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
           </div>
 

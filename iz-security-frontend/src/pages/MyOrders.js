@@ -73,13 +73,18 @@ function MyOrders({ user }) {
             )}
 
             <div>
-            <strong>Products:</strong>
-            <ul style={{ marginLeft: "20px", marginTop: "5px" }}>
-            {order.products.split(",").map((item, i) => (
-            <li key={i}>{item.trim()}</li>
-              ))}
-             </ul>
-            </div>
+              <strong>Products:</strong>
+              <ul style={{ marginLeft: "20px", marginTop: "5px" }}>
+                {order.products
+                  .split(/(?<=x\d)\s*,\s*/)
+                  .map((item, i) => (
+                    <li key={i} style={{ marginBottom: "6px" }}>
+                      {item.trim()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
 
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
 
