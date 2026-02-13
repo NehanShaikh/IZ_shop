@@ -65,19 +65,29 @@ app.post("/save-user", (req, res) => {
 });
 
 // Configure Storage
+const fs = require("fs");
+
+const uploadDir = path.join(__dirname, "uploads");
+
+// Create uploads folder if not exists
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 // Serve uploaded images
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(uploadDir));
+
 
 // Save Order API
 app.post("/place-order", async (req, res) => {
