@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 function Orders({ user }) {
 
   const [orders, setOrders] = useState([]);
+  const [filter, setFilter] = useState("All"); // 🔥 Filter state
 
   // =============================
   // FETCH ORDERS
@@ -43,25 +44,51 @@ function Orders({ user }) {
         body: JSON.stringify({ status: newStatus })
       });
 
-      fetchOrders(); // 🔥 refresh from DB
+      fetchOrders();
 
     } catch (error) {
       console.error("Update error:", error);
     }
   };
 
+  // 🔥 Filtered Orders
+  const filteredOrders =
+    filter === "All"
+      ? orders
+      : orders.filter(order => order.order_status === filter);
+
   return (
     <div className="container">
 
-      <h2 style={{ marginBottom: "30px", color: "#38bdf8" }}>
+      <h2 style={{ marginBottom: "20px", color: "#38bdf8" }}>
         Customer Orders
       </h2>
 
-      {orders.length === 0 && (
+      {/* 🔥 FILTER BUTTONS */}
+      <div style={{ marginBottom: "25px" }}>
+        {["All", "Pending", "Delivered", "Cancelled"].map(status => (
+          <button
+            key={status}
+            className="button"
+            style={{
+              marginRight: "10px",
+              background:
+                filter === status
+                  ? "linear-gradient(90deg,#22c55e,#16a34a)"
+                  : ""
+            }}
+            onClick={() => setFilter(status)}
+          >
+            {status}
+          </button>
+        ))}
+      </div>
+
+      {filteredOrders.length === 0 && (
         <p style={{ color: "#94a3b8" }}>No orders available.</p>
       )}
 
-      {orders.map(order => (
+      {filteredOrders.map(order => (
 
         <div className="order-card" key={order.id}>
 
@@ -76,42 +103,37 @@ function Orders({ user }) {
             <p><strong>Name:</strong> {order.customer_name}</p>
             <p><strong>Phone:</strong> {order.phone}</p>
             <p><strong>Address:</strong> {order.address}</p>
-            <div>
-  <strong>Products:</strong>
-  <ul style={{ marginLeft: "20px", marginTop: "5px" }}>
-    {order.products
-      .match(/.*?x\d/g)
-      ?.map((item, i) => (
-        <li key={i} style={{ marginBottom: "6px" }}>
-          {item.trim()}
-        </li>
-      ))}
-  </ul>
-</div>
 
+            <div>
+              <strong>Products:</strong>
+              <ul style={{ marginLeft: "20px", marginTop: "5px" }}>
+                {order.products
+                  .match(/.*?x\d/g)
+                  ?.map((item, i) => (
+                    <li key={i}>{item.trim()}</li>
+                  ))}
+              </ul>
+            </div>
 
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
           </div>
 
-          {/* 🔥 ACTION BUTTONS */}
           {order.order_status === "Pending" && (
             <div className="order-actions">
+              <button
+                className="button delete-btn"
+                onClick={() => updateStatus(order.id, "Cancelled")}
+              >
+                Cancel Order
+              </button>
 
               <button
-  className="button admin-cancel"
-  onClick={() => updateStatus(order.id, "Cancelled")}
->
-  Cancel Order
-</button>
-
-<button
-  className="button admin-deliver"
-  onClick={() => updateStatus(order.id, "Delivered")}
->
-  Mark Delivered
-</button>
-
-
+                className="button"
+                style={{ marginLeft: "10px" }}
+                onClick={() => updateStatus(order.id, "Delivered")}
+              >
+                Mark Delivered
+              </button>
             </div>
           )}
 
