@@ -18,6 +18,11 @@ function Home() {
           Explore Products
         </Link>
 
+        {/* 🔥 Delivery Notice */}
+        <div className="delivery-notice">
+          🚚 <strong>Note:</strong> Delivery is currently available only within Mangalore City, Karnataka.
+        </div>
+
       </div>
     </div>
   );
