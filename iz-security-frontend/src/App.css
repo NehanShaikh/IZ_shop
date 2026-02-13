@@ -525,6 +525,7 @@ body {
     font-size: 14px;
   }
 
+  
   /* Product Grid - keep same layout */
   .product-grid {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
