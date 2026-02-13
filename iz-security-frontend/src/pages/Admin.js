@@ -12,7 +12,7 @@ function Products({ user, cart, setCart }) {
   });
 
   useEffect(() => {
-    fetch("http://localhost:5000/products")
+    fetch("https://iz-shop.onrender.com/products")
       .then(res => res.json())
       .then(data => setProducts(data));
   }, []);
@@ -22,13 +22,13 @@ function Products({ user, cart, setCart }) {
   // ======================
 
   const handleAddProduct = async () => {
-    await fetch("http://localhost:5000/products", {
+    await fetch("https://iz-shop.onrender.com/products", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newProduct)
     });
 
-    const updated = await fetch("http://localhost:5000/products");
+    const updated = await fetch("https://iz-shop.onrender.com/products");
     const data = await updated.json();
     setProducts(data);
 
@@ -42,7 +42,7 @@ function Products({ user, cart, setCart }) {
   };
 
   const handleDelete = async (id) => {
-    await fetch(`http://localhost:5000/products/${id}`, {
+    await fetch(`https://iz-shop.onrender.com/products/${id}`, {
       method: "DELETE"
     });
 

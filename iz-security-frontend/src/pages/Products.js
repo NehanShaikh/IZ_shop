@@ -21,7 +21,7 @@ function Products({ user }) {
   // ==========================
   const fetchProducts = async () => {
     try {
-      const res = await fetch("http://localhost:5000/products");
+      const res = await fetch("https://iz-shop.onrender.com/products");
       const data = await res.json();
       setProducts(data);
     } catch (error) {
@@ -47,13 +47,13 @@ function Products({ user }) {
         formData.append("stock", newProduct.stock);
         formData.append("image", newProduct.image);
 
-        await fetch("http://localhost:5000/upload-product", {
+        await fetch("https://iz-shop.onrender.com/upload-product", {
           method: "POST",
           body: formData
         });
 
       } else {
-        await fetch("http://localhost:5000/products", {
+        await fetch("https://iz-shop.onrender.com/products", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newProduct)
@@ -82,7 +82,7 @@ function Products({ user }) {
   // ==========================
   const handleDelete = async (id) => {
     try {
-      await fetch(`http://localhost:5000/products/${id}`, {
+      await fetch(`https://iz-shop.onrender.com/products/${id}`, {
         method: "DELETE"
       });
       fetchProducts();
@@ -102,7 +102,7 @@ function Products({ user }) {
     }
 
     try {
-      await fetch("http://localhost:5000/cart", {
+      await fetch("https://iz-shop.onrender.com/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -221,7 +221,7 @@ function Products({ user }) {
         {products.map(product => {
 
           const imageUrl = product.image?.startsWith("/uploads")
-            ? `http://localhost:5000${product.image}`
+            ? `https://iz-shop.onrender.com${product.image}`
             : product.image;
 
           return (

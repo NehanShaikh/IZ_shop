@@ -7,7 +7,7 @@ function Cart({ user }) {
 
   // 🔥 Load cart from database
   useEffect(() => {
-    fetch(`http://localhost:5000/cart/${user.id}`)
+    fetch(`https://iz-shop.onrender.com/cart/${user.id}`)
       .then(res => res.json())
       .then(data => setCart(data));
   }, [user]);
@@ -15,7 +15,7 @@ function Cart({ user }) {
   // 🔥 Increase Quantity
   const increaseQty = async (id, currentQty) => {
 
-    await fetch(`http://localhost:5000/cart/${id}`, {
+    await fetch(`https://iz-shop.onrender.com/cart/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ quantity: currentQty + 1 })
@@ -33,7 +33,7 @@ function Cart({ user }) {
 
     if (currentQty <= 1) return;
 
-    await fetch(`http://localhost:5000/cart/${id}`, {
+    await fetch(`https://iz-shop.onrender.com/cart/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ quantity: currentQty - 1 })
@@ -49,7 +49,7 @@ function Cart({ user }) {
   // 🔥 Remove Item
   const removeItem = async (id) => {
 
-    await fetch(`http://localhost:5000/cart/${id}`, {
+    await fetch(`https://iz-shop.onrender.com/cart/${id}`, {
       method: "DELETE"
     });
 
@@ -75,7 +75,7 @@ function Cart({ user }) {
             <img
               src={
                 item.image.startsWith("/uploads")
-                  ? `http://localhost:5000${item.image}`
+                  ? `https://iz-shop.onrender.com${item.image}`
                   : item.image
               }
               alt={item.name}

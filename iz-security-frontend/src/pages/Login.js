@@ -11,7 +11,7 @@ function Login({ setUser }) {
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
 
-      const response = await fetch("http://localhost:5000/save-user", {
+      const response = await fetch("https://iz-shop.onrender.com/save-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

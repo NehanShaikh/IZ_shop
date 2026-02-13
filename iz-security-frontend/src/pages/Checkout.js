@@ -12,7 +12,7 @@ function Checkout({ user }) {
 
   // 🔥 Load cart from database
   useEffect(() => {
-    fetch(`http://localhost:5000/cart/${user.id}`)
+    fetch(`https://iz-shop.onrender.com/cart/${user.id}`)
       .then(res => res.json())
       .then(data => setCart(data));
   }, [user]);
@@ -29,7 +29,7 @@ function Checkout({ user }) {
     return;
   }
 
-  const response = await fetch("http://localhost:5000/place-order", {
+  const response = await fetch("https://iz-shop.onrender.com/place-order", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

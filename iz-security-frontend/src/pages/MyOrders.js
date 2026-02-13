@@ -7,7 +7,7 @@ function MyOrders({ user }) {
   useEffect(() => {
 
     const fetchOrders = () => {
-      fetch(`http://localhost:5000/my-orders/${user.id}`)
+      fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`)
         .then(res => res.json())
         .then(data => setOrders(data));
     };
@@ -20,13 +20,13 @@ function MyOrders({ user }) {
 
   const cancelOrder = async (id) => {
 
-    await fetch(`http://localhost:5000/update-order-status/${id}`, {
+    await fetch(`https://iz-shop.onrender.com/update-order-status/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "Cancelled" })
     });
 
-    fetch(`http://localhost:5000/my-orders/${user.id}`)
+    fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`)
       .then(res => res.json())
       .then(data => setOrders(data));
   };
@@ -58,7 +58,7 @@ function MyOrders({ user }) {
               <img
                 src={
                   order.image.startsWith("/uploads")
-                    ? `http://localhost:5000${order.image}`
+                    ? `https://iz-shop.onrender.com${order.image}`
                     : order.image
                 }
                 alt="Product"

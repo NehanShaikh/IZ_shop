@@ -9,7 +9,7 @@ function Orders({ user }) {
   // =============================
   const fetchOrders = async () => {
     try {
-      const res = await fetch("http://localhost:5000/orders");
+      const res = await fetch("https://iz-shop.onrender.com/orders");
       const data = await res.json();
       setOrders(data);
     } catch (error) {
@@ -37,7 +37,7 @@ function Orders({ user }) {
   const updateStatus = async (id, newStatus) => {
 
     try {
-      await fetch(`http://localhost:5000/update-order-status/${id}`, {
+      await fetch(`https://iz-shop.onrender.com/update-order-status/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus })
