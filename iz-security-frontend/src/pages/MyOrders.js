@@ -6,15 +6,11 @@ function MyOrders({ user }) {
 
   useEffect(() => {
 
-    const fetchOrders = () => {
-      fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`)
-        .then(res => res.json())
-        .then(data => setOrders(data));
-    };
+    if (!user) return;
 
-    if (user) {
-      fetchOrders();
-    }
+    fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`)
+      .then(res => res.json())
+      .then(data => setOrders(data));
 
   }, [user]);
 
@@ -29,6 +25,19 @@ function MyOrders({ user }) {
     fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`)
       .then(res => res.json())
       .then(data => setOrders(data));
+  };
+
+  // 🔥 Smart Product Split Function
+  const splitProducts = (productsString) => {
+    if (!productsString) return [];
+
+    return productsString
+      // First split by newline
+      .split("\n")
+      // Then split remaining comma separated items
+      .flatMap(item => item.split(/,(?=\s*[A-Za-z])/))
+      .map(item => item.trim())
+      .filter(item => item.length > 0);
   };
 
   return (
@@ -49,11 +58,14 @@ function MyOrders({ user }) {
 
         const hoursLeft = Math.max(0, 24 - diffHours).toFixed(1);
 
+        const productList = splitProducts(order.products);
+
         return (
           <div className="card" key={order.id}>
 
             <h4>Order #{orders.length - index}</h4>
-            {/* 🔥 Product Image Added */}
+
+            {/* Product Image */}
             {order.image && (
               <img
                 src={
@@ -73,18 +85,15 @@ function MyOrders({ user }) {
             )}
 
             <div>
-  <strong>Products:</strong>
-  <ul style={{ marginLeft: "20px", marginTop: "5px" }}>
-    {order.products
-      .split("\n")
-      .map((item, i) => (
-        <li key={i} style={{ marginBottom: "6px" }}>
-          {item.trim()}
-        </li>
-      ))}
-  </ul>
-</div>
-
+              <strong>Products:</strong>
+              <ul style={{ marginLeft: "20px", marginTop: "5px" }}>
+                {productList.map((item, i) => (
+                  <li key={i} style={{ marginBottom: "6px" }}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
 
