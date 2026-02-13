@@ -116,7 +116,7 @@ app.post("/place-order", async (req, res) => {
       const productList = cartItems.map(item => {
         total += item.price * item.quantity;
         return `${item.name} x${item.quantity}`;
-      }).join(", ");
+      }).join("\n");
 
       // 🔥 Save order in DB
       const orderQuery = `
@@ -140,7 +140,8 @@ app.post("/place-order", async (req, res) => {
 📞 Phone: ${phone}
 📍 Address: ${address}
 
-📦 Products: ${productList}
+📦 Products:
+${productList}
 💰 Total: ₹${total}
             `,
             from: process.env.TWILIO_WHATSAPP_NUMBER,
