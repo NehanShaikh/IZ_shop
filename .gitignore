@@ -1,4 +1,15 @@
+# Backend
 node_modules/
+
+# Frontend
+iz-security-frontend/node_modules/
+
+# Environment files
 .env
-dist/
+
+# React build folders
 build/
+dist/
+
+# Logs
+npm-debug.log*
