@@ -76,7 +76,14 @@ function Orders({ user }) {
             <p><strong>Name:</strong> {order.customer_name}</p>
             <p><strong>Phone:</strong> {order.phone}</p>
             <p><strong>Address:</strong> {order.address}</p>
-            <p><strong>Products:</strong> {order.products}</p>
+            <div>
+            <strong>Products:</strong>
+            {order.products.split(",").map((item, index) => (
+             <p key={index} style={{ marginLeft: "10px" }}>
+              {item.trim()}
+             </p>
+             ))}
+            </div>
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
           </div>
 
