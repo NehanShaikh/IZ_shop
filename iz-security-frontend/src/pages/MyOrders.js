@@ -67,7 +67,7 @@ function MyOrders({ user }) {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
-    });
+    }).replace(',', '');
   };
 
   const getTimeRemaining = (orderDate) => {
@@ -91,269 +91,155 @@ function MyOrders({ user }) {
   const getStatusColor = (status) => {
     switch(status?.toLowerCase()) {
       case 'cancelled':
-        return '#dc3545';
+        return { bg: '#fee', color: '#c00', text: 'CANCELLED' };
       case 'delivered':
-        return '#28a745';
+        return { bg: '#e8f5e9', color: '#2e7d32', text: 'DELIVERED' };
       case 'pending':
-        return '#ffc107';
+        return { bg: '#fff3e0', color: '#ed6c02', text: 'PENDING' };
       case 'processing':
-        return '#17a2b8';
+        return { bg: '#e3f2fd', color: '#0288d1', text: 'PROCESSING' };
       default:
-        return '#6c757d';
+        return { bg: '#f5f5f5', color: '#666', text: status?.toUpperCase() || 'PENDING' };
     }
+  };
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http')) return imagePath;
+    return `https://iz-shop.onrender.com/${imagePath}`;
   };
 
   if (!user) {
     return (
-      <div style={{ textAlign: 'center', padding: '40px' }}>
-        <p>Please log in to view your orders.</p>
+      <div style={styles.container}>
+        <div style={styles.emptyState}>
+          <p>Please log in to view your orders.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
-      <h2 style={{ 
-        marginBottom: '30px', 
-        borderBottom: '2px solid #f0f0f0', 
-        paddingBottom: '10px',
-        fontFamily: 'Arial, sans-serif'
-      }}>
-        My Orders
-      </h2>
+    <div style={styles.container}>
+      <h1 style={styles.title}>My Orders</h1>
 
       {loading && (
-        <div style={{ textAlign: 'center', padding: '40px' }}>
+        <div style={styles.loadingState}>
           <p>Loading your orders...</p>
         </div>
       )}
 
       {!loading && orders.length === 0 && (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '60px 20px', 
-          backgroundColor: '#f9f9f9', 
-          borderRadius: '8px' 
-        }}>
-          <p style={{ fontSize: '18px', color: '#666' }}>No orders found.</p>
+        <div style={styles.emptyState}>
+          <p style={styles.emptyStateText}>No orders found.</p>
+          <p style={styles.emptyStateSubtext}>Start shopping to see your orders here!</p>
         </div>
       )}
 
       {orders.map((order, index) => {
-        const orderTime = new Date(order.created_at);
-        const now = new Date();
-        const diffHours = (now - orderTime) / (1000 * 60 * 60);
-        const canCancel = order.order_status?.toLowerCase() === "pending" && diffHours <= 24;
+        const status = getStatusColor(order.order_status);
+        const canCancel = order.order_status?.toLowerCase() === "pending";
         const timeRemaining = getTimeRemaining(order.created_at);
         const isCancelling = cancellingId === order.id;
 
         return (
-          <div 
-            key={order.id} 
-            style={{ 
-              border: '1px solid #e0e0e0',
-              borderRadius: '12px',
-              padding: '25px',
-              marginBottom: '25px',
-              backgroundColor: '#fff',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-              fontFamily: 'Arial, sans-serif'
-            }}
-          >
+          <div key={order.id} style={styles.orderCard}>
             {/* Order Header */}
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '20px',
-              paddingBottom: '15px',
-              borderBottom: '2px solid #f0f0f0'
-            }}>
-              <h3 style={{ margin: 0, color: '#333' }}>
-                Order #{orders.length - index}
-              </h3>
-              <span style={{ fontSize: '14px', color: '#666' }}>
-                {formatDate(order.created_at)}
-              </span>
+            <div style={styles.orderHeader}>
+              <h2 style={styles.orderNumber}>Order #{orders.length - index}</h2>
+              <span style={styles.orderDate}>{formatDate(order.created_at)}</span>
             </div>
 
-            {/* Products Grid */}
-            <div style={{ marginBottom: '25px' }}>
-              <h4 style={{ marginBottom: '15px', color: '#555', fontSize: '16px' }}>
-                Products:
-              </h4>
+            {/* Products Section */}
+            <div style={styles.productsSection}>
+              <h3 style={styles.sectionTitle}>Products:</h3>
               
               {order.products_list && order.products_list.length > 0 ? (
-                <div style={{ 
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                  gap: '20px'
-                }}>
+                <div style={styles.productsGrid}>
                   {order.products_list.map((product, i) => (
-                    <div 
-                      key={i} 
-                      style={{ 
-                        display: 'flex',
-                        gap: '15px',
-                        padding: '15px',
-                        backgroundColor: '#f8f9fa',
-                        borderRadius: '10px',
-                        border: '1px solid #eee',
-                        transition: 'transform 0.2s, box-shadow 0.2s',
-                        cursor: 'default'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-2px)';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                    >
+                    <div key={i} style={styles.productCard}>
                       {/* Product Image */}
-                      <div style={{ 
-                        width: '80px',
-                        height: '80px',
-                        backgroundColor: '#fff',
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: '1px solid #ddd',
-                        overflow: 'hidden',
-                        flexShrink: 0
-                      }}>
+                      <div style={styles.imageContainer}>
                         {product.image ? (
                           <img 
-                            src={product.image}
+                            src={getImageUrl(product.image)}
                             alt={product.name}
-                            style={{ 
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover'
-                            }}
+                            style={styles.productImage}
                             onError={(e) => {
                               e.target.onerror = null;
                               e.target.style.display = 'none';
                               e.target.parentElement.innerHTML = `
                                 <div style="
-                                  font-size: 11px; 
-                                  color: #999; 
-                                  text-align: center;
-                                  padding: 5px;
+                                  width: 60px;
+                                  height: 60px;
+                                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                  border-radius: 8px;
+                                  display: flex;
+                                  align-items: center;
+                                  justify-content: center;
+                                  color: white;
+                                  font-size: 24px;
+                                  font-weight: bold;
+                                  text-transform: uppercase;
                                 ">
-                                  Image<br/>not available
+                                  ${product.name.charAt(0)}
                                 </div>
                               `;
                             }}
                           />
                         ) : (
-                          <div style={{ 
-                            fontSize: '11px', 
-                            color: '#999',
-                            textAlign: 'center',
-                            padding: '5px'
-                          }}>
-                            No image
+                          <div style={styles.imagePlaceholder}>
+                            {product.name.charAt(0).toUpperCase()}
                           </div>
                         )}
                       </div>
                       
-                      {/* Product Details */}
-                      <div style={{ 
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}>
-                        <div style={{ 
-                          fontSize: '15px',
-                          fontWeight: '600',
-                          color: '#333',
-                          marginBottom: '5px',
-                          wordBreak: 'break-word'
-                        }}>
-                          {product.name}
-                        </div>
+                      {/* Product Name */}
+                      <div style={styles.productInfo}>
+                        <span style={styles.productName}>{product.name}</span>
                         {product.matchedWith && (
-                          <div style={{ 
-                            fontSize: '11px', 
-                            color: '#28a745',
-                            backgroundColor: '#e8f5e9',
-                            padding: '2px 8px',
-                            borderRadius: '12px',
-                            display: 'inline-block',
-                            alignSelf: 'flex-start'
-                          }}>
-                            ✓ Matched
-                          </div>
+                          <span style={styles.matchedBadge}>✓ In Stock</span>
                         )}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div style={{ color: '#999', fontStyle: 'italic', padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-                  No product details available
+                <div style={styles.noProducts}>
+                  <p>No product details available</p>
                 </div>
               )}
             </div>
 
             {/* Order Footer */}
-            <div style={{ 
-              backgroundColor: '#f8f9fa',
-              padding: '20px',
-              borderRadius: '10px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '20px',
-              border: '1px solid #eee'
-            }}>
-              <div>
-                <p style={{ margin: '5px 0', fontSize: '16px' }}>
-                  <strong>Total Amount:</strong>{' '}
-                  <span style={{ color: '#28a745', fontSize: '18px' }}>
-                    ₹{Number(order.total_amount).toFixed(2)}
-                  </span>
-                </p>
+            <div style={styles.orderFooter}>
+              <div style={styles.orderDetails}>
+                <div style={styles.totalAmount}>
+                  <span style={styles.totalLabel}>Total Amount:</span>
+                  <span style={styles.totalValue}>₹{Number(order.total_amount).toFixed(2)}</span>
+                </div>
                 
-                <p style={{ margin: '5px 0' }}>
-                  <strong>Status:</strong>{' '}
+                <div style={styles.statusContainer}>
+                  <span style={styles.statusLabel}>Status:</span>
                   <span style={{
-                    display: 'inline-block',
-                    padding: '6px 16px',
-                    borderRadius: '20px',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    backgroundColor: getStatusColor(order.order_status),
-                    color: order.order_status?.toLowerCase() === 'pending' ? '#000' : '#fff',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
+                    ...styles.statusBadge,
+                    backgroundColor: status.bg,
+                    color: status.color
                   }}>
-                    {order.order_status || 'PENDING'}
+                    {status.text}
                   </span>
-                </p>
+                </div>
               </div>
 
               {canCancel && (
-                <div style={{ textAlign: 'right' }}>
+                <div style={styles.cancelSection}>
                   <button
                     onClick={() => cancelOrder(order.id)}
                     disabled={isCancelling}
                     style={{
-                      padding: '12px 32px',
-                      backgroundColor: isCancelling ? '#dc354580' : '#dc3545',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      cursor: isCancelling ? 'not-allowed' : 'pointer',
-                      fontSize: '15px',
-                      fontWeight: '600',
-                      transition: 'background-color 0.2s',
-                      boxShadow: '0 2px 4px rgba(220,53,69,0.2)'
+                      ...styles.cancelButton,
+                      opacity: isCancelling ? 0.7 : 1,
+                      cursor: isCancelling ? 'not-allowed' : 'pointer'
                     }}
                     onMouseEnter={(e) => {
                       if (!isCancelling) e.target.style.backgroundColor = '#c82333';
@@ -366,12 +252,8 @@ function MyOrders({ user }) {
                   </button>
 
                   {timeRemaining && (
-                    <p style={{ 
-                      fontSize: '13px', 
-                      color: '#666',
-                      marginTop: '10px'
-                    }}>
-                      ⏰ Time remaining: <span style={{ color: '#dc3545', fontWeight: '600' }}>{timeRemaining}</span>
+                    <p style={styles.timeRemaining}>
+                      ⏰ Time remaining: <span style={styles.timeValue}>{timeRemaining}</span>
                     </p>
                   )}
                 </div>
@@ -382,6 +264,277 @@ function MyOrders({ user }) {
       })}
     </div>
   );
+}
+
+// Styles object
+const styles = {
+  container: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '30px 20px',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    backgroundColor: '#f8f9fa',
+    minHeight: '100vh'
+  },
+  title: {
+    fontSize: '32px',
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: '30px',
+    paddingBottom: '15px',
+    borderBottom: '3px solid #e0e0e0',
+    letterSpacing: '-0.5px'
+  },
+  loadingState: {
+    textAlign: 'center',
+    padding: '60px',
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+    color: '#666',
+    fontSize: '16px'
+  },
+  emptyState: {
+    textAlign: 'center',
+    padding: '80px 20px',
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+  },
+  emptyStateText: {
+    fontSize: '20px',
+    color: '#333',
+    marginBottom: '10px',
+    fontWeight: '500'
+  },
+  emptyStateSubtext: {
+    fontSize: '16px',
+    color: '#999'
+  },
+  orderCard: {
+    backgroundColor: 'white',
+    borderRadius: '16px',
+    padding: '25px',
+    marginBottom: '25px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+    transition: 'box-shadow 0.3s ease',
+    border: '1px solid #f0f0f0'
+  },
+  orderHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '25px',
+    paddingBottom: '15px',
+    borderBottom: '2px solid #f0f0f0'
+  },
+  orderNumber: {
+    fontSize: '20px',
+    fontWeight: '600',
+    color: '#333',
+    margin: 0
+  },
+  orderDate: {
+    fontSize: '14px',
+    color: '#666',
+    backgroundColor: '#f5f5f5',
+    padding: '6px 12px',
+    borderRadius: '20px'
+  },
+  productsSection: {
+    marginBottom: '25px'
+  },
+  sectionTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#444',
+    marginBottom: '15px'
+  },
+  productsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+    gap: '15px'
+  },
+  productCard: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '15px',
+    padding: '15px',
+    backgroundColor: '#f8f9fa',
+    borderRadius: '12px',
+    border: '1px solid #eee',
+    transition: 'all 0.2s ease'
+  },
+  imageContainer: {
+    width: '60px',
+    height: '60px',
+    flexShrink: 0,
+    borderRadius: '8px',
+    overflow: 'hidden'
+  },
+  productImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover'
+  },
+  imagePlaceholder: {
+    width: '60px',
+    height: '60px',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'white',
+    fontSize: '24px',
+    fontWeight: 'bold',
+    textTransform: 'uppercase'
+  },
+  productInfo: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '5px'
+  },
+  productName: {
+    fontSize: '15px',
+    fontWeight: '500',
+    color: '#333',
+    lineHeight: '1.4'
+  },
+  matchedBadge: {
+    fontSize: '11px',
+    color: '#2e7d32',
+    backgroundColor: '#e8f5e9',
+    padding: '2px 8px',
+    borderRadius: '12px',
+    display: 'inline-block',
+    alignSelf: 'flex-start'
+  },
+  noProducts: {
+    padding: '30px',
+    backgroundColor: '#f8f9fa',
+    borderRadius: '12px',
+    textAlign: 'center',
+    color: '#999',
+    fontStyle: 'italic'
+  },
+  orderFooter: {
+    backgroundColor: '#f8f9fa',
+    padding: '20px',
+    borderRadius: '12px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '20px',
+    border: '1px solid #eee',
+    marginTop: '10px'
+  },
+  orderDetails: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px'
+  },
+  totalAmount: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px'
+  },
+  totalLabel: {
+    fontSize: '16px',
+    fontWeight: '500',
+    color: '#555'
+  },
+  totalValue: {
+    fontSize: '20px',
+    fontWeight: '700',
+    color: '#2e7d32'
+  },
+  statusContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px'
+  },
+  statusLabel: {
+    fontSize: '14px',
+    color: '#666'
+  },
+  statusBadge: {
+    padding: '6px 16px',
+    borderRadius: '20px',
+    fontSize: '13px',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: '0.3px'
+  },
+  cancelSection: {
+    textAlign: 'right'
+  },
+  cancelButton: {
+    padding: '12px 32px',
+    backgroundColor: '#dc3545',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    transition: 'background-color 0.2s',
+    boxShadow: '0 2px 4px rgba(220,53,69,0.2)'
+  },
+  timeRemaining: {
+    fontSize: '13px',
+    color: '#666',
+    marginTop: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5px'
+  },
+  timeValue: {
+    color: '#dc3545',
+    fontWeight: '600',
+    backgroundColor: '#fee',
+    padding: '2px 8px',
+    borderRadius: '12px'
+  }
+};
+
+// Media queries for responsiveness
+const mediaStyles = `
+  @media (max-width: 768px) {
+    .order-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    
+    .products-grid {
+      grid-template-columns: 1fr !important;
+    }
+    
+    .order-footer {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .cancel-section {
+      text-align: left;
+      width: 100%;
+    }
+    
+    .cancel-button {
+      width: 100%;
+    }
+  }
+`;
+
+// Add media styles to document
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = mediaStyles;
+  document.head.appendChild(style);
 }
 
 export default MyOrders;
