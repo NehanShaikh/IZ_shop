@@ -29,7 +29,7 @@ function MyOrders({ user }) {
     await fetch(`${API}/update-order-status/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "Cancelled due to out of stock" })
+      body: JSON.stringify({ status: "Cancelled" })
     });
 
     const res = await fetch(`${API}/my-orders/${user.id}`);
@@ -144,6 +144,19 @@ function MyOrders({ user }) {
               >
                 {order.order_status}
               </span>
+
+              {/* 🔥 Extra line only if admin cancelled */}
+  {order.order_status === "Cancelled" && !canCancel && (
+    <div
+      style={{
+        fontSize: "13px",
+        color: "#f87171",
+        marginTop: "4px"
+      }}
+    >
+      Cancelled due to Out of Stock
+    </div>
+  )}
             </p>
 
             <p>
