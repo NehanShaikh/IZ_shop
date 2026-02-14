@@ -603,26 +603,30 @@ body {
 
   .hamburger {
     display: block;
+    z-index: 1001;
+    position: relative;
   }
 
   .nav-right {
-    position: absolute;
-    top: 70px;
-    right: 0;
+    position: fixed;     /* 🔥 Change this */
+    top: 0;              /* 🔥 Change this */
+    right: -100%;        /* 🔥 Start hidden */
+    height: 100vh;       /* 🔥 Full screen */
+    width: 75%;
     background: #111;
-    width: 100%;
-    display: none;
     flex-direction: column;
-    padding: 20px;
+    padding: 80px 20px;
+    transition: 0.3s ease;
+    z-index: 1000;
+  }
+
+  .nav-right.active {
+    right: 0;            /* 🔥 Slide in */
   }
 
   .nav-right a,
   .nav-right button {
-    margin: 10px 0;
-  }
-
-  .nav-right.active {
-    display: flex;
+    margin: 15px 0;
   }
 }
 
@@ -635,6 +639,7 @@ body {
   background: rgba(0, 0, 0, 0.6);
   z-index: 999;
 }
+
 
 
 /* ================= DELIVERY NOTICE ================= */
