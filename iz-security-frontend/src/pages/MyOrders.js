@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
 function MyOrders({ user }) {
-
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
@@ -10,8 +9,7 @@ function MyOrders({ user }) {
     fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`)
       .then(res => res.json())
       .then(data => {
-
-        // 🔥 Remove duplicate order IDs
+        // Remove duplicate order IDs
         const uniqueOrders = [];
         const seenIds = new Set();
 
@@ -24,7 +22,6 @@ function MyOrders({ user }) {
 
         setOrders(uniqueOrders);
       });
-
   }, [user]);
 
   const cancelOrder = async (id) => {
@@ -37,7 +34,6 @@ function MyOrders({ user }) {
     fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`)
       .then(res => res.json())
       .then(data => {
-
         const uniqueOrders = [];
         const seenIds = new Set();
 
@@ -52,9 +48,9 @@ function MyOrders({ user }) {
       });
   };
 
+  // Fallback function for parsing products text (if order_items is empty)
   const splitProducts = (productsString) => {
     if (!productsString) return [];
-
     return productsString
       .split("\n")
       .flatMap(item => item.split(/,(?=\s*[A-Za-z])/))
@@ -69,7 +65,6 @@ function MyOrders({ user }) {
       {orders.length === 0 && <p>No orders found.</p>}
 
       {orders.map((order, index) => {
-
         const orderTime = new Date(order.created_at);
         const now = new Date();
         const diffHours = (now - orderTime) / (1000 * 60 * 60);
@@ -80,61 +75,173 @@ function MyOrders({ user }) {
 
         const hoursLeft = Math.max(0, 24 - diffHours).toFixed(1);
 
+        // Check if we have order_items from the new backend
+        const hasOrderItems = order.order_items && order.order_items.length > 0;
+        
+        // Fallback product list from text
         const productList = splitProducts(order.products);
 
         return (
-          <div className="card" key={order.id}>
-
-            <h4>Order #{orders.length - index}</h4>
+          <div className="card" key={order.id} style={{ 
+            marginBottom: "20px",
+            padding: "20px",
+            border: "1px solid #ddd",
+            borderRadius: "8px",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+          }}>
+            <h4>Order #{order.id}</h4>
 
             <div>
-              <strong>Products:</strong>
-              <ul style={{ marginLeft: "20px", marginTop: "5px" }}>
-                {productList.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
-              </ul>
+              <strong style={{ fontSize: "16px" }}>Products:</strong>
+              
+              {/* Show products with images if available */}
+              {hasOrderItems ? (
+                <div style={{ marginTop: "15px" }}>
+                  {order.order_items.map((item, i) => (
+                    <div key={i} style={{ 
+                      display: "flex", 
+                      alignItems: "center", 
+                      gap: "20px",
+                      marginBottom: "15px",
+                      padding: "15px",
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "8px",
+                      backgroundColor: "#f9f9f9"
+                    }}>
+                      {/* Product Image */}
+                      {item.image ? (
+                        <img 
+                          src={item.image} 
+                          alt={item.product_name}
+                          style={{
+                            width: "80px",
+                            height: "80px",
+                            objectFit: "cover",
+                            borderRadius: "8px",
+                            border: "1px solid #ddd"
+                          }}
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "https://via.placeholder.com/80x80?text=No+Image";
+                          }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: "80px",
+                          height: "80px",
+                          backgroundColor: "#f0f0f0",
+                          borderRadius: "8px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "12px",
+                          color: "#999",
+                          border: "1px solid #ddd"
+                        }}>
+                          No Image
+                        </div>
+                      )}
+                      
+                      {/* Product Details */}
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: "bold", fontSize: "16px", marginBottom: "5px" }}>
+                          {item.product_name || "Unknown Product"}
+                        </div>
+                        <div style={{ fontSize: "14px", color: "#666", marginBottom: "3px" }}>
+                          Quantity: {item.quantity}
+                        </div>
+                        <div style={{ fontSize: "14px", color: "#666", marginBottom: "3px" }}>
+                          Price: ₹{item.price}
+                        </div>
+                        {item.description && (
+                          <div style={{ fontSize: "12px", color: "#888", marginTop: "5px" }}>
+                            {item.description.substring(0, 100)}...
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* Fallback to text-based product list */
+                <div>
+                  <ul style={{ marginLeft: "20px", marginTop: "10px" }}>
+                    {productList.map((item, i) => (
+                      <li key={i} style={{ marginBottom: "5px" }}>{item}</li>
+                    ))}
+                  </ul>
+                  {productList.length === 0 && (
+                    <p style={{ color: "#999", fontStyle: "italic" }}>
+                      Product details not available
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
-            <p><strong>Total:</strong> ₹{order.total_amount}</p>
+            <div style={{ 
+              marginTop: "15px", 
+              padding: "10px", 
+              backgroundColor: "#f5f5f5", 
+              borderRadius: "5px" 
+            }}>
+              <p><strong>Total:</strong> ₹{order.total_amount}</p>
 
-            <p>
-              <strong>Status:</strong>{" "}
-              <span style={{
-                color:
-                  order.order_status === "Cancelled"
-                    ? "red"
-                    : order.order_status === "Delivered"
-                    ? "green"
-                    : "orange"
-              }}>
-                {order.order_status}
-              </span>
-            </p>
+              <p>
+                <strong>Status:</strong>{" "}
+                <span style={{
+                  color:
+                    order.order_status === "Cancelled"
+                      ? "red"
+                      : order.order_status === "Delivered"
+                      ? "green"
+                      : "#ff6b00",
+                  fontWeight: "bold",
+                  padding: "2px 8px",
+                  backgroundColor: 
+                    order.order_status === "Cancelled"
+                      ? "#ffe6e6"
+                      : order.order_status === "Delivered"
+                      ? "#e6ffe6"
+                      : "#fff0e6",
+                  borderRadius: "4px"
+                }}>
+                  {order.order_status}
+                </span>
+              </p>
 
-            <p>
-              <strong>Date:</strong>{" "}
-              {new Date(order.created_at).toLocaleString()}
-            </p>
+              <p>
+                <strong>Date:</strong>{" "}
+                {new Date(order.created_at).toLocaleString()}
+              </p>
+            </div>
 
             {canCancel && (
-              <>
+              <div style={{ marginTop: "15px" }}>
                 <button
                   className="button"
-                  style={{ marginTop: "10px", backgroundColor: "red", color: "white" }}
+                  style={{ 
+                    backgroundColor: "#dc3545", 
+                    color: "white",
+                    border: "none",
+                    padding: "10px 20px",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    fontWeight: "bold"
+                  }}
                   onClick={() => cancelOrder(order.id)}
                 >
                   Cancel Order
                 </button>
 
-                <p style={{ fontSize: "12px", color: "gray", marginTop: "5px" }}>
+                <p style={{ fontSize: "12px", color: "#666", marginTop: "10px" }}>
                   You can cancel this order within 24 hours.
                   <br />
-                  Time remaining: {hoursLeft} hours
+                  <strong>Time remaining: {hoursLeft} hours</strong>
                 </p>
-              </>
+              </div>
             )}
-
           </div>
         );
       })}

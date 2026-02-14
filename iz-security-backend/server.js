@@ -202,20 +202,34 @@ app.post("/upload-product", upload.single("image"), (req, res) => {
 
 // 🔥 Get orders for specific user
 app.get("/my-orders/:userId", (req, res) => {
-
   const sql = `
     SELECT 
-      orders.id,
-      orders.products,
-      orders.total_amount,
-      orders.order_status,
-      orders.created_at,
-      products.image
-    FROM orders
-    LEFT JOIN products 
-      ON orders.products LIKE CONCAT('%', products.name, '%')
-    WHERE orders.user_id = ?
-    ORDER BY orders.id DESC
+      o.id,
+      o.products,
+      o.total_amount,
+      o.order_status,
+      o.created_at,
+      o.customer_name,
+      o.phone,
+      o.address,
+      (
+        SELECT JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'product_id', p.id,
+            'product_name', p.name,
+            'quantity', oi.quantity,
+            'price', oi.price,
+            'image', p.image,
+            'description', p.description
+          )
+        )
+        FROM order_items oi
+        LEFT JOIN products p ON oi.product_id = p.id
+        WHERE oi.order_id = o.id
+      ) as order_items
+    FROM orders o
+    WHERE o.user_id = ?
+    ORDER BY o.id DESC
   `;
 
   db.query(sql, [req.params.userId], (err, results) => {
@@ -223,7 +237,14 @@ app.get("/my-orders/:userId", (req, res) => {
       console.error(err);
       return res.status(500).send("Error fetching orders");
     }
-    res.json(results);
+
+    // Parse the JSON string for each order
+    const formattedResults = results.map(order => ({
+      ...order,
+      order_items: order.order_items ? JSON.parse(order.order_items) : []
+    }));
+
+    res.json(formattedResults);
   });
 });
 
