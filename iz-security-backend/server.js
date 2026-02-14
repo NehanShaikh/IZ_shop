@@ -202,7 +202,6 @@ app.post("/upload-product", upload.single("image"), (req, res) => {
 
 // 🔥 Get orders for specific user
 app.get("/my-orders/:userId", (req, res) => {
-  // First, get all orders for the user
   const ordersSql = `
     SELECT 
       id,
@@ -221,57 +220,62 @@ app.get("/my-orders/:userId", (req, res) => {
       return res.status(500).send("Error fetching orders");
     }
 
-    // For each order, fetch the corresponding product images
     const ordersWithProducts = orders.map(order => {
-      // Parse the products string into an array
+      // Parse the products string
       const productNames = order.products
         .split('\n')
         .flatMap(item => item.split(/,(?=\s*[A-Za-z])/))
-        .map(item => item.trim())
+        .map(item => item.trim().toLowerCase()) // Convert to lowercase for matching
         .filter(item => item.length > 0);
 
-      // Create a promise to fetch images for each product
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         if (productNames.length === 0) {
           resolve({ ...order, products_list: [] });
           return;
         }
 
-        // Create placeholders for SQL IN clause
-        const placeholders = productNames.map(() => '?').join(',');
+        // Get ALL products and do matching in JavaScript for more flexibility
+        const allProductsSql = `SELECT name, image FROM products`;
         
-        const productsSql = `
-          SELECT name, image 
-          FROM products 
-          WHERE name IN (${placeholders})
-        `;
-
-        db.query(productsSql, productNames, (err, products) => {
+        db.query(allProductsSql, [], (err, allProducts) => {
           if (err) {
             console.error(err);
-            // Return order with empty products_list on error
             resolve({ ...order, products_list: [] });
             return;
           }
 
-          // Create a map of product name to image for quick lookup
-          const imageMap = {};
-          products.forEach(p => {
-            imageMap[p.name] = p.image;
-          });
+          // Create a flexible matching map
+          const products_list = productNames.map(orderProductName => {
+            // Try to find a matching product
+            const matchedProduct = allProducts.find(dbProduct => {
+              const dbProductName = dbProduct.name.toLowerCase().trim();
+              const orderProductLower = orderProductName.toLowerCase().trim();
+              
+              // Try exact match first
+              if (dbProductName === orderProductLower) return true;
+              
+              // Try if order product name contains db product name or vice versa
+              if (dbProductName.includes(orderProductLower) || 
+                  orderProductLower.includes(dbProductName)) return true;
+              
+              // Remove common variations (spaces, hyphens) and compare
+              const normalize = (str) => str.replace(/[-\s]/g, '');
+              if (normalize(dbProductName) === normalize(orderProductLower)) return true;
+              
+              return false;
+            });
 
-          // Create the products list with images
-          const products_list = productNames.map(name => ({
-            name: name,
-            image: imageMap[name] || null // Use null if image not found
-          }));
+            return {
+              name: orderProductName,
+              image: matchedProduct ? matchedProduct.image : null
+            };
+          });
 
           resolve({ ...order, products_list });
         });
       });
     });
 
-    // Wait for all product image fetches to complete
     Promise.all(ordersWithProducts)
       .then(ordersWithImages => {
         res.json(ordersWithImages);
