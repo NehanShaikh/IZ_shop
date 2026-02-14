@@ -581,6 +581,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  z-index: 2000;   /* 🔥 Add this only */
   padding: 15px 30px;
   background-color: #111;
   color: white;
@@ -603,8 +604,8 @@ body {
 
   .hamburger {
     display: block;
+    z-index: 1001;
     position: relative;
-    z-index: 2001;   /* 🔥 very high */
   }
 
   .nav-right {
@@ -615,14 +616,19 @@ body {
     width: 75%;
     background: #111;
 
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    display: flex;              /* 🔥 ADD THIS */
+    flex-direction: column;     /* 🔥 ADD THIS */
+    align-items: flex-start;    /* 🔥 ADD THIS */
 
     padding: 80px 20px;
     transition: 0.3s ease;
+    z-index: 1000;
+  }
 
-    z-index: 2000;   /* 🔥 higher than everything */
+  .nav-right a,
+  .nav-right button {
+    margin: 15px 0;
+    font-size: 18px;
   }
 
   .nav-right.active {
@@ -638,7 +644,7 @@ body {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.6);
-  z-index: 1999;   /* just below menu */
+  z-index: 999;
 }
 
 
