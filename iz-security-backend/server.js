@@ -19,6 +19,7 @@ app.use(express.json());
 // Connect to MySQL
 const db = mysql.createConnection(process.env.DATABASE_URL);
 
+
 db.connect((err) => {
   if (err) {
     console.error("Database connection failed:", err);
@@ -201,6 +202,7 @@ app.post("/upload-product", upload.single("image"), (req, res) => {
 
 // 🔥 Get orders for specific user
 app.get("/my-orders/:userId", (req, res) => {
+
   const sql = `
     SELECT 
       orders.id,
@@ -208,23 +210,11 @@ app.get("/my-orders/:userId", (req, res) => {
       orders.total_amount,
       orders.order_status,
       orders.created_at,
-      orders.customer_name,
-      orders.phone,
-      orders.address,
-      JSON_ARRAYAGG(
-        JSON_OBJECT(
-          'product_id', products.id,
-          'product_name', products.name,
-          'quantity', order_items.quantity,
-          'price', order_items.price,
-          'image', products.image
-        )
-      ) as order_items_with_images
+      products.image
     FROM orders
-    LEFT JOIN order_items ON orders.id = order_items.order_id
-    LEFT JOIN products ON order_items.product_id = products.id
+    LEFT JOIN products 
+      ON orders.products LIKE CONCAT('%', products.name, '%')
     WHERE orders.user_id = ?
-    GROUP BY orders.id
     ORDER BY orders.id DESC
   `;
 
@@ -233,14 +223,7 @@ app.get("/my-orders/:userId", (req, res) => {
       console.error(err);
       return res.status(500).send("Error fetching orders");
     }
-    
-    // Parse the JSON string back to array
-    const formattedResults = results.map(order => ({
-      ...order,
-      order_items_with_images: JSON.parse(order.order_items_with_images)
-    }));
-    
-    res.json(formattedResults);
+    res.json(results);
   });
 });
 
