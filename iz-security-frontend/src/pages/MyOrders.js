@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
 function MyOrders({ user }) {
-
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
@@ -10,8 +9,7 @@ function MyOrders({ user }) {
     fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`)
       .then(res => res.json())
       .then(data => {
-
-        // 🔥 Remove duplicate order IDs
+        // Remove duplicate order IDs (if any)
         const uniqueOrders = [];
         const seenIds = new Set();
 
@@ -24,7 +22,6 @@ function MyOrders({ user }) {
 
         setOrders(uniqueOrders);
       });
-
   }, [user]);
 
   const cancelOrder = async (id) => {
@@ -34,10 +31,10 @@ function MyOrders({ user }) {
       body: JSON.stringify({ status: "Cancelled" })
     });
 
+    // Refresh orders
     fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`)
       .then(res => res.json())
       .then(data => {
-
         const uniqueOrders = [];
         const seenIds = new Set();
 
@@ -52,9 +49,10 @@ function MyOrders({ user }) {
       });
   };
 
+  // Parse the products string from the orders table
   const splitProducts = (productsString) => {
     if (!productsString) return [];
-
+    
     return productsString
       .split("\n")
       .flatMap(item => item.split(/,(?=\s*[A-Za-z])/))
@@ -69,7 +67,6 @@ function MyOrders({ user }) {
       {orders.length === 0 && <p>No orders found.</p>}
 
       {orders.map((order, index) => {
-
         const orderTime = new Date(order.created_at);
         const now = new Date();
         const diffHours = (now - orderTime) / (1000 * 60 * 60);
@@ -80,20 +77,58 @@ function MyOrders({ user }) {
 
         const hoursLeft = Math.max(0, 24 - diffHours).toFixed(1);
 
+        // Get products either from the new joined data or fall back to the text parsing
+        const orderItems = order.order_items_with_images || [];
         const productList = splitProducts(order.products);
 
         return (
           <div className="card" key={order.id}>
-
             <h4>Order #{orders.length - index}</h4>
 
             <div>
               <strong>Products:</strong>
-              <ul style={{ marginLeft: "20px", marginTop: "5px" }}>
-                {productList.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
-              </ul>
+              
+              {/* If we have order items with images, show them with images */}
+              {orderItems.length > 0 ? (
+                <div style={{ marginTop: "10px" }}>
+                  {orderItems.map((item, i) => (
+                    <div key={i} style={{ 
+                      display: "flex", 
+                      alignItems: "center", 
+                      gap: "15px",
+                      marginBottom: "10px",
+                      padding: "10px",
+                      border: "1px solid #eee",
+                      borderRadius: "5px"
+                    }}>
+                      {item.image && (
+                        <img 
+                          src={item.image} 
+                          alt={item.product_name}
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            objectFit: "cover",
+                            borderRadius: "5px"
+                          }}
+                        />
+                      )}
+                      <div>
+                        <strong>{item.product_name}</strong>
+                        <div>Quantity: {item.quantity}</div>
+                        <div>Price: ₹{item.price}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                // Fallback to the text-based product list
+                <ul style={{ marginLeft: "20px", marginTop: "5px" }}>
+                  {productList.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
@@ -134,7 +169,6 @@ function MyOrders({ user }) {
                 </p>
               </>
             )}
-
           </div>
         );
       })}
