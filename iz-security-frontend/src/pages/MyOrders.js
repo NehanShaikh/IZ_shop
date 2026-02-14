@@ -1,16 +1,22 @@
 import { useEffect, useState } from "react";
 
 function MyOrders({ user }) {
+
   const [orders, setOrders] = useState([]);
+  const [customerCancelled, setCustomerCancelled] = useState([]); // 🔥 track customer cancels
 
   const API = "https://iz-shop.onrender.com";
 
+  // ==============================
+  // FETCH ORDERS
+  // ==============================
   useEffect(() => {
     if (!user) return;
 
     fetch(`${API}/my-orders/${user.id}`)
       .then(res => res.json())
       .then(data => {
+
         const uniqueOrders = [];
         const seenIds = new Set();
 
@@ -23,15 +29,24 @@ function MyOrders({ user }) {
 
         setOrders(uniqueOrders);
       });
+
   }, [user]);
 
+  // ==============================
+  // CUSTOMER CANCEL
+  // ==============================
   const cancelOrder = async (id) => {
+
     await fetch(`${API}/update-order-status/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "Cancelled" })
     });
 
+    // 🔥 Mark this order as cancelled by customer
+    setCustomerCancelled(prev => [...prev, id]);
+
+    // Refresh orders
     const res = await fetch(`${API}/my-orders/${user.id}`);
     const data = await res.json();
 
@@ -55,6 +70,7 @@ function MyOrders({ user }) {
       {orders.length === 0 && <p>No orders found.</p>}
 
       {orders.map((order, index) => {
+
         const orderTime = new Date(order.created_at);
         const now = new Date();
         const diffHours = (now - orderTime) / (1000 * 60 * 60);
@@ -80,7 +96,7 @@ function MyOrders({ user }) {
           >
             <h4>Order #{orders.length - index}</h4>
 
-            {/* PRODUCTS SECTION */}
+            {/* PRODUCTS */}
             <div style={{ marginTop: "10px" }}>
               <strong>Products:</strong>
 
@@ -98,7 +114,6 @@ function MyOrders({ user }) {
                       borderRadius: "8px"
                     }}
                   >
-                    {/* IMAGE */}
                     <img
                       src={
                         product.image
@@ -116,11 +131,8 @@ function MyOrders({ user }) {
                       }}
                     />
 
-                    {/* NAME */}
-                    <div>
-                      <div style={{ fontSize: "15px", fontWeight: "500" }}>
-                        {product.name}
-                      </div>
+                    <div style={{ fontSize: "15px", fontWeight: "500" }}>
+                      {product.name}
                     </div>
                   </div>
                 ))}
@@ -129,6 +141,7 @@ function MyOrders({ user }) {
 
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
 
+            {/* STATUS */}
             <p>
               <strong>Status:</strong>{" "}
               <span
@@ -145,18 +158,19 @@ function MyOrders({ user }) {
                 {order.order_status}
               </span>
 
-              {/* 🔥 Extra line only if admin cancelled */}
-  {order.order_status === "Cancelled" && !canCancel && (
-    <div
-      style={{
-        fontSize: "13px",
-        color: "#f87171",
-        marginTop: "4px"
-      }}
-    >
-      Cancelled due to Out of Stock
-    </div>
-  )}
+              {/* 🔥 Show reason ONLY if admin cancelled */}
+              {order.order_status === "Cancelled" &&
+                !customerCancelled.includes(order.id) && (
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "#f87171",
+                      marginTop: "4px"
+                    }}
+                  >
+                    Cancelled due to Out of Stock
+                  </div>
+              )}
             </p>
 
             <p>
@@ -164,6 +178,7 @@ function MyOrders({ user }) {
               {new Date(order.created_at).toLocaleString()}
             </p>
 
+            {/* CUSTOMER CANCEL BUTTON */}
             {canCancel && (
               <>
                 <button
@@ -194,6 +209,7 @@ function MyOrders({ user }) {
                 </p>
               </>
             )}
+
           </div>
         );
       })}
