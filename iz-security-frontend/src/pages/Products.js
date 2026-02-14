@@ -205,14 +205,36 @@ function Products({ user }) {
       {/* ================= PRODUCT DETAILS MODAL ================= */}
       {selectedProduct && (
         <div
-          className="image-modal"
-          onClick={() => setSelectedProduct(null)}
-        >
-          <div
-            className="zoom-container"
-            onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: "600px" }}
-          >
+  className="image-modal"
+  onClick={() => setSelectedProduct(null)}
+  style={{
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background: "rgba(0,0,0,0.7)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    overflowY: "auto",
+    padding: "20px",
+    zIndex: 1000
+  }}
+>
+  <div
+    onClick={(e) => e.stopPropagation()}
+    style={{
+      background: "#1e293b",
+      borderRadius: "12px",
+      padding: "20px",
+      width: "100%",
+      maxWidth: "600px",
+      maxHeight: "90vh",
+      overflowY: "auto"
+    }}
+  >
+
             <img
               src={
                 selectedProduct.image?.startsWith("/uploads")
