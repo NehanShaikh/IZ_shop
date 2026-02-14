@@ -577,16 +577,13 @@ body {
 
 }
 
-/* ================= MOBILE ================= */
 @media (max-width: 768px) {
 
-  .nav-right {
-    display: flex;
-    align-items: center;
-  }
-
-  .hamburger {
+  .mobile-menu-icon {
     display: block;
+    font-size: 22px;
+    cursor: pointer;
+    margin-right: 10px;
   }
 
   .nav-links {
@@ -611,11 +608,15 @@ body {
     font-size: 14px;
   }
 
-  .logout-btn {
+  .logout-mobile {
+    position: absolute;
+    top: 12px;
+    right: 15px;
     font-size: 12px;
-    padding: 6px 12px;
+    padding: 6px 10px;
   }
 }
+
 
 /* ================= DELIVERY NOTICE ================= */
 
