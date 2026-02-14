@@ -577,6 +577,46 @@ body {
 
 }
 
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 60px;
+    right: 15px;
+    background: #1e293b;
+    flex-direction: column;
+    padding: 15px;
+    border-radius: 10px;
+    display: none;
+    width: 180px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 8px 0;
+    font-size: 14px;
+  }
+
+  .logout-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+
 /* ================= DELIVERY NOTICE ================= */
 
 .delivery-notice {
