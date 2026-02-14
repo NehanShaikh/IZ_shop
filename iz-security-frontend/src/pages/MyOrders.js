@@ -53,6 +53,7 @@ function MyOrders({ user }) {
       {orders.length === 0 && <p>No orders found.</p>}
 
       {orders.map((order, index) => {
+        console.log(order);
         const orderTime = new Date(order.created_at);
         const now = new Date();
         const diffHours = (now - orderTime) / (1000 * 60 * 60);
