@@ -228,15 +228,27 @@ app.get("/my-orders/:userId", (req, res) => {
         .filter(line => line.length > 0);
       
       console.log(`\n=== Processing Order #${order.id} ===`);
-      console.log("Product lines:", productLines);
+      console.log("Raw product lines:", productLines);
 
-      // Extract clean product names (remove x1, x2 etc. from the end)
+      // Extract clean product names (remove x1, x2, x 1, x 2, quantity etc.)
       const productNames = productLines.map(line => {
-        // Remove quantity indicators like "x1", "x2", "x 1", "x 2" at the end
-        return line.replace(/\s*x\s*\d+$/i, '').trim();
+        // Multiple strategies to clean product names:
+        
+        // Strategy 1: Remove " x1", " x2", " x 1", " x 2" at the end
+        let clean = line.replace(/\s*x\s*\d+$/i, '').trim();
+        
+        // Strategy 2: Remove " 1", " 2" at the end (if it's quantity)
+        clean = clean.replace(/\s+\d+$/, '').trim();
+        
+        // Strategy 3: If the line contains " x", split and take first part
+        if (line.toLowerCase().includes(' x')) {
+          clean = line.split(/\s+x\s*\d+/i)[0].trim();
+        }
+        
+        return clean;
       });
 
-      console.log("Clean product names (without quantity):", productNames);
+      console.log("Cleaned product names (without quantity):", productNames);
 
       return new Promise((resolve) => {
         if (productNames.length === 0) {
@@ -250,35 +262,38 @@ app.get("/my-orders/:userId", (req, res) => {
         db.query(allProductsSql, [], (err, allProducts) => {
           if (err) {
             console.error(err);
-            resolve({ ...order, products_list: productNames.map(name => ({ 
-              name: name, 
-              image: null,
-              original: name
-            })) });
+            resolve({ 
+              ...order, 
+              products_list: productLines.map(name => ({ 
+                name: name, 
+                image: null,
+                cleanName: name.replace(/\s*x\s*\d+$/i, '').trim()
+              })) 
+            });
             return;
           }
 
           console.log("Products in DB:", allProducts.map(p => p.name));
 
           // Match each product
-          const products_list = productNames.map((cleanName, index) => {
-            const originalLine = productLines[index];
-            console.log(`\nLooking for match for: "${cleanName}" (from original: "${originalLine}")`);
+          const products_list = productLines.map((originalLine, index) => {
+            const cleanName = productNames[index];
+            console.log(`\nLooking for match: "${cleanName}" (original: "${originalLine}")`);
             
             let matchedProduct = null;
             let matchMethod = "";
             
-            // Strategy 1: Exact match (case-insensitive)
+            // Strategy 1: Exact match with cleaned name (case-insensitive)
             matchedProduct = allProducts.find(dbProduct => 
               dbProduct.name.toLowerCase() === cleanName.toLowerCase()
             );
             
             if (matchedProduct) {
-              matchMethod = "exact";
-              console.log(`✓ Exact match found: "${matchedProduct.name}"`);
+              matchMethod = "exact match after cleaning";
+              console.log(`✓ ${matchMethod}: "${matchedProduct.name}"`);
             }
 
-            // Strategy 2: Product name contains the clean name
+            // Strategy 2: DB product name contains the cleaned name
             if (!matchedProduct) {
               matchedProduct = allProducts.find(dbProduct => {
                 const dbName = dbProduct.name.toLowerCase();
@@ -287,11 +302,11 @@ app.get("/my-orders/:userId", (req, res) => {
               });
               if (matchedProduct) {
                 matchMethod = "db contains search";
-                console.log(`✓ DB contains search: "${matchedProduct.name}"`);
+                console.log(`✓ ${matchMethod}: "${matchedProduct.name}"`);
               }
             }
 
-            // Strategy 3: Clean name contains product name
+            // Strategy 3: Cleaned name contains DB product name
             if (!matchedProduct) {
               matchedProduct = allProducts.find(dbProduct => {
                 const dbName = dbProduct.name.toLowerCase();
@@ -300,19 +315,24 @@ app.get("/my-orders/:userId", (req, res) => {
               });
               if (matchedProduct) {
                 matchMethod = "search contains db";
-                console.log(`✓ Search contains DB: "${matchedProduct.name}"`);
+                console.log(`✓ ${matchMethod}: "${matchedProduct.name}"`);
               }
             }
 
-            // Strategy 4: Remove spaces and special characters
+            // Strategy 4: Check if "Camate Eclipse" matches "Camate Eclipse" regardless of extras
             if (!matchedProduct) {
-              const normalize = (str) => str.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-              matchedProduct = allProducts.find(dbProduct => 
-                normalize(dbProduct.name) === normalize(cleanName)
-              );
+              // Split into words and check if most words match
+              const searchWords = cleanName.toLowerCase().split(' ');
+              matchedProduct = allProducts.find(dbProduct => {
+                const dbWords = dbProduct.name.toLowerCase().split(' ');
+                const matchingWords = searchWords.filter(word => 
+                  dbWords.some(dbWord => dbWord.includes(word) || word.includes(dbWord))
+                );
+                return matchingWords.length >= Math.min(2, searchWords.length);
+              });
               if (matchedProduct) {
-                matchMethod = "normalized";
-                console.log(`✓ Normalized match: "${matchedProduct.name}"`);
+                matchMethod = "word matching";
+                console.log(`✓ ${matchMethod}: "${matchedProduct.name}"`);
               }
             }
 
@@ -321,7 +341,7 @@ app.get("/my-orders/:userId", (req, res) => {
             }
 
             return {
-              name: originalLine, // Keep the original line with quantity for display
+              name: originalLine, // Keep original line with quantity for display
               cleanName: cleanName,
               image: matchedProduct ? matchedProduct.image : null,
               matchedWith: matchedProduct ? matchedProduct.name : null,
@@ -331,7 +351,8 @@ app.get("/my-orders/:userId", (req, res) => {
 
           console.log("Final products_list:", products_list.map(p => ({
             name: p.name,
-            hasImage: !!p.image
+            hasImage: !!p.image,
+            matchedWith: p.matchedWith
           })));
 
           resolve({ ...order, products_list });

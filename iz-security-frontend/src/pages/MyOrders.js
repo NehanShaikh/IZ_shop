@@ -106,6 +106,9 @@ function MyOrders({ user }) {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
     if (imagePath.startsWith('http')) return imagePath;
+    if (imagePath.startsWith('/uploads')) {
+      return `https://iz-shop.onrender.com${imagePath}`;
+    }
     return `https://iz-shop.onrender.com/${imagePath}`;
   };
 
@@ -156,53 +159,62 @@ function MyOrders({ user }) {
               
               {order.products_list && order.products_list.length > 0 ? (
                 <div style={styles.productsGrid}>
-                  {order.products_list.map((product, i) => (
-                    <div key={i} style={styles.productCard}>
-                      {/* Product Image */}
-                      <div style={styles.imageContainer}>
-                        {product.image ? (
-                          <img 
-                            src={getImageUrl(product.image)}
-                            alt={product.name}
-                            style={styles.productImage}
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.style.display = 'none';
-                              e.target.parentElement.innerHTML = `
-                                <div style="
-                                  width: 60px;
-                                  height: 60px;
-                                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                                  border-radius: 8px;
-                                  display: flex;
-                                  align-items: center;
-                                  justify-content: center;
-                                  color: white;
-                                  font-size: 24px;
-                                  font-weight: bold;
-                                  text-transform: uppercase;
-                                ">
-                                  ${product.name.charAt(0)}
-                                </div>
-                              `;
-                            }}
-                          />
-                        ) : (
-                          <div style={styles.imagePlaceholder}>
-                            {product.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                  {order.products_list.map((product, i) => {
+                    // Extract product name without quantity for display
+                    const displayName = product.name.replace(/\s*x\s*\d+$/i, '').trim();
+                    
+                    return (
+                      <div key={i} style={styles.productCard}>
+                        {/* Product Image */}
+                        <div style={styles.imageContainer}>
+                          {product.image ? (
+                            <img 
+                              src={getImageUrl(product.image)}
+                              alt={displayName}
+                              style={styles.productImage}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.style.display = 'none';
+                                e.target.parentElement.innerHTML = `
+                                  <div style="
+                                    width: 70px;
+                                    height: 70px;
+                                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                    border-radius: 8px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    color: white;
+                                    font-size: 28px;
+                                    font-weight: bold;
+                                    text-transform: uppercase;
+                                  ">
+                                    ${displayName.charAt(0)}
+                                  </div>
+                                `;
+                              }}
+                            />
+                          ) : (
+                            <div style={styles.imagePlaceholder}>
+                              {displayName.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Product Details */}
+                        <div style={styles.productInfo}>
+                          <span style={styles.productName}>
+                            {displayName}
+                          </span>
+                          {product.name.includes('x1') && (
+                            <span style={styles.quantityBadge}>
+                              Qty: 1
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      
-                      {/* Product Name */}
-                      <div style={styles.productInfo}>
-                        <span style={styles.productName}>{product.name}</span>
-                        {product.matchedWith && (
-                          <span style={styles.matchedBadge}>✓ In Stock</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div style={styles.noProducts}>
@@ -366,8 +378,8 @@ const styles = {
     transition: 'all 0.2s ease'
   },
   imageContainer: {
-    width: '60px',
-    height: '60px',
+    width: '70px',
+    height: '70px',
     flexShrink: 0,
     borderRadius: '8px',
     overflow: 'hidden'
@@ -378,15 +390,15 @@ const styles = {
     objectFit: 'cover'
   },
   imagePlaceholder: {
-    width: '60px',
-    height: '60px',
+    width: '70px',
+    height: '70px',
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     borderRadius: '8px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     color: 'white',
-    fontSize: '24px',
+    fontSize: '28px',
     fontWeight: 'bold',
     textTransform: 'uppercase'
   },
@@ -402,10 +414,10 @@ const styles = {
     color: '#333',
     lineHeight: '1.4'
   },
-  matchedBadge: {
+  quantityBadge: {
     fontSize: '11px',
-    color: '#2e7d32',
-    backgroundColor: '#e8f5e9',
+    color: '#666',
+    backgroundColor: '#e0e0e0',
     padding: '2px 8px',
     borderRadius: '12px',
     display: 'inline-block',
@@ -500,41 +512,5 @@ const styles = {
     borderRadius: '12px'
   }
 };
-
-// Media queries for responsiveness
-const mediaStyles = `
-  @media (max-width: 768px) {
-    .order-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
-    }
-    
-    .products-grid {
-      grid-template-columns: 1fr !important;
-    }
-    
-    .order-footer {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    
-    .cancel-section {
-      text-align: left;
-      width: 100%;
-    }
-    
-    .cancel-button {
-      width: 100%;
-    }
-  }
-`;
-
-// Add media styles to document
-if (typeof document !== 'undefined') {
-  const style = document.createElement('style');
-  style.textContent = mediaStyles;
-  document.head.appendChild(style);
-}
 
 export default MyOrders;
