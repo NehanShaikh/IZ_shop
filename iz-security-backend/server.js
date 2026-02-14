@@ -202,34 +202,50 @@ app.post("/upload-product", upload.single("image"), (req, res) => {
 
 // 🔥 Get orders for specific user
 app.get("/my-orders/:userId", (req, res) => {
-  const sql = `
-    SELECT o.*, p.image
-    FROM orders o
-    LEFT JOIN products p 
-      ON LOWER(o.products) LIKE CONCAT('%', LOWER(p.name), '%')
-    WHERE o.user_id = ?
-    ORDER BY o.id DESC
+  const ordersSql = `
+    SELECT id, products, total_amount, order_status, created_at
+    FROM orders
+    WHERE user_id = ?
+    ORDER BY id DESC
   `;
 
-  db.query(sql, [req.params.userId], (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send("Error fetching orders");
-    }
+  db.query(ordersSql, [req.params.userId], async (err, orders) => {
+    if (err) return res.status(500).send("Error fetching orders");
 
-    const formatted = results.map(order => ({
-      ...order,
-      products_list: [
-        {
-          name: order.products,
-          image: order.image
-        }
-      ]
-    }));
+    const allProductsSql = `SELECT name, image FROM products`;
 
-    res.json(formatted);
+    db.query(allProductsSql, [], (err2, allProducts) => {
+      if (err2) return res.status(500).send("Error fetching products");
+
+      const formattedOrders = orders.map(order => {
+
+        const productLines = order.products
+          .split("\n")
+          .map(line => line.trim())
+          .filter(line => line.length > 0);
+
+        const products_list = productLines.map(line => {
+
+          const cleanName = line.replace(/\s*x\s*\d+$/i, "").trim();
+
+          const matched = allProducts.find(p =>
+            p.name.toLowerCase() === cleanName.toLowerCase()
+          );
+
+          return {
+            name: line,
+            image: matched ? matched.image : null
+          };
+        });
+
+        return { ...order, products_list };
+      });
+
+      res.json(formattedOrders);
+    });
   });
 });
+
 
 
 

@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 function MyOrders({ user }) {
   const [orders, setOrders] = useState([]);
 
+  const API = "https://iz-shop.onrender.com";
+
   useEffect(() => {
     if (!user) return;
 
-    fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`)
+    fetch(`${API}/my-orders/${user.id}`)
       .then(res => res.json())
       .then(data => {
         const uniqueOrders = [];
@@ -24,13 +26,13 @@ function MyOrders({ user }) {
   }, [user]);
 
   const cancelOrder = async (id) => {
-    await fetch(`https://iz-shop.onrender.com/update-order-status/${id}`, {
+    await fetch(`${API}/update-order-status/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "Cancelled" })
     });
 
-    const res = await fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`);
+    const res = await fetch(`${API}/my-orders/${user.id}`);
     const data = await res.json();
 
     const uniqueOrders = [];
@@ -53,7 +55,6 @@ function MyOrders({ user }) {
       {orders.length === 0 && <p>No orders found.</p>}
 
       {orders.map((order, index) => {
-        console.log(order);
         const orderTime = new Date(order.created_at);
         const now = new Date();
         const diffHours = (now - orderTime) / (1000 * 60 * 60);
@@ -64,7 +65,6 @@ function MyOrders({ user }) {
 
         const hoursLeft = Math.max(0, 24 - diffHours).toFixed(1);
 
-        // 🔥 Use products_list from backend
         const productList = order.products_list || [];
 
         return (
@@ -80,7 +80,7 @@ function MyOrders({ user }) {
           >
             <h4>Order #{orders.length - index}</h4>
 
-            {/* 🔥 PRODUCTS SECTION WITH IMAGE */}
+            {/* PRODUCTS SECTION */}
             <div style={{ marginTop: "10px" }}>
               <strong>Products:</strong>
 
@@ -94,26 +94,34 @@ function MyOrders({ user }) {
                       gap: "15px",
                       marginBottom: "12px",
                       background: "#0f172a",
-                      padding: "10px",
+                      padding: "12px",
                       borderRadius: "8px"
                     }}
                   >
-                    {product.image && (
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        style={{
-                          width: "70px",
-                          height: "70px",
-                          objectFit: "cover",
-                          borderRadius: "6px"
-                        }}
-                      />
-                    )}
+                    {/* IMAGE */}
+                    <img
+                      src={
+                        product.image
+                          ? product.image.startsWith("/uploads")
+                            ? `${API}${product.image}`
+                            : product.image
+                          : "https://via.placeholder.com/70"
+                      }
+                      alt={product.name}
+                      style={{
+                        width: "70px",
+                        height: "70px",
+                        objectFit: "cover",
+                        borderRadius: "6px"
+                      }}
+                    />
 
-                    <span style={{ fontSize: "15px" }}>
-                      {product.name}
-                    </span>
+                    {/* NAME */}
+                    <div>
+                      <div style={{ fontSize: "15px", fontWeight: "500" }}>
+                        {product.name}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
