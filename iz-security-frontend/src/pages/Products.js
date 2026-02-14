@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 
 function Products({ user }) {
+  const API = "https://iz-shop.onrender.com";
 
- const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [useFileUpload, setUseFileUpload] = useState(false);
-
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [zoomLevel, setZoomLevel] = useState(1); // 🔥 Image modal state
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -21,7 +21,7 @@ function Products({ user }) {
   // ==========================
   const fetchProducts = async () => {
     try {
-      const res = await fetch("https://iz-shop.onrender.com/products");
+      const res = await fetch(`${API}/products`);
       const data = await res.json();
       setProducts(data);
     } catch (error) {
@@ -34,11 +34,17 @@ function Products({ user }) {
   }, []);
 
   // ==========================
-  // ADMIN: ADD PRODUCT
+  // SEARCH FILTER
+  // ==========================
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // ==========================
+  // ADD PRODUCT (ADMIN)
   // ==========================
   const handleAddProduct = async () => {
     try {
-
       if (useFileUpload) {
         const formData = new FormData();
         formData.append("name", newProduct.name);
@@ -47,13 +53,12 @@ function Products({ user }) {
         formData.append("stock", newProduct.stock);
         formData.append("image", newProduct.image);
 
-        await fetch("https://iz-shop.onrender.com/upload-product", {
+        await fetch(`${API}/upload-product`, {
           method: "POST",
           body: formData
         });
-
       } else {
-        await fetch("https://iz-shop.onrender.com/products", {
+        await fetch(`${API}/products`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newProduct)
@@ -71,38 +76,37 @@ function Products({ user }) {
       });
 
       alert("Product Added Successfully");
-
     } catch (error) {
       console.error("Error adding product:", error);
     }
   };
 
   // ==========================
-  // ADMIN: DELETE PRODUCT
+  // DELETE PRODUCT (ADMIN)
   // ==========================
   const handleDelete = async (id) => {
     try {
-      await fetch(`https://iz-shop.onrender.com/products/${id}`, {
+      await fetch(`${API}/products/${id}`, {
         method: "DELETE"
       });
       fetchProducts();
+      setSelectedProduct(null);
     } catch (error) {
       console.error("Delete error:", error);
     }
   };
 
   // ==========================
-  // CUSTOMER: ADD TO CART
+  // ADD TO CART (CUSTOMER)
   // ==========================
   const addToCart = async (product) => {
-
     if (!user || !user.id) {
       alert("Please login properly");
       return;
     }
 
     try {
-      await fetch("https://iz-shop.onrender.com/cart", {
+      await fetch(`${API}/cart`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -119,13 +123,29 @@ function Products({ user }) {
 
   return (
     <div className="container">
-
       <h2 style={{ marginBottom: "20px" }}>Products</h2>
 
-      {/* ================= ADMIN ADD SECTION ================= */}
+      {/* 🔍 SEARCH */}
+      <div style={{ marginBottom: "25px" }}>
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "10px 15px",
+            borderRadius: "8px",
+            border: "1px solid #334155",
+            background: "#0f172a",
+            color: "white"
+          }}
+        />
+      </div>
+
+      {/* ================= ADMIN ADD ================= */}
       {user && user.role === "admin" && (
         <div className="admin-card">
-
           <h3>Add Product</h3>
 
           <input
@@ -154,157 +174,108 @@ function Products({ user }) {
             onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })}
           />
 
-          {/* Upload Toggle */}
-          <div className="upload-toggle">
-            <span>Image Source:</span>
-
-            <div className="toggle-switch">
-              <button
-                type="button"
-                className={!useFileUpload ? "active" : ""}
-                onClick={() => setUseFileUpload(false)}
-              >
-                URL
-              </button>
-
-              <button
-                type="button"
-                className={useFileUpload ? "active" : ""}
-                onClick={() => setUseFileUpload(true)}
-              >
-                Upload
-              </button>
-            </div>
-          </div>
-
-          {/* Upload Input */}
-          {useFileUpload ? (
-            <div className="file-upload-wrapper">
-              <label className="file-upload">
-                Choose Image
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={e =>
-                    setNewProduct({ ...newProduct, image: e.target.files[0] })
-                  }
-                />
-              </label>
-
-              {newProduct.image && (
-                <span className="file-name">
-                  {newProduct.image.name}
-                </span>
-              )}
-            </div>
-          ) : (
-            <input
-              className="url-input"
-              placeholder="Enter Image URL"
-              value={newProduct.image}
-              onChange={e =>
-                setNewProduct({ ...newProduct, image: e.target.value })
-              }
-            />
-          )}
+          <input
+            placeholder="Image URL"
+            value={newProduct.image}
+            onChange={e => setNewProduct({ ...newProduct, image: e.target.value })}
+          />
 
           <button className="button" onClick={handleAddProduct}>
             Add Product
           </button>
-
         </div>
       )}
 
       {/* ================= PRODUCT GRID ================= */}
       <div className="product-grid">
-
-        {products.map(product => {
-
+        {filteredProducts.map(product => {
           const imageUrl = product.image?.startsWith("/uploads")
-            ? `https://iz-shop.onrender.com${product.image}`
+            ? `${API}${product.image}`
             : product.image;
 
           return (
-            <div className="product-card" key={product.id}>
-
+            <div
+              className="product-card"
+              key={product.id}
+              onClick={() => setSelectedProduct(product)}
+              style={{ cursor: "pointer" }}
+            >
               {product.image && (
                 <div className="image-wrapper">
                   <img
                     src={imageUrl}
                     alt={product.name}
-                    style={{ cursor: "zoom-in" }}
-                    onClick={() => setSelectedImage(imageUrl)}
                   />
                 </div>
               )}
 
-              <h4>{product.name}</h4>
-              <p className="desc">{product.description}</p>
-              <p className="price">₹{product.price}</p>
-              <p className="stock">Stock: {product.stock}</p>
-
-              {user && user.role === "customer" && (
-                <button
-                  className="button"
-                  onClick={() => addToCart(product)}
-                >
-                  Add to Cart
-                </button>
-              )}
-
-              {user && user.role === "admin" && (
-                <button
-                  className="button delete-btn"
-                  onClick={() => handleDelete(product.id)}
-                >
-                  Delete
-                </button>
-              )}
-
+              <h4 style={{ textAlign: "center", marginTop: "10px" }}>
+                {product.name}
+              </h4>
             </div>
           );
         })}
-
       </div>
 
-      {selectedImage && (
+      {/* ================= PRODUCT DETAILS MODAL ================= */}
+      {selectedProduct && (
         <div
           className="image-modal"
-          onClick={() => {
-            setSelectedImage(null);
-            setZoomLevel(1);
-          }}
+          onClick={() => setSelectedProduct(null)}
         >
           <div
             className="zoom-container"
             onClick={(e) => e.stopPropagation()}
-            onWheel={(e) => {
-              e.preventDefault();
-              if (e.deltaY < 0) {
-                setZoomLevel((prev) => Math.min(prev + 0.2, 3));
-              } else {
-                setZoomLevel((prev) => Math.max(prev - 0.2, 1));
-              }
-            }}
+            style={{ maxWidth: "600px" }}
           >
             <img
-              src={selectedImage}
-              alt="Zoomed"
+              src={
+                selectedProduct.image?.startsWith("/uploads")
+                  ? `${API}${selectedProduct.image}`
+                  : selectedProduct.image
+              }
+              alt={selectedProduct.name}
               style={{
-                transform: `scale(${zoomLevel})`,
-                transition: "transform 0.2s ease"
+                width: "100%",
+                borderRadius: "10px",
+                marginBottom: "15px"
               }}
             />
 
-            <div className="zoom-controls">
-              <button onClick={() => setZoomLevel(z => Math.min(z + 0.2, 3))}>+</button>
-              <button onClick={() => setZoomLevel(z => Math.max(z - 0.2, 1))}>−</button>
-            </div>
+            <h3>{selectedProduct.name}</h3>
 
+            <p style={{ margin: "10px 0", color: "#94a3b8" }}>
+              {selectedProduct.description}
+            </p>
+
+            <h3 style={{ color: "#38bdf8" }}>
+              ₹{selectedProduct.price}
+            </h3>
+
+            <p>Stock: {selectedProduct.stock}</p>
+
+            {user && user.role === "customer" && (
+              <button
+                className="button"
+                style={{ marginTop: "15px" }}
+                onClick={() => addToCart(selectedProduct)}
+              >
+                Add to Cart
+              </button>
+            )}
+
+            {user && user.role === "admin" && (
+              <button
+                className="button delete-btn"
+                style={{ marginTop: "15px" }}
+                onClick={() => handleDelete(selectedProduct.id)}
+              >
+                Delete
+              </button>
+            )}
           </div>
         </div>
       )}
-
     </div>
   );
 }
