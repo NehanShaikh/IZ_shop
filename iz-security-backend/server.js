@@ -202,174 +202,35 @@ app.post("/upload-product", upload.single("image"), (req, res) => {
 
 // 🔥 Get orders for specific user
 app.get("/my-orders/:userId", (req, res) => {
-  const ordersSql = `
-    SELECT 
-      id,
-      products,
-      total_amount,
-      order_status,
-      created_at
-    FROM orders
-    WHERE user_id = ?
-    ORDER BY id DESC
+  const sql = `
+    SELECT o.*, p.image
+    FROM orders o
+    LEFT JOIN products p 
+      ON LOWER(o.products) LIKE CONCAT('%', LOWER(p.name), '%')
+    WHERE o.user_id = ?
+    ORDER BY o.id DESC
   `;
 
-  db.query(ordersSql, [req.params.userId], (err, orders) => {
+  db.query(sql, [req.params.userId], (err, results) => {
     if (err) {
       console.error(err);
       return res.status(500).send("Error fetching orders");
     }
 
-    const ordersWithProducts = orders.map(order => {
-      // Parse the products string - split by newlines
-      const productLines = order.products
-        .split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
-      
-      console.log(`\n=== Processing Order #${order.id} ===`);
-      console.log("Raw product lines:", productLines);
-
-      // Extract clean product names (remove x1, x2, x 1, x 2, quantity etc.)
-      const productNames = productLines.map(line => {
-        // Multiple strategies to clean product names:
-        
-        // Strategy 1: Remove " x1", " x2", " x 1", " x 2" at the end
-        let clean = line.replace(/\s*x\s*\d+$/i, '').trim();
-        
-        // Strategy 2: Remove " 1", " 2" at the end (if it's quantity)
-        clean = clean.replace(/\s+\d+$/, '').trim();
-        
-        // Strategy 3: If the line contains " x", split and take first part
-        if (line.toLowerCase().includes(' x')) {
-          clean = line.split(/\s+x\s*\d+/i)[0].trim();
+    const formatted = results.map(order => ({
+      ...order,
+      products_list: [
+        {
+          name: order.products,
+          image: order.image
         }
-        
-        return clean;
-      });
+      ]
+    }));
 
-      console.log("Cleaned product names (without quantity):", productNames);
-
-      return new Promise((resolve) => {
-        if (productNames.length === 0) {
-          resolve({ ...order, products_list: [] });
-          return;
-        }
-
-        // Get ALL products from database
-        const allProductsSql = `SELECT name, image FROM products`;
-        
-        db.query(allProductsSql, [], (err, allProducts) => {
-          if (err) {
-            console.error(err);
-            resolve({ 
-              ...order, 
-              products_list: productLines.map(name => ({ 
-                name: name, 
-                image: null,
-                cleanName: name.replace(/\s*x\s*\d+$/i, '').trim()
-              })) 
-            });
-            return;
-          }
-
-          console.log("Products in DB:", allProducts.map(p => p.name));
-
-          // Match each product
-          const products_list = productLines.map((originalLine, index) => {
-            const cleanName = productNames[index];
-            console.log(`\nLooking for match: "${cleanName}" (original: "${originalLine}")`);
-            
-            let matchedProduct = null;
-            let matchMethod = "";
-            
-            // Strategy 1: Exact match with cleaned name (case-insensitive)
-            matchedProduct = allProducts.find(dbProduct => 
-              dbProduct.name.toLowerCase() === cleanName.toLowerCase()
-            );
-            
-            if (matchedProduct) {
-              matchMethod = "exact match after cleaning";
-              console.log(`✓ ${matchMethod}: "${matchedProduct.name}"`);
-            }
-
-            // Strategy 2: DB product name contains the cleaned name
-            if (!matchedProduct) {
-              matchedProduct = allProducts.find(dbProduct => {
-                const dbName = dbProduct.name.toLowerCase();
-                const searchName = cleanName.toLowerCase();
-                return dbName.includes(searchName);
-              });
-              if (matchedProduct) {
-                matchMethod = "db contains search";
-                console.log(`✓ ${matchMethod}: "${matchedProduct.name}"`);
-              }
-            }
-
-            // Strategy 3: Cleaned name contains DB product name
-            if (!matchedProduct) {
-              matchedProduct = allProducts.find(dbProduct => {
-                const dbName = dbProduct.name.toLowerCase();
-                const searchName = cleanName.toLowerCase();
-                return searchName.includes(dbName);
-              });
-              if (matchedProduct) {
-                matchMethod = "search contains db";
-                console.log(`✓ ${matchMethod}: "${matchedProduct.name}"`);
-              }
-            }
-
-            // Strategy 4: Check if "Camate Eclipse" matches "Camate Eclipse" regardless of extras
-            if (!matchedProduct) {
-              // Split into words and check if most words match
-              const searchWords = cleanName.toLowerCase().split(' ');
-              matchedProduct = allProducts.find(dbProduct => {
-                const dbWords = dbProduct.name.toLowerCase().split(' ');
-                const matchingWords = searchWords.filter(word => 
-                  dbWords.some(dbWord => dbWord.includes(word) || word.includes(dbWord))
-                );
-                return matchingWords.length >= Math.min(2, searchWords.length);
-              });
-              if (matchedProduct) {
-                matchMethod = "word matching";
-                console.log(`✓ ${matchMethod}: "${matchedProduct.name}"`);
-              }
-            }
-
-            if (!matchedProduct) {
-              console.log(`✗ No match found for "${cleanName}"`);
-            }
-
-            return {
-              name: originalLine, // Keep original line with quantity for display
-              cleanName: cleanName,
-              image: matchedProduct ? matchedProduct.image : null,
-              matchedWith: matchedProduct ? matchedProduct.name : null,
-              matchMethod: matchMethod
-            };
-          });
-
-          console.log("Final products_list:", products_list.map(p => ({
-            name: p.name,
-            hasImage: !!p.image,
-            matchedWith: p.matchedWith
-          })));
-
-          resolve({ ...order, products_list });
-        });
-      });
-    });
-
-    Promise.all(ordersWithProducts)
-      .then(ordersWithImages => {
-        res.json(ordersWithImages);
-      })
-      .catch(error => {
-        console.error(error);
-        res.status(500).send("Error processing orders");
-      });
+    res.json(formatted);
   });
 });
+
 
 
 app.get("/products", (req, res) => {
