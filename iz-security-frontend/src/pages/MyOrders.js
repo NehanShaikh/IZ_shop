@@ -178,15 +178,15 @@ function MyOrders({ user }) {
                                 e.target.style.display = 'none';
                                 // Create fallback element
                                 const fallback = document.createElement('div');
-                                fallback.style.width = '70px';
-                                fallback.style.height = '70px';
+                                fallback.style.width = '60px';
+                                fallback.style.height = '60px';
                                 fallback.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
                                 fallback.style.borderRadius = '8px';
                                 fallback.style.display = 'flex';
                                 fallback.style.alignItems = 'center';
                                 fallback.style.justifyContent = 'center';
                                 fallback.style.color = 'white';
-                                fallback.style.fontSize = '28px';
+                                fallback.style.fontSize = '24px';
                                 fallback.style.fontWeight = 'bold';
                                 fallback.style.textTransform = 'uppercase';
                                 fallback.textContent = displayName.charAt(0).toUpperCase();
@@ -208,12 +208,6 @@ function MyOrders({ user }) {
                           {product.name.includes('x1') && (
                             <span style={styles.quantityBadge}>
                               Qty: 1
-                            </span>
-                          )}
-                          {/* Show if product was matched */}
-                          {product.matchedWith && (
-                            <span style={styles.matchedBadge}>
-                              ✓ In stock
                             </span>
                           )}
                         </div>
@@ -283,122 +277,117 @@ function MyOrders({ user }) {
   );
 }
 
-// Fixed Styles object - removed weird purple border
-// Updated Styles object - with purple border and matching background
+// Styles matching your product cards exactly
+// Styles matching your product cards EXACTLY
 const styles = {
   container: {
     maxWidth: '1200px',
     margin: '0 auto',
-    padding: '30px 20px',
+    padding: '20px',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-    backgroundColor: '#f0f2f5',
+    backgroundColor: '#f5f5f5',  // Same as your products page background
     minHeight: '100vh'
   },
   title: {
-    fontSize: '32px',
+    fontSize: '28px',
     fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: '30px',
-    paddingBottom: '15px',
-    borderBottom: '3px solid #e0e0e0',
-    letterSpacing: '-0.5px'
+    color: '#333',
+    marginBottom: '25px',
+    paddingBottom: '10px',
+    borderBottom: '2px solid #ddd'
   },
   loadingState: {
     textAlign: 'center',
-    padding: '60px',
-    backgroundColor: '#ffffff',
-    borderRadius: '16px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+    padding: '40px',
+    backgroundColor: '#f5f5f5',  // Same as product card background
+    borderRadius: '8px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
     color: '#666',
-    fontSize: '16px',
-    border: '1px solid #423c85'
+    border: '1px solid #e0e0e0'
   },
   emptyState: {
     textAlign: 'center',
-    padding: '80px 20px',
-    backgroundColor: '#ffffff',
-    borderRadius: '16px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-    border: '1px solid #423c85'
+    padding: '60px 20px',
+    backgroundColor: '#f5f5f5',  // Same as product card background
+    borderRadius: '8px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    border: '1px solid #e0e0e0'
   },
   emptyStateText: {
-    fontSize: '20px',
+    fontSize: '18px',
     color: '#333',
     marginBottom: '10px',
     fontWeight: '500'
   },
   emptyStateSubtext: {
-    fontSize: '16px',
+    fontSize: '14px',
     color: '#999'
   },
   orderCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: '20px',
-    padding: '25px',
-    marginBottom: '25px',
-    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.08)',
+    backgroundColor: '#f5f5f5',  // Same light gray as product cards
+    borderRadius: '8px',
+    padding: '20px',
+    marginBottom: '20px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',  // Subtle shadow like product cards
     transition: 'box-shadow 0.3s ease',
-    border: '2px solid #423c85'
+    border: '1px solid #e0e0e0'  // Subtle border like product cards
   },
   orderHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '25px',
-    paddingBottom: '15px',
-    borderBottom: '2px solid #423c85'
+    marginBottom: '20px',
+    paddingBottom: '10px',
+    borderBottom: '1px solid #d0d0d0',  // Slightly darker border for separation
+    flexWrap: 'wrap',
+    gap: '10px'
   },
   orderNumber: {
-    fontSize: '22px',
-    fontWeight: '700',
-    color: '#1e293b',
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#333',
     margin: 0
   },
   orderDate: {
-    fontSize: '14px',
-    color: '#64748b',
-    backgroundColor: '#f8fafc',
-    padding: '6px 14px',
-    borderRadius: '30px',
-    fontWeight: '500',
-    border: '1px solid #423c85'
+    fontSize: '13px',
+    color: '#666',
+    backgroundColor: '#e8e8e8',  // Slightly darker than card background
+    padding: '4px 10px',
+    borderRadius: '4px'
   },
   productsSection: {
-    marginBottom: '25px'
+    marginBottom: '20px'
   },
   sectionTitle: {
-    fontSize: '18px',
+    fontSize: '16px',
     fontWeight: '600',
-    color: '#334155',
-    marginBottom: '18px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px'
+    color: '#444',
+    marginBottom: '12px'
   },
   productsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-    gap: '16px'
+    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    gap: '12px'
   },
   productCard: {
     display: 'flex',
     alignItems: 'center',
-    gap: '18px',
-    padding: '16px',
-    backgroundColor: '#ffffff',
-    borderRadius: '16px',
-    border: '1px solid #423c85',
-    transition: 'all 0.2s ease'
+    gap: '12px',
+    padding: '12px',
+    backgroundColor: '#ffffff',  // White background for inner product cards (like in your screenshot)
+    borderRadius: '6px',
+    border: '1px solid #e0e0e0',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
   },
   imageContainer: {
-    width: '70px',
-    height: '70px',
+    width: '60px',
+    height: '60px',
     flexShrink: 0,
-    borderRadius: '12px',
+    borderRadius: '6px',
     overflow: 'hidden',
-    backgroundColor: '#f8fafc',
-    border: '1px solid #423c85',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.02)'
+    backgroundColor: '#f0f0f0',
+    border: '1px solid #ddd'
   },
   productImage: {
     width: '100%',
@@ -406,151 +395,212 @@ const styles = {
     objectFit: 'cover'
   },
   imagePlaceholder: {
-    width: '70px',
-    height: '70px',
+    width: '60px',
+    height: '60px',
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    borderRadius: '12px',
+    borderRadius: '6px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     color: 'white',
-    fontSize: '28px',
+    fontSize: '24px',
     fontWeight: 'bold',
-    textTransform: 'uppercase',
-    boxShadow: '0 4px 10px rgba(99, 102, 241, 0.2)',
-    border: '1px solid #423c85'
+    textTransform: 'uppercase'
   },
   productInfo: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    gap: '6px'
+    gap: '4px'
   },
   productName: {
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#1e293b',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#333',
     lineHeight: '1.4',
     wordBreak: 'break-word'
   },
   quantityBadge: {
-    fontSize: '12px',
-    color: '#475569',
-    backgroundColor: '#f1f5f9',
-    padding: '4px 10px',
-    borderRadius: '20px',
-    display: 'inline-block',
-    alignSelf: 'flex-start',
-    fontWeight: '500',
-    border: '1px solid #423c85'
-  },
-  matchedBadge: {
     fontSize: '11px',
-    color: '#059669',
-    backgroundColor: '#ecfdf5',
-    padding: '4px 10px',
-    borderRadius: '20px',
+    color: '#666',
+    backgroundColor: '#f0f0f0',
+    padding: '2px 8px',
+    borderRadius: '12px',
     display: 'inline-block',
-    alignSelf: 'flex-start',
-    fontWeight: '500',
-    border: '1px solid #423c85'
+    alignSelf: 'flex-start'
   },
   noProducts: {
-    padding: '40px',
-    backgroundColor: '#f8fafc',
-    borderRadius: '16px',
+    padding: '30px',
+    backgroundColor: '#ffffff',
+    borderRadius: '6px',
     textAlign: 'center',
-    color: '#94a3b8',
+    color: '#999',
     fontStyle: 'italic',
-    border: '2px dashed #423c85'
+    border: '1px dashed #ccc'
   },
   orderFooter: {
-    backgroundColor: '#f8fafc',
-    padding: '22px',
-    borderRadius: '16px',
+    backgroundColor: '#e8e8e8',  // Slightly darker than card background for contrast
+    padding: '15px',
+    borderRadius: '6px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
-    gap: '20px',
-    border: '1px solid #423c85',
+    gap: '15px',
+    border: '1px solid #d0d0d0',
     marginTop: '10px'
   },
   orderDetails: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px'
+    gap: '8px'
   },
   totalAmount: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px'
+    gap: '8px',
+    flexWrap: 'wrap'
   },
   totalLabel: {
-    fontSize: '16px',
+    fontSize: '14px',
     fontWeight: '500',
-    color: '#475569'
+    color: '#555'
   },
   totalValue: {
-    fontSize: '24px',
+    fontSize: '20px',
     fontWeight: '700',
-    color: '#059669'
+    color: '#2e7d32'
   },
   statusContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px'
+    gap: '8px',
+    flexWrap: 'wrap'
   },
   statusLabel: {
-    fontSize: '14px',
-    color: '#64748b',
-    fontWeight: '500'
+    fontSize: '13px',
+    color: '#666'
   },
   statusBadge: {
-    padding: '6px 18px',
-    borderRadius: '30px',
+    padding: '4px 12px',
+    borderRadius: '4px',
+    fontSize: '12px',
+    fontWeight: '600',
+    textTransform: 'uppercase'
+  },
+  cancelSection: {
+    textAlign: 'right',
+    minWidth: '200px'
+  },
+  cancelButton: {
+    padding: '10px 24px',
+    backgroundColor: '#dc3545',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
     fontSize: '13px',
     fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)',
-    border: '1px solid #423c85'
+    transition: 'background-color 0.2s',
+    boxShadow: '0 2px 4px rgba(220,53,69,0.2)',
+    width: '100%',
+    cursor: 'pointer'
   },
-  cancelSection: {
-    textAlign: 'right'
-  },
-  cancelButton: {
-  padding: '14px 36px',
-  backgroundColor: '#dc2626',
-  color: 'white',
-  border: '1px solid #423c85',
-  borderRadius: '40px',
-  fontSize: '15px',
-  fontWeight: '600',
-  textTransform: 'uppercase',
-  letterSpacing: '0.8px',
-  transition: 'background-color 0.3s ease',
-  boxShadow: '0 4px 12px rgba(220, 38, 38, 0.2)',
-  cursor: 'pointer'
-},
   timeRemaining: {
-    fontSize: '14px',
-    color: '#475569',
-    marginTop: '12px',
+    fontSize: '12px',
+    color: '#666',
+    marginTop: '8px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    gap: '8px'
+    gap: '5px',
+    flexWrap: 'wrap'
   },
   timeValue: {
-    color: '#dc2626',
-    fontWeight: '700',
-    backgroundColor: '#fee2e2',
-    padding: '4px 12px',
-    borderRadius: '30px',
-    fontSize: '13px',
-    border: '1px solid #423c85'
+    color: '#dc3545',
+    fontWeight: '600',
+    backgroundColor: '#fee',
+    padding: '2px 8px',
+    borderRadius: '4px'
   }
 };
 
+// Add responsive styles as a style tag
+const responsiveStyles = `
+  @media (max-width: 768px) {
+    .order-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .products-grid {
+      grid-template-columns: 1fr !important;
+    }
+    
+    .order-footer {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .cancel-section {
+      text-align: left;
+      width: 100%;
+    }
+    
+    .cancel-button {
+      width: 100%;
+    }
+    
+    .total-amount, .status-container {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .container {
+      padding: 10px;
+    }
+    
+    .order-card {
+      padding: 15px;
+    }
+    
+    .product-card {
+      padding: 10px;
+    }
+    
+    .image-container {
+      width: 50px;
+      height: 50px;
+    }
+    
+    .image-placeholder {
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
+    }
+    
+    .product-name {
+      font-size: 13px;
+    }
+    
+    .total-value {
+      font-size: 18px;
+    }
+    
+    .cancel-button {
+      padding: 8px 16px;
+      font-size: 12px;
+    }
+  }
+`;
+
+// Add responsive styles to document
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = responsiveStyles;
+  document.head.appendChild(style);
+}
+
 export default MyOrders;
+
