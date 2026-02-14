@@ -603,8 +603,8 @@ body {
 
   .hamburger {
     display: block;
-    z-index: 1001;
     position: relative;
+    z-index: 2001;   /* 🔥 very high */
   }
 
   .nav-right {
@@ -615,19 +615,14 @@ body {
     width: 75%;
     background: #111;
 
-    display: flex;              /* 🔥 ADD THIS */
-    flex-direction: column;     /* 🔥 ADD THIS */
-    align-items: flex-start;    /* 🔥 ADD THIS */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 
     padding: 80px 20px;
     transition: 0.3s ease;
-    z-index: 1000;
-  }
 
-  .nav-right a,
-  .nav-right button {
-    margin: 15px 0;
-    font-size: 18px;
+    z-index: 2000;   /* 🔥 higher than everything */
   }
 
   .nav-right.active {
@@ -643,7 +638,7 @@ body {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.6);
-  z-index: 999;
+  z-index: 1999;   /* just below menu */
 }
 
 
