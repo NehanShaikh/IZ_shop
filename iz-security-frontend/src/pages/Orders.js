@@ -118,7 +118,16 @@ function Orders({ user }) {
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
             <p>
             <strong>Date:</strong>{" "}
-              {new Date(order.created_at).toLocaleString()}
+              {new Date(order.created_at).toLocaleString("en-IN", {
+  day: "numeric",
+  month: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: true   // 🔥 force 12-hour format
+})}
+
             </p>
           </div>
 
