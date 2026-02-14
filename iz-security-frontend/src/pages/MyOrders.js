@@ -1,20 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 function MyOrders({ user }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState(null);
 
-  useEffect(() => {
+  // Wrap fetchOrders in useCallback to prevent unnecessary re-renders
+  const fetchOrders = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
     }
 
-    fetchOrders();
-  }, [user]);
-
-  const fetchOrders = async () => {
     setLoading(true);
     try {
       const response = await fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`);
@@ -37,7 +34,11 @@ function MyOrders({ user }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]); // user is dependency for fetchOrders
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]); // Now fetchOrders is the dependency
 
   const cancelOrder = async (id) => {
     setCancellingId(id);
@@ -109,6 +110,16 @@ function MyOrders({ user }) {
     if (imagePath.startsWith('http')) return imagePath;
     // Otherwise, prepend your base URL
     return `https://iz-shop.onrender.com/${imagePath}`;
+  };
+
+  // Helper function for splitting products (keep for fallback)
+  const splitProducts = (productsString) => {
+    if (!productsString) return [];
+    return productsString
+      .split("\n")
+      .flatMap(item => item.split(/,(?=\s*[A-Za-z])/))
+      .map(item => item.trim())
+      .filter(item => item.length > 0);
   };
 
   if (!user) {
@@ -236,9 +247,13 @@ function MyOrders({ user }) {
                               e.target.onerror = null;
                               e.target.style.display = 'none';
                               // Show fallback when image fails
-                              e.target.parentElement.innerHTML += `
-                                <div style="font-size: 12px; color: #999;">Image not available</div>
-                              `;
+                              const parent = e.target.parentElement;
+                              const fallback = document.createElement('div');
+                              fallback.style.fontSize = '12px';
+                              fallback.style.color = '#999';
+                              fallback.style.textAlign = 'center';
+                              fallback.textContent = 'Image not available';
+                              parent.appendChild(fallback);
                             }}
                           />
                         ) : (
@@ -306,7 +321,7 @@ function MyOrders({ user }) {
                       fontSize: '13px',
                       fontWeight: '500',
                       backgroundColor: getStatusColor(order.order_status),
-                      color: '#fff',
+                      color: order.order_status?.toLowerCase() === 'pending' ? '#000' : '#fff',
                       textTransform: 'capitalize'
                     }}>
                       {order.order_status || 'Pending'}
@@ -366,15 +381,5 @@ function MyOrders({ user }) {
     </div>
   );
 }
-
-// Helper function (keep this for fallback)
-const splitProducts = (productsString) => {
-  if (!productsString) return [];
-  return productsString
-    .split("\n")
-    .flatMap(item => item.split(/,(?=\s*[A-Za-z])/))
-    .map(item => item.trim())
-    .filter(item => item.length > 0);
-};
 
 export default MyOrders;
