@@ -2,6 +2,21 @@ import { useEffect, useState } from "react";
 
 function MyOrders({ user }) {
   const [orders, setOrders] = useState([]);
+  const [products, setProducts] = useState([]);
+
+  // Fetch all products to get images
+  useEffect(() => {
+    fetch('https://iz-shop.onrender.com/products')
+      .then(res => res.json())
+      .then(data => {
+        // Create a map of product name -> product details
+        const productMap = {};
+        data.forEach(p => {
+          productMap[p.name.toLowerCase()] = p;
+        });
+        setProducts(productMap);
+      });
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -9,7 +24,6 @@ function MyOrders({ user }) {
     fetch(`https://iz-shop.onrender.com/my-orders/${user.id}`)
       .then(res => res.json())
       .then(data => {
-        // Remove duplicate order IDs
         const uniqueOrders = [];
         const seenIds = new Set();
 
@@ -48,14 +62,43 @@ function MyOrders({ user }) {
       });
   };
 
-  // Fallback function for parsing products text (if order_items is empty)
-  const splitProducts = (productsString) => {
+  // Parse products and match with images
+  const parseProductsWithImages = (productsString) => {
     if (!productsString) return [];
+    
     return productsString
       .split("\n")
-      .flatMap(item => item.split(/,(?=\s*[A-Za-z])/))
       .map(item => item.trim())
-      .filter(item => item.length > 0);
+      .filter(item => item.length > 0)
+      .map(item => {
+        // Parse "Product Name xQuantity"
+        const match = item.match(/(.+?)\s*x(\d+)$/i);
+        if (match) {
+          const productName = match[1].trim();
+          const quantity = parseInt(match[2]);
+          const productInfo = products[productName.toLowerCase()];
+          
+          return {
+            name: productName,
+            quantity: quantity,
+            original: item,
+            image: productInfo?.image || null,
+            price: productInfo?.price || null,
+            description: productInfo?.description || null
+          };
+        }
+        
+        // If no quantity format
+        const productInfo = products[item.toLowerCase()];
+        return {
+          name: item,
+          quantity: 1,
+          original: item,
+          image: productInfo?.image || null,
+          price: productInfo?.price || null,
+          description: productInfo?.description || null
+        };
+      });
   };
 
   return (
@@ -75,11 +118,8 @@ function MyOrders({ user }) {
 
         const hoursLeft = Math.max(0, 24 - diffHours).toFixed(1);
 
-        // Check if we have order_items from the new backend
-        const hasOrderItems = order.order_items && order.order_items.length > 0;
-        
-        // Fallback product list from text
-        const productList = splitProducts(order.products);
+        // Parse products with images
+        const productList = parseProductsWithImages(order.products);
 
         return (
           <div className="card" key={order.id} style={{ 
@@ -94,89 +134,74 @@ function MyOrders({ user }) {
             <div>
               <strong style={{ fontSize: "16px" }}>Products:</strong>
               
-              {/* Show products with images if available */}
-              {hasOrderItems ? (
-                <div style={{ marginTop: "15px" }}>
-                  {order.order_items.map((item, i) => (
-                    <div key={i} style={{ 
-                      display: "flex", 
-                      alignItems: "center", 
-                      gap: "20px",
-                      marginBottom: "15px",
-                      padding: "15px",
-                      border: "1px solid #e0e0e0",
-                      borderRadius: "8px",
-                      backgroundColor: "#f9f9f9"
-                    }}>
-                      {/* Product Image */}
-                      {item.image ? (
-                        <img 
-                          src={item.image} 
-                          alt={item.product_name}
-                          style={{
-                            width: "80px",
-                            height: "80px",
-                            objectFit: "cover",
-                            borderRadius: "8px",
-                            border: "1px solid #ddd"
-                          }}
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "https://via.placeholder.com/80x80?text=No+Image";
-                          }}
-                        />
-                      ) : (
-                        <div style={{
+              <div style={{ marginTop: "15px" }}>
+                {productList.map((item, i) => (
+                  <div key={i} style={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: "20px",
+                    marginBottom: "15px",
+                    padding: "15px",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "8px",
+                    backgroundColor: "#f9f9f9"
+                  }}>
+                    {/* Product Image */}
+                    {item.image ? (
+                      <img 
+                        src={item.image} 
+                        alt={item.name}
+                        style={{
                           width: "80px",
                           height: "80px",
-                          backgroundColor: "#f0f0f0",
+                          objectFit: "cover",
                           borderRadius: "8px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "12px",
-                          color: "#999",
                           border: "1px solid #ddd"
-                        }}>
-                          No Image
-                        </div>
-                      )}
-                      
-                      {/* Product Details */}
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: "bold", fontSize: "16px", marginBottom: "5px" }}>
-                          {item.product_name || "Unknown Product"}
-                        </div>
-                        <div style={{ fontSize: "14px", color: "#666", marginBottom: "3px" }}>
-                          Quantity: {item.quantity}
-                        </div>
+                        }}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "https://via.placeholder.com/80x80?text=No+Image";
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: "80px",
+                        height: "80px",
+                        backgroundColor: "#f0f0f0",
+                        borderRadius: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "12px",
+                        color: "#999",
+                        border: "1px solid #ddd"
+                      }}>
+                        No Image
+                      </div>
+                    )}
+                    
+                    {/* Product Details */}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: "bold", fontSize: "16px", marginBottom: "5px" }}>
+                        {item.name}
+                      </div>
+                      <div style={{ fontSize: "14px", color: "#666", marginBottom: "3px" }}>
+                        Quantity: {item.quantity}
+                      </div>
+                      {item.price && (
                         <div style={{ fontSize: "14px", color: "#666", marginBottom: "3px" }}>
                           Price: ₹{item.price}
                         </div>
-                        {item.description && (
-                          <div style={{ fontSize: "12px", color: "#888", marginTop: "5px" }}>
-                            {item.description.substring(0, 100)}...
-                          </div>
-                        )}
-                      </div>
+                      )}
+                      {item.description && (
+                        <div style={{ fontSize: "12px", color: "#888", marginTop: "5px" }}>
+                          {item.description.substring(0, 100)}...
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                /* Fallback to text-based product list */
-                <div>
-                  <ul style={{ marginLeft: "20px", marginTop: "10px" }}>
-                    {productList.map((item, i) => (
-                      <li key={i} style={{ marginBottom: "5px" }}>{item}</li>
-                    ))}
-                  </ul>
-                  {productList.length === 0 && (
-                    <p style={{ color: "#999", fontStyle: "italic" }}>
-                      Product details not available
-                    </p>
-                  )}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div style={{ 
