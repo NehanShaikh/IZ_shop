@@ -7,11 +7,20 @@ body {
   font-family: 'Segoe UI', sans-serif;
   background: linear-gradient(135deg, #0f172a, #0b1120);
   overflow-x: hidden;
+  padding-top: 70px;
   color: #f1f5f9;
 }
 
 .container {
   padding: 30px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow-x: hidden;
 }
 
 /* ========================= */
@@ -580,6 +589,7 @@ body {
 
 .navbar {
   display: flex;
+  position: fixed;
   justify-content: space-between;
   align-items: center;
   padding: 15px 30px;
