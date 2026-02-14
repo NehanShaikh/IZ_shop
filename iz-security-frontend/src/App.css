@@ -581,10 +581,12 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 2000;   /* 🔥 Add this only */
   padding: 15px 30px;
   background-color: #111;
   color: white;
+
+  position: relative;   /* 🔥 ADD THIS */
+  z-index: 2000;        /* 🔥 KEEP THIS */
 }
 
 .nav-right a {
