@@ -584,6 +584,12 @@ body {
   padding: 15px 30px;
   background-color: #111;
   color: white;
+  position: relative;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
 }
 
 .nav-right a {
@@ -596,6 +602,7 @@ body {
   display: none;
   font-size: 28px;
   cursor: pointer;
+  z-index: 1001;
 }
 
 /* 🔥 MOBILE VIEW */
@@ -606,26 +613,31 @@ body {
   }
 
   .nav-right {
-    position: absolute;
-    top: 70px;
-    right: 0;
+    position: fixed;
+    top: 0;
+    right: -100%;
+    height: 100vh;
+    width: 75%;
     background: #111;
-    width: 100%;
-    display: none;
     flex-direction: column;
-    padding: 20px;
+    align-items: flex-start;
+    padding: 80px 20px;
+    transition: 0.3s ease-in-out;
+    z-index: 1000;
   }
 
   .nav-right a,
   .nav-right button {
-    margin: 10px 0;
+    margin: 15px 0;
+    font-size: 18px;
   }
 
   .nav-right.active {
-    display: flex;
+    right: 0;
   }
 }
 
+/* Overlay */
 .overlay {
   position: fixed;
   top: 0;
@@ -635,7 +647,6 @@ body {
   background: rgba(0, 0, 0, 0.6);
   z-index: 999;
 }
-
 
 /* ================= DELIVERY NOTICE ================= */
 

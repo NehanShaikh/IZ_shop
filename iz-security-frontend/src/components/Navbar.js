@@ -19,62 +19,68 @@ function Navbar({ user, setUser }) {
     }
   };
 
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
+
   return (
-  <div className="navbar">
+    <div className="navbar">
 
-    {/* Left Side - Brand */}
-    <div className="nav-left">
-      <h2 className="brand-name">IZ Security System</h2>
-    </div>
+      {/* Left Side - Brand */}
+      <div className="nav-left">
+        <h2 className="brand-name">IZ Security System</h2>
+      </div>
 
-    {/* Hamburger Icon (Mobile Only) */}
-    <div 
-      className="hamburger"
-      onClick={() => setMenuOpen(!menuOpen)}
-    >
-      ☰
-    </div>
+      {/* Hamburger Icon (Mobile Only) */}
+      <div
+        className="hamburger"
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
+        ☰
+      </div>
 
-    {/* 🔥 Overlay goes HERE */}
-    {menuOpen && (
-      <div 
-        className="overlay" 
-        onClick={() => setMenuOpen(false)}
-      ></div>
-    )}
-
-    {/* Right Side - Navigation */}
-    <div className={`nav-right ${menuOpen ? "active" : ""}`}>
-
-      <Link to="/">Home</Link>
-      <Link to="/products">Products</Link>
-
-      {user && user.role === "admin" && (
-        <Link to="/orders">All Orders</Link>
+      {/* Overlay */}
+      {menuOpen && (
+        <div
+          className="overlay"
+          onClick={closeMenu}
+        ></div>
       )}
 
-      {user && user.role !== "admin" && (
-        <>
-          <Link to="/cart">Cart</Link>
-          <Link to="/my-orders">My Orders</Link>
-          <Link to="/contact">Contact Us</Link>
-        </>
-      )}
+      {/* Right Side - Navigation */}
+      <div className={`nav-right ${menuOpen ? "active" : ""}`}>
 
-      {user && (
-        <button
-          className="button"
-          style={{ marginLeft: "20px" }}
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
-      )}
+        <Link to="/" onClick={closeMenu}>Home</Link>
+        <Link to="/products" onClick={closeMenu}>Products</Link>
+
+        {user && user.role === "admin" && (
+          <Link to="/orders" onClick={closeMenu}>All Orders</Link>
+        )}
+
+        {user && user.role !== "admin" && (
+          <>
+            <Link to="/cart" onClick={closeMenu}>Cart</Link>
+            <Link to="/my-orders" onClick={closeMenu}>My Orders</Link>
+            <Link to="/contact" onClick={closeMenu}>Contact Us</Link>
+          </>
+        )}
+
+        {user && (
+          <button
+            className="button"
+            onClick={() => {
+              handleLogout();
+              closeMenu();
+            }}
+          >
+            Logout
+          </button>
+        )}
+
+      </div>
 
     </div>
-
-  </div>
-);
+  );
 }
 
 export default Navbar;
