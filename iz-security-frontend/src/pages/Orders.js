@@ -116,6 +116,10 @@ function Orders({ user }) {
             </div>
 
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
+            <p>
+            <strong>Date:</strong>{" "}
+              {new Date(order.created_at).toLocaleString()}
+            </p>
           </div>
 
           {order.order_status === "Pending" && (
