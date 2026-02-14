@@ -219,7 +219,7 @@ function Products({ user }) {
     alignItems: "center",
     overflowY: "auto",
     padding: "20px",
-    zIndex: 1000
+    zIndex: 5000
   }}
 >
   <div

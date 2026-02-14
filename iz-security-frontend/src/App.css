@@ -652,6 +652,10 @@ body {
   z-index: 2500;
 }
 
+body {
+  overflow-x: hidden;
+}
+
 
 
 /* ================= DELIVERY NOTICE ================= */
