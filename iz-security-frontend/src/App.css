@@ -793,31 +793,3 @@ body {
   color: white;
 }
 
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.order-card {
-  transition: box-shadow 0.3s ease;
-}
-
-.order-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-@media (max-width: 600px) {
-  .container {
-    padding: 10px;
-  }
-  
-  .order-card {
-    padding: 15px;
-  }
-  
-  .order-card .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 10px;
-  }
-}
