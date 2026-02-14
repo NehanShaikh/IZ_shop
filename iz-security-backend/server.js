@@ -151,7 +151,7 @@ ${productList}
           // 🔥 Clear Cart After Order
           db.query("DELETE FROM cart WHERE user_id = ?", [userId]);
 
-          res.send("Order placed successfully & WhatsApp sent!");
+          res.send("Order placed successfully!");
         });
 
     });

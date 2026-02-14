@@ -88,7 +88,7 @@ function Checkout({ user }) {
           className="checkout-btn"
           onClick={handleOrder}
         >
-          Place Order via WhatsApp
+          Place Order
         </button>
 
       </div>
