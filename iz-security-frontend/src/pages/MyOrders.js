@@ -330,7 +330,7 @@ const styles = {
     marginBottom: '25px',
     boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
     transition: 'box-shadow 0.3s ease',
-    border: '1px solid #f0f0f0'
+    border: '1px solid #423c85'
   },
   orderHeader: {
     display: 'flex',
