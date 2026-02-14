@@ -520,20 +520,19 @@ const styles = {
     textAlign: 'right'
   },
   cancelButton: {
-    padding: '14px 36px',
-    backgroundColor: '#dc2626',
-    color: 'white',
-    border: 'none',
-    borderRadius: '40px',
-    fontSize: '15px',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: '0.8px',
-    transition: 'background-color 0.3s ease',
-    boxShadow: '0 4px 12px rgba(220, 38, 38, 0.2)',
-    cursor: 'pointer',
-    border: '1px solid #423c85'
-  },
+  padding: '14px 36px',
+  backgroundColor: '#dc2626',
+  color: 'white',
+  border: '1px solid #423c85',
+  borderRadius: '40px',
+  fontSize: '15px',
+  fontWeight: '600',
+  textTransform: 'uppercase',
+  letterSpacing: '0.8px',
+  transition: 'background-color 0.3s ease',
+  boxShadow: '0 4px 12px rgba(220, 38, 38, 0.2)',
+  cursor: 'pointer'
+},
   timeRemaining: {
     fontSize: '14px',
     color: '#475569',
