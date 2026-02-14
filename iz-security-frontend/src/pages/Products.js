@@ -5,7 +5,6 @@ function Products({ user }) {
 
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [useFileUpload, setUseFileUpload] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const [newProduct, setNewProduct] = useState({
@@ -45,25 +44,11 @@ function Products({ user }) {
   // ==========================
   const handleAddProduct = async () => {
     try {
-      if (useFileUpload) {
-        const formData = new FormData();
-        formData.append("name", newProduct.name);
-        formData.append("description", newProduct.description);
-        formData.append("price", newProduct.price);
-        formData.append("stock", newProduct.stock);
-        formData.append("image", newProduct.image);
-
-        await fetch(`${API}/upload-product`, {
-          method: "POST",
-          body: formData
-        });
-      } else {
-        await fetch(`${API}/products`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newProduct)
-        });
-      }
+      await fetch(`${API}/products`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newProduct)
+      });
 
       fetchProducts();
 
