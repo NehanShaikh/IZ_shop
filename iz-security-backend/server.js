@@ -221,12 +221,22 @@ app.get("/my-orders/:userId", (req, res) => {
     }
 
     const ordersWithProducts = orders.map(order => {
-      // Parse the products string
-      const productNames = order.products
+      // Parse the products string - split by newlines
+      const productLines = order.products
         .split('\n')
-        .flatMap(item => item.split(/,(?=\s*[A-Za-z])/))
-        .map(item => item.trim().toLowerCase()) // Convert to lowercase for matching
-        .filter(item => item.length > 0);
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+      
+      console.log(`\n=== Processing Order #${order.id} ===`);
+      console.log("Product lines:", productLines);
+
+      // Extract clean product names (remove x1, x2 etc. from the end)
+      const productNames = productLines.map(line => {
+        // Remove quantity indicators like "x1", "x2", "x 1", "x 2" at the end
+        return line.replace(/\s*x\s*\d+$/i, '').trim();
+      });
+
+      console.log("Clean product names (without quantity):", productNames);
 
       return new Promise((resolve) => {
         if (productNames.length === 0) {
@@ -234,42 +244,95 @@ app.get("/my-orders/:userId", (req, res) => {
           return;
         }
 
-        // Get ALL products and do matching in JavaScript for more flexibility
+        // Get ALL products from database
         const allProductsSql = `SELECT name, image FROM products`;
         
         db.query(allProductsSql, [], (err, allProducts) => {
           if (err) {
             console.error(err);
-            resolve({ ...order, products_list: [] });
+            resolve({ ...order, products_list: productNames.map(name => ({ 
+              name: name, 
+              image: null,
+              original: name
+            })) });
             return;
           }
 
-          // Create a flexible matching map
-          const products_list = productNames.map(orderProductName => {
-            // Try to find a matching product
-            const matchedProduct = allProducts.find(dbProduct => {
-              const dbProductName = dbProduct.name.toLowerCase().trim();
-              const orderProductLower = orderProductName.toLowerCase().trim();
-              
-              // Try exact match first
-              if (dbProductName === orderProductLower) return true;
-              
-              // Try if order product name contains db product name or vice versa
-              if (dbProductName.includes(orderProductLower) || 
-                  orderProductLower.includes(dbProductName)) return true;
-              
-              // Remove common variations (spaces, hyphens) and compare
-              const normalize = (str) => str.replace(/[-\s]/g, '');
-              if (normalize(dbProductName) === normalize(orderProductLower)) return true;
-              
-              return false;
-            });
+          console.log("Products in DB:", allProducts.map(p => p.name));
+
+          // Match each product
+          const products_list = productNames.map((cleanName, index) => {
+            const originalLine = productLines[index];
+            console.log(`\nLooking for match for: "${cleanName}" (from original: "${originalLine}")`);
+            
+            let matchedProduct = null;
+            let matchMethod = "";
+            
+            // Strategy 1: Exact match (case-insensitive)
+            matchedProduct = allProducts.find(dbProduct => 
+              dbProduct.name.toLowerCase() === cleanName.toLowerCase()
+            );
+            
+            if (matchedProduct) {
+              matchMethod = "exact";
+              console.log(`✓ Exact match found: "${matchedProduct.name}"`);
+            }
+
+            // Strategy 2: Product name contains the clean name
+            if (!matchedProduct) {
+              matchedProduct = allProducts.find(dbProduct => {
+                const dbName = dbProduct.name.toLowerCase();
+                const searchName = cleanName.toLowerCase();
+                return dbName.includes(searchName);
+              });
+              if (matchedProduct) {
+                matchMethod = "db contains search";
+                console.log(`✓ DB contains search: "${matchedProduct.name}"`);
+              }
+            }
+
+            // Strategy 3: Clean name contains product name
+            if (!matchedProduct) {
+              matchedProduct = allProducts.find(dbProduct => {
+                const dbName = dbProduct.name.toLowerCase();
+                const searchName = cleanName.toLowerCase();
+                return searchName.includes(dbName);
+              });
+              if (matchedProduct) {
+                matchMethod = "search contains db";
+                console.log(`✓ Search contains DB: "${matchedProduct.name}"`);
+              }
+            }
+
+            // Strategy 4: Remove spaces and special characters
+            if (!matchedProduct) {
+              const normalize = (str) => str.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+              matchedProduct = allProducts.find(dbProduct => 
+                normalize(dbProduct.name) === normalize(cleanName)
+              );
+              if (matchedProduct) {
+                matchMethod = "normalized";
+                console.log(`✓ Normalized match: "${matchedProduct.name}"`);
+              }
+            }
+
+            if (!matchedProduct) {
+              console.log(`✗ No match found for "${cleanName}"`);
+            }
 
             return {
-              name: orderProductName,
-              image: matchedProduct ? matchedProduct.image : null
+              name: originalLine, // Keep the original line with quantity for display
+              cleanName: cleanName,
+              image: matchedProduct ? matchedProduct.image : null,
+              matchedWith: matchedProduct ? matchedProduct.name : null,
+              matchMethod: matchMethod
             };
           });
+
+          console.log("Final products_list:", products_list.map(p => ({
+            name: p.name,
+            hasImage: !!p.image
+          })));
 
           resolve({ ...order, products_list });
         });
