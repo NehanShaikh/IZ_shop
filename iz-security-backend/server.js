@@ -202,49 +202,84 @@ app.post("/upload-product", upload.single("image"), (req, res) => {
 
 // 🔥 Get orders for specific user
 app.get("/my-orders/:userId", (req, res) => {
-  const sql = `
+  // First, get all orders for the user
+  const ordersSql = `
     SELECT 
-      o.id,
-      o.products,
-      o.total_amount,
-      o.order_status,
-      o.created_at,
-      o.customer_name,
-      o.phone,
-      o.address,
-      (
-        SELECT JSON_ARRAYAGG(
-          JSON_OBJECT(
-            'product_id', p.id,
-            'product_name', p.name,
-            'quantity', oi.quantity,
-            'price', oi.price,
-            'image', p.image,
-            'description', p.description
-          )
-        )
-        FROM order_items oi
-        LEFT JOIN products p ON oi.product_id = p.id
-        WHERE oi.order_id = o.id
-      ) as order_items
-    FROM orders o
-    WHERE o.user_id = ?
-    ORDER BY o.id DESC
+      id,
+      products,
+      total_amount,
+      order_status,
+      created_at
+    FROM orders
+    WHERE user_id = ?
+    ORDER BY id DESC
   `;
 
-  db.query(sql, [req.params.userId], (err, results) => {
+  db.query(ordersSql, [req.params.userId], (err, orders) => {
     if (err) {
       console.error(err);
       return res.status(500).send("Error fetching orders");
     }
 
-    // Parse the JSON string for each order
-    const formattedResults = results.map(order => ({
-      ...order,
-      order_items: order.order_items ? JSON.parse(order.order_items) : []
-    }));
+    // For each order, fetch the corresponding product images
+    const ordersWithProducts = orders.map(order => {
+      // Parse the products string into an array
+      const productNames = order.products
+        .split('\n')
+        .flatMap(item => item.split(/,(?=\s*[A-Za-z])/))
+        .map(item => item.trim())
+        .filter(item => item.length > 0);
 
-    res.json(formattedResults);
+      // Create a promise to fetch images for each product
+      return new Promise((resolve, reject) => {
+        if (productNames.length === 0) {
+          resolve({ ...order, products_list: [] });
+          return;
+        }
+
+        // Create placeholders for SQL IN clause
+        const placeholders = productNames.map(() => '?').join(',');
+        
+        const productsSql = `
+          SELECT name, image 
+          FROM products 
+          WHERE name IN (${placeholders})
+        `;
+
+        db.query(productsSql, productNames, (err, products) => {
+          if (err) {
+            console.error(err);
+            // Return order with empty products_list on error
+            resolve({ ...order, products_list: [] });
+            return;
+          }
+
+          // Create a map of product name to image for quick lookup
+          const imageMap = {};
+          products.forEach(p => {
+            imageMap[p.name] = p.image;
+          });
+
+          // Create the products list with images
+          const products_list = productNames.map(name => ({
+            name: name,
+            image: imageMap[name] || null // Use null if image not found
+          }));
+
+          resolve({ ...order, products_list });
+        });
+      });
+    });
+
+    // Wait for all product image fetches to complete
+    Promise.all(ordersWithProducts)
+      .then(ordersWithImages => {
+        res.json(ordersWithImages);
+      })
+      .catch(error => {
+        console.error(error);
+        res.status(500).send("Error processing orders");
+      });
   });
 });
 
