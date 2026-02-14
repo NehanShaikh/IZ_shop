@@ -29,7 +29,7 @@ function MyOrders({ user }) {
     await fetch(`${API}/update-order-status/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "Cancelled" })
+      body: JSON.stringify({ status: "Cancelled due to out of stock" })
     });
 
     const res = await fetch(`${API}/my-orders/${user.id}`);
