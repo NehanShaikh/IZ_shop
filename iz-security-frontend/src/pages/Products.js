@@ -212,13 +212,14 @@ function Products({ user }) {
     top: 0,
     left: 0,
     width: "100%",
+    maxWidth: "100vw",
     height: "100%",
     background: "rgba(0,0,0,0.7)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     overflowY: "auto",
-    padding: "20px",
+    padding: "15px",
     zIndex: 5000
   }}
 >
@@ -229,7 +230,7 @@ function Products({ user }) {
       borderRadius: "12px",
       padding: "20px",
       width: "100%",
-      maxWidth: "600px",
+      maxWidth: "500px",
       maxHeight: "90vh",
       overflowY: "auto"
     }}
