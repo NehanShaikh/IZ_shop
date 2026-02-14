@@ -285,7 +285,7 @@ const styles = {
     margin: '0 auto',
     padding: '20px',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-    backgroundColor: '#f5f5f5',  // Same as your products page background
+    backgroundColor: '#5d42c6',  // Same as your products page background
     minHeight: '100vh'
   },
   title: {
@@ -299,7 +299,7 @@ const styles = {
   loadingState: {
     textAlign: 'center',
     padding: '40px',
-    backgroundColor: '#f5f5f5',  // Same as product card background
+    backgroundColor: '#4d31b2',  // Same as product card background
     borderRadius: '8px',
     boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
     color: '#666',
@@ -308,7 +308,7 @@ const styles = {
   emptyState: {
     textAlign: 'center',
     padding: '60px 20px',
-    backgroundColor: '#f5f5f5',  // Same as product card background
+    backgroundColor: '#5039b5',  // Same as product card background
     borderRadius: '8px',
     boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
     border: '1px solid #e0e0e0'
@@ -324,7 +324,7 @@ const styles = {
     color: '#999'
   },
   orderCard: {
-    backgroundColor: '#f5f5f5',  // Same light gray as product cards
+    backgroundColor: '#543097',  // Same light gray as product cards
     borderRadius: '8px',
     padding: '20px',
     marginBottom: '20px',
