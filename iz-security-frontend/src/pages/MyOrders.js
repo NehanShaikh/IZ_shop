@@ -150,7 +150,8 @@ function MyOrders({ user }) {
                   style={{
                     fontSize: "13px",
                     color: "#f87171",
-                    marginTop: "4px"
+                    marginTop: "4px",
+                    whiteSpace: "pre-line"
                   }}
                 >
                   {order.cancel_reason}
