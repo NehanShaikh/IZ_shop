@@ -3,13 +3,8 @@ import { useEffect, useState } from "react";
 function MyOrders({ user }) {
 
   const [orders, setOrders] = useState([]);
-  const [customerCancelled, setCustomerCancelled] = useState([]); // 🔥 track customer cancels
-
   const API = "https://iz-shop.onrender.com";
 
-  // ==============================
-  // FETCH ORDERS
-  // ==============================
   useEffect(() => {
     if (!user) return;
 
@@ -32,21 +27,14 @@ function MyOrders({ user }) {
 
   }, [user]);
 
-  // ==============================
-  // CUSTOMER CANCEL
-  // ==============================
   const cancelOrder = async (id) => {
 
     await fetch(`${API}/update-order-status/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "Cancelled" })
+      body: JSON.stringify({ status: "Cancelled" }) // no reason
     });
 
-    // 🔥 Mark this order as cancelled by customer
-    setCustomerCancelled(prev => [...prev, id]);
-
-    // Refresh orders
     const res = await fetch(`${API}/my-orders/${user.id}`);
     const data = await res.json();
 
@@ -96,7 +84,6 @@ function MyOrders({ user }) {
           >
             <h4>Order #{orders.length - index}</h4>
 
-            {/* PRODUCTS */}
             <div style={{ marginTop: "10px" }}>
               <strong>Products:</strong>
 
@@ -141,7 +128,6 @@ function MyOrders({ user }) {
 
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
 
-            {/* STATUS */}
             <p>
               <strong>Status:</strong>{" "}
               <span
@@ -158,36 +144,33 @@ function MyOrders({ user }) {
                 {order.order_status}
               </span>
 
-              {/* 🔥 Show reason ONLY if admin cancelled */}
-              {order.order_status === "Cancelled" &&
-                !customerCancelled.includes(order.id) && (
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      color: "#f87171",
-                      marginTop: "4px"
-                    }}
-                  >
-                    Cancelled due to Out of Stock
-                  </div>
+              {/* 🔥 Show reason only if exists (admin cancel) */}
+              {order.cancel_reason && (
+                <div
+                  style={{
+                    fontSize: "13px",
+                    color: "#f87171",
+                    marginTop: "4px"
+                  }}
+                >
+                  {order.cancel_reason}
+                </div>
               )}
             </p>
 
             <p>
               <strong>Date:</strong>{" "}
               {new Date(order.created_at).toLocaleString("en-IN", {
-  day: "numeric",
-  month: "numeric",
-  year: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  second: "2-digit",
-  hour12: true   // 🔥 force 12-hour format
-})}
-
+                day: "numeric",
+                month: "numeric",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true
+              })}
             </p>
 
-            {/* CUSTOMER CANCEL BUTTON */}
             {canCancel && (
               <>
                 <button

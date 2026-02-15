@@ -3,14 +3,16 @@ import { useEffect, useState } from "react";
 function Orders({ user }) {
 
   const [orders, setOrders] = useState([]);
-  const [filter, setFilter] = useState("All"); // 🔥 Filter state
+  const [filter, setFilter] = useState("All");
+
+  const API = "https://iz-shop.onrender.com";
 
   // =============================
   // FETCH ORDERS
   // =============================
   const fetchOrders = async () => {
     try {
-      const res = await fetch("https://iz-shop.onrender.com/orders");
+      const res = await fetch(`${API}/orders`);
       const data = await res.json();
       setOrders(data);
     } catch (error) {
@@ -35,23 +37,23 @@ function Orders({ user }) {
   // =============================
   // UPDATE ORDER STATUS
   // =============================
-  const updateStatus = async (id, newStatus) => {
-
+  const updateStatus = async (id, newStatus, reason = null) => {
     try {
-      await fetch(`https://iz-shop.onrender.com/update-order-status/${id}`, {
+      await fetch(`${API}/update-order-status/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({
+          status: newStatus,
+          reason: reason
+        })
       });
 
       fetchOrders();
-
     } catch (error) {
       console.error("Update error:", error);
     }
   };
 
-  // 🔥 Filtered Orders
   const filteredOrders =
     filter === "All"
       ? orders
@@ -64,7 +66,7 @@ function Orders({ user }) {
         Customer Orders
       </h2>
 
-      {/* 🔥 FILTER BUTTONS */}
+      {/* FILTER BUTTONS */}
       <div style={{ marginBottom: "25px" }}>
         {["All", "Pending", "Delivered", "Cancelled"].map(status => (
           <button
@@ -108,7 +110,7 @@ function Orders({ user }) {
               <strong>Products:</strong>
               <ul style={{ marginLeft: "20px", marginTop: "5px" }}>
                 {order.products
-                  .match(/.*?x\d/g)
+                  ?.match(/.*?x\d/g)
                   ?.map((item, i) => (
                     <li key={i}>{item.trim()}</li>
                   ))}
@@ -116,18 +118,18 @@ function Orders({ user }) {
             </div>
 
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
-            <p>
-            <strong>Date:</strong>{" "}
-              {new Date(order.created_at).toLocaleString("en-IN", {
-  day: "numeric",
-  month: "numeric",
-  year: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  second: "2-digit",
-  hour12: true   // 🔥 force 12-hour format
-})}
 
+            <p>
+              <strong>Date:</strong>{" "}
+              {new Date(order.created_at).toLocaleString("en-IN", {
+                day: "numeric",
+                month: "numeric",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true
+              })}
             </p>
           </div>
 
@@ -135,7 +137,13 @@ function Orders({ user }) {
             <div className="order-actions">
               <button
                 className="button delete-btn"
-                onClick={() => updateStatus(order.id, "Cancelled")}
+                onClick={() =>
+                  updateStatus(
+                    order.id,
+                    "Cancelled",
+                    "Cancelled due to Out of Stock"
+                  )
+                }
               >
                 Cancel Order
               </button>

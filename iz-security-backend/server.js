@@ -424,15 +424,15 @@ app.get("/orders", (req, res) => {
 // 🔥 Update order status (Admin)
 app.put("/update-order-status/:id", (req, res) => {
 
-  const { status } = req.body;
+  const { status, reason } = req.body;
 
   const sql = `
     UPDATE orders
-    SET order_status = ?
+    SET order_status = ?, cancel_reason = ?
     WHERE id = ?
   `;
 
-  db.query(sql, [status, req.params.id], (err) => {
+  db.query(sql, [status, reason || null, req.params.id], (err) => {
     if (err) {
       console.error(err);
       return res.status(500).send("Error updating order");
@@ -441,6 +441,7 @@ app.put("/update-order-status/:id", (req, res) => {
   });
 
 });
+
 
 
 app.listen(process.env.PORT, () => {
