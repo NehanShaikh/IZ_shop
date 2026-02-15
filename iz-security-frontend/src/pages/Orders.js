@@ -180,7 +180,7 @@ function Orders({ user }) {
           )}
 
           {order.order_status === "Cancelled" && (
-            <p className="cancelled-text">
+            <div className="cancelled-text">
               ✕ Order Cancelled
 
               {order.cancel_reason && (
@@ -195,7 +195,7 @@ function Orders({ user }) {
                 {order.cancel_reason}
               </div>
             )}
-            </p>
+            </div>
           )}
 
         </div>
