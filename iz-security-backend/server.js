@@ -465,15 +465,6 @@ Customer: ${order.customer_name}
 Phone: ${order.phone}
 Address: ${order.address}
 Total: ₹${order.total_amount}
-Date: ${new Date(order.created_at).toLocaleString("en-IN", {
-              day: "numeric",
-              month: "numeric",
-              year: "numeric",
-              hour: "numeric",
-              minute: "2-digit",
-              hour12: true
-            })}
-
 Products:
 ${order.products}
 `;
