@@ -24,7 +24,7 @@ function Home() {
           🚚 <strong>Note:</strong> Delivery is currently available only within Mangalore City, Karnataka.
           </p>
         <p>
-          If the order is cancelled by the customer, only 50% of the amount will be refunded.
+          In case of order cancellation by the customer, only 50% of the paid amount will be refunded.
          </p>
         </div>
 
