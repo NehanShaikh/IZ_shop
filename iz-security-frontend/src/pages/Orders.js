@@ -161,18 +161,6 @@ function Orders({ user }) {
                 Cancel Order
               </button>
 
-              {order.cancel_reason && (
-  <div
-    style={{
-      fontSize: "13px",
-      color: "#f87171",
-      marginTop: "4px",
-      whiteSpace: "pre-line"   // 🔥 IMPORTANT
-    }}
-  >
-    {order.cancel_reason}
-  </div>
-)}
 
 
               <button
@@ -194,6 +182,19 @@ function Orders({ user }) {
           {order.order_status === "Cancelled" && (
             <p className="cancelled-text">
               ✕ Order Cancelled
+
+              {order.cancel_reason && (
+                <div
+                  style={{
+                  fontSize: "13px",
+                  color: "#f87171",
+                  marginTop: "4px",
+                  whiteSpace: "pre-line"   // 🔥 IMPORTANT
+                }}
+              >
+                {order.cancel_reason}
+              </div>
+            )}
             </p>
           )}
 
