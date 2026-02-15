@@ -467,12 +467,13 @@ app.put("/update-order-status/:id", async (req, res) => {
   `;
 
   db.query(sql, [status, reason || null, orderId], async (err) => {
+
     if (err) {
       console.error(err);
       return res.status(500).send("Error updating order");
     }
 
-    // 🔥 If customer cancelled (no reason sent)
+    // 🔥 If customer cancelled (no reason provided)
     if (status === "Cancelled" && !reason) {
 
       db.query(
@@ -480,21 +481,29 @@ app.put("/update-order-status/:id", async (req, res) => {
         [orderId],
         async (err2, results) => {
 
-          if (!err2 && results.length > 0) {
+          if (err2) {
+            console.error(err2);
+            return;
+          }
+
+          if (results.length > 0) {
 
             const order = results[0];
 
             const message = `
-🚨 Order Cancelled by Customer
+🚨 ORDER CANCELLED BY CUSTOMER
 
-Order ID: ${order.id}
-Customer: ${order.customer_name}
-Phone: ${order.phone}
-Address: ${order.address}
-Total: ₹${order.total_amount}
-Products:
+🆔 Order ID: ${order.id}
+👤 Customer: ${order.customer_name}
+📞 Phone: ${order.phone}
+📍 Address: ${order.address}
+
+💳 Payment Method: ${order.payment_method}
+💰 Total: ₹${order.total_amount}
+
+📦 Products:
 ${order.products}
-`;
+            `;
 
             try {
               await client.messages.create({
@@ -514,8 +523,6 @@ ${order.products}
   });
 
 });
-
-
 
 
 app.listen(process.env.PORT, () => {
