@@ -21,7 +21,7 @@ function Home() {
         {/* 🔥 Delivery Notice */}
         <div className="delivery-notice">
           🚚 <strong>Note:</strong> Delivery is currently available only within Mangalore City, Karnataka.
-          If Order is cancelled by the customer , only 50% of the amount will be Refunded.
+          <br>If Order is cancelled by the customer , only 50% of the amount will be Refunded.</br>
         </div>
 
       </div>

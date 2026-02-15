@@ -154,7 +154,8 @@ function Orders({ user }) {
                   updateStatus(
                     order.id,
                     "Cancelled",
-                    "Cancelled due to Out of Stock\n Paid amount will be refunded"
+                    "Cancelled due to Out of Stock",
+                    "If Paid, Amount will be Refunded"
                   )
                 }
               >
