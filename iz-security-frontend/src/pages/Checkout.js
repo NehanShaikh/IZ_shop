@@ -45,7 +45,7 @@ function Checkout({ user }) {
           name,
           phone,
           address,
-          paymentMethod: "COD"
+          paymentMethod: "Cash on Delivery"
         })
       });
 

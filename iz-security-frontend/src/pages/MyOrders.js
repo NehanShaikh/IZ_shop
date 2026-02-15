@@ -171,7 +171,7 @@ function MyOrders({ user }) {
     }}
   >
     {order.payment_status === "Paid"
-      ? "Paid"
+      ? "Paid Online"
       : order.payment_method === "COD"
       ? "Cash on Delivery"
       : "Pending"}
