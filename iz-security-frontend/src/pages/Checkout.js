@@ -70,7 +70,7 @@ function Checkout({ user }) {
       const paymentData = await paymentRes.json();
 
       const options = {
-        key: "YOUR_RAZORPAY_KEY_ID", // 🔥 replace with your test key
+        key: "rzp_test_SGR2OuhuHLx71x", // 🔥 replace with your test key
         amount: paymentData.amount,
         currency: "INR",
         name: "IZ Security System",
