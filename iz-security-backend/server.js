@@ -126,33 +126,39 @@ app.post("/place-order", async (req, res) => {
       `;
 
       db.query(orderQuery,
-        [userId, name, phone, address, productList, total],
-        async (err2) => {
+  [userId, name, phone, address, productList, total],
+  async (err2, result) => {
 
-          if (err2) return res.status(500).send("Order save error");
+    if (err2) return res.status(500).send("Order save error");
 
-          // 🔥 Send WhatsApp via Twilio
-          await client.messages.create({
-            body: `
+    const orderId = result.insertId; // 🔥 get new order ID
+
+    // 🔥 Send WhatsApp via Twilio
+    await client.messages.create({
+      body: `
 🛒 NEW ORDER - IZ Security System
-Order ID: ${order.id}
+
+🆔 Order ID: ${orderId}
 👤 Name: ${name}
 📞 Phone: ${phone}
 📍 Address: ${address}
 
 📦 Products:
 ${productList}
+
 💰 Total: ₹${total}
-            `,
-            from: process.env.TWILIO_WHATSAPP_NUMBER,
-            to: process.env.ADMIN_WHATSAPP
-          });
+      `,
+      from: process.env.TWILIO_WHATSAPP_NUMBER,
+      to: process.env.ADMIN_WHATSAPP
+    });
 
-          // 🔥 Clear Cart After Order
-          db.query("DELETE FROM cart WHERE user_id = ?", [userId]);
+    // 🔥 Clear Cart After Order
+    db.query("DELETE FROM cart WHERE user_id = ?", [userId]);
 
-          res.send("Order placed successfully!");
-        });
+    res.send("Order placed successfully!");
+  }
+);
+
 
     });
 
