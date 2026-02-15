@@ -154,13 +154,26 @@ function Orders({ user }) {
                   updateStatus(
                     order.id,
                     "Cancelled",
-                    "Cancelled due to Out of Stock",
-                    "If Paid, Amount will be Refunded"
+                    "Order cancelled due to out of stock.\nIf prepaid, the amount will be refunded."
                   )
                 }
               >
                 Cancel Order
               </button>
+
+              {order.cancel_reason && (
+  <div
+    style={{
+      fontSize: "13px",
+      color: "#f87171",
+      marginTop: "4px",
+      whiteSpace: "pre-line"   // 🔥 IMPORTANT
+    }}
+  >
+    {order.cancel_reason}
+  </div>
+)}
+
 
               <button
                 className="button"
@@ -186,9 +199,11 @@ function Orders({ user }) {
 
         </div>
       ))}
+      
 
     </div>
   );
 }
+
 
 export default Orders;
