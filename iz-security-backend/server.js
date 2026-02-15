@@ -203,7 +203,7 @@ app.post("/upload-product", upload.single("image"), (req, res) => {
 // 🔥 Get orders for specific user
 app.get("/my-orders/:userId", (req, res) => {
   const ordersSql = `
-    SELECT id, products, total_amount, order_status, created_at
+    SELECT id, products, total_amount, order_status, created_at, cancel_reason
     FROM orders
     WHERE user_id = ?
     ORDER BY id DESC
