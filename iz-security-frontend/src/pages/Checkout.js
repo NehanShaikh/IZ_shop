@@ -5,14 +5,17 @@ function Checkout({ user }) {
 
   const navigate = useNavigate();
 
+  const API = "https://iz-shop.onrender.com";
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [cart, setCart] = useState([]);
+  const [paymentMethod, setPaymentMethod] = useState("COD");
 
   // 🔥 Load cart from database
   useEffect(() => {
-    fetch(`https://iz-shop.onrender.com/cart/${user.id}`)
+    fetch(`${API}/cart/${user.id}`)
       .then(res => res.json())
       .then(data => setCart(data));
   }, [user]);
@@ -24,28 +27,93 @@ function Checkout({ user }) {
 
   const handleOrder = async () => {
 
-  if (!name || !phone || !address) {
-    alert("Please fill all details");
-    return;
-  }
+    if (!name || !phone || !address) {
+      alert("Please fill all details");
+      return;
+    }
 
-  const response = await fetch("https://iz-shop.onrender.com/place-order", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId: user.id,
-      name,
-      phone,
-      address
-    })
-  });
+    // =============================
+    // CASH ON DELIVERY
+    // =============================
+    if (paymentMethod === "COD") {
 
-  const text = await response.text();
-  alert(text);
+      const response = await fetch(`${API}/place-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id,
+          name,
+          phone,
+          address,
+          paymentMethod: "COD"
+        })
+      });
 
-  navigate("/");
-};
+      const text = await response.text();
+      alert(text);
 
+      navigate("/");
+      return;
+    }
+
+    // =============================
+    // ONLINE PAYMENT
+    // =============================
+    try {
+
+      const paymentRes = await fetch(`${API}/create-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: total })
+      });
+
+      const paymentData = await paymentRes.json();
+
+      const options = {
+        key: "YOUR_RAZORPAY_KEY_ID", // 🔥 replace with your test key
+        amount: paymentData.amount,
+        currency: "INR",
+        name: "IZ Security System",
+        description: "Order Payment",
+        order_id: paymentData.id,
+
+        handler: async function () {
+
+          // After successful payment → Save order
+          await fetch(`${API}/place-order`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: user.id,
+              name,
+              phone,
+              address,
+              paymentMethod: "ONLINE"
+            })
+          });
+
+          alert("Payment successful & Order placed!");
+          navigate("/");
+        },
+
+        prefill: {
+          name: name,
+          contact: phone
+        },
+
+        theme: {
+          color: "#0ea5e9"
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
+    } catch (error) {
+      console.error(error);
+      alert("Payment failed. Try again.");
+    }
+  };
 
   return (
     <div className="checkout-page">
@@ -76,6 +144,35 @@ function Checkout({ user }) {
             value={address}
             onChange={e => setAddress(e.target.value)}
           />
+
+          {/* PAYMENT METHOD */}
+          <div style={{ marginTop: "20px" }}>
+            <strong>Payment Method:</strong>
+
+            <div style={{ marginTop: "10px" }}>
+              <label>
+                <input
+                  type="radio"
+                  value="COD"
+                  checked={paymentMethod === "COD"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                />
+                Cash on Delivery
+              </label>
+            </div>
+
+            <div style={{ marginTop: "8px" }}>
+              <label>
+                <input
+                  type="radio"
+                  value="ONLINE"
+                  checked={paymentMethod === "ONLINE"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                />
+                Online Payment
+              </label>
+            </div>
+          </div>
 
         </div>
 

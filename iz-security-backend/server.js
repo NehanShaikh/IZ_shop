@@ -16,6 +16,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const Razorpay = require("razorpay");
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
+
+
 // Connect to MySQL
 const db = mysql.createConnection(process.env.DATABASE_URL);
 
@@ -92,11 +100,10 @@ app.use("/uploads", express.static(uploadDir));
 // Save Order API
 app.post("/place-order", async (req, res) => {
 
-  const { userId, name, phone, address } = req.body;
+  const { userId, name, phone, address, paymentMethod } = req.body;
 
   try {
 
-    // 🔥 Get Cart Items
     const cartQuery = `
       SELECT products.name, cart.quantity, products.price
       FROM cart
@@ -107,7 +114,6 @@ app.post("/place-order", async (req, res) => {
     db.query(cartQuery, [userId], async (err, cartItems) => {
 
       if (err) return res.status(500).send("Error fetching cart");
-
       if (cartItems.length === 0)
         return res.status(400).send("Cart is empty");
 
@@ -118,54 +124,75 @@ app.post("/place-order", async (req, res) => {
         return `${item.name} x${item.quantity}`;
       }).join("\n");
 
-      // 🔥 Save order in DB
+      const paymentStatus =
+        paymentMethod === "ONLINE" ? "Paid" : "Pending";
+
       const orderQuery = `
         INSERT INTO orders
-        (user_id, customer_name, phone, address, products, total_amount)
-        VALUES (?, ?, ?, ?, ?, ?)
+        (user_id, customer_name, phone, address, products, total_amount, payment_method, payment_status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       db.query(orderQuery,
-  [userId, name, phone, address, productList, total],
-  async (err2, result) => {
+        [userId, name, phone, address, productList, total, paymentMethod, paymentStatus],
+        async (err2, result) => {
 
-    if (err2) return res.status(500).send("Order save error");
+          if (err2) return res.status(500).send("Order save error");
 
-    const orderId = result.insertId; // 🔥 get new order ID
+          const orderId = result.insertId;
 
-    // 🔥 Send WhatsApp via Twilio
-    await client.messages.create({
-      body: `
-🛒 NEW ORDER - IZ Security System
+          // WhatsApp to Admin
+          await client.messages.create({
+            body: `
+🛒 NEW ORDER
 
 🆔 Order ID: ${orderId}
 👤 Name: ${name}
 📞 Phone: ${phone}
 📍 Address: ${address}
 
+💳 Payment: ${paymentMethod}
+💰 Total: ₹${total}
+
 📦 Products:
 ${productList}
+            `,
+            from: process.env.TWILIO_WHATSAPP_NUMBER,
+            to: process.env.ADMIN_WHATSAPP
+          });
 
-💰 Total: ₹${total}
-      `,
-      from: process.env.TWILIO_WHATSAPP_NUMBER,
-      to: process.env.ADMIN_WHATSAPP
-    });
+          db.query("DELETE FROM cart WHERE user_id = ?", [userId]);
 
-    // 🔥 Clear Cart After Order
-    db.query("DELETE FROM cart WHERE user_id = ?", [userId]);
-
-    res.send("Order placed successfully!");
-  }
-);
-
+          res.send("Order placed successfully!");
+        });
 
     });
 
   } catch (error) {
     console.error(error);
-    res.status(500).send("Twilio error");
+    res.status(500).send("Server error");
   }
+});
+
+
+app.post("/create-payment", async (req, res) => {
+
+  const { amount } = req.body;
+
+  const options = {
+    amount: amount * 100, // in paise
+    currency: "INR",
+    receipt: "receipt_order"
+  };
+
+  try {
+    const order = await razorpay.orders.create(options);
+    res.json(order);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Payment creation failed");
+  }
+
 });
 
 
