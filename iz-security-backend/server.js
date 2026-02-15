@@ -422,9 +422,10 @@ app.get("/orders", (req, res) => {
 });
 
 // 🔥 Update order status (Admin)
-app.put("/update-order-status/:id", (req, res) => {
+app.put("/update-order-status/:id", async (req, res) => {
 
   const { status, reason } = req.body;
+  const orderId = req.params.id;
 
   const sql = `
     UPDATE orders
@@ -432,15 +433,64 @@ app.put("/update-order-status/:id", (req, res) => {
     WHERE id = ?
   `;
 
-  db.query(sql, [status, reason || null, req.params.id], (err) => {
+  db.query(sql, [status, reason || null, orderId], async (err) => {
     if (err) {
       console.error(err);
       return res.status(500).send("Error updating order");
     }
+
+    // 🔥 If customer cancelled (no reason sent)
+    if (status === "Cancelled" && !reason) {
+
+      db.query(
+        "SELECT * FROM orders WHERE id = ?",
+        [orderId],
+        async (err2, results) => {
+
+          if (!err2 && results.length > 0) {
+
+            const order = results[0];
+
+            const message = `
+🚨 Order Cancelled by Customer
+
+Order ID: ${order.id}
+Customer: ${order.customer_name}
+Phone: ${order.phone}
+Address: ${order.address}
+Total: ₹${order.total_amount}
+Date: ${new Date(order.created_at).toLocaleString("en-IN", {
+              day: "numeric",
+              month: "numeric",
+              year: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true
+            })}
+
+Products:
+${order.products}
+`;
+
+            try {
+              await client.messages.create({
+                from: process.env.TWILIO_WHATSAPP_NUMBER,
+                to: process.env.ADMIN_WHATSAPP,
+                body: message
+              });
+            } catch (twilioError) {
+              console.error("Twilio Error:", twilioError);
+            }
+          }
+        }
+      );
+    }
+
     res.send("Order status updated");
   });
 
 });
+
 
 
 
