@@ -159,6 +159,25 @@ function MyOrders({ user }) {
             </p>
 
             <p>
+  <strong>Payment:</strong>{" "}
+  <span
+    style={{
+      fontWeight: "bold",
+      color:
+        order.payment_status === "Paid"
+          ? "#22c55e"
+          : "#facc15"
+    }}
+  >
+    {order.payment_status === "Paid"
+      ? "Paid"
+      : order.payment_method === "COD"
+      ? "Cash on Delivery"
+      : "Pending"}
+  </span>
+</p>
+
+            <p>
               <strong>Date:</strong>{" "}
               {new Date(order.created_at).toLocaleString("en-IN", {
                 day: "numeric",

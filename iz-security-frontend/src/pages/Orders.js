@@ -119,6 +119,19 @@ function Orders({ user }) {
 
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
 
+            {order.payment_method === "ONLINE" && (
+  <p style={{ color: "#22c55e", fontWeight: "bold" }}>
+    💳 Paid Online
+  </p>
+)}
+
+{order.payment_method === "COD" && (
+  <p style={{ color: "#facc15", fontWeight: "bold" }}>
+    🚚 Cash on Delivery
+  </p>
+)}
+
+
             <p>
               <strong>Date:</strong>{" "}
               {new Date(order.created_at).toLocaleString("en-IN", {
