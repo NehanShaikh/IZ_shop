@@ -5,6 +5,12 @@ function Orders({ user }) {
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("All");
 
+  // 🔥 Cancel Modal States
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [cancelReasonType, setCancelReasonType] = useState("");
+  const [customReason, setCustomReason] = useState("");
+
   const API = "https://iz-shop.onrender.com";
 
   // =============================
@@ -69,13 +75,13 @@ function Orders({ user }) {
       {/* FILTER BUTTONS */}
       <div style={{ marginBottom: "25px" }}>
         {[
-  "All",
-  "Pending",
-  "Shipped",
-  "Out for Delivery",
-  "Delivered",
-  "Cancelled"
-].map(status => (
+          "All",
+          "Pending",
+          "Shipped",
+          "Out for Delivery",
+          "Delivered",
+          "Cancelled"
+        ].map(status => (
           <button
             key={status}
             className="button"
@@ -103,29 +109,28 @@ function Orders({ user }) {
 
           <div className="order-header">
             <h3>Order #{order.id}</h3>
-            <span
-  className="status-badge"
-  style={{
-    padding: "6px 12px",
-    borderRadius: "20px",
-    fontSize: "13px",
-    fontWeight: "bold",
-    color: "white",
-    backgroundColor:
-      order.order_status === "Pending"
-        ? "#facc15"         // Yellow
-        : order.order_status === "Shipped"
-        ? "#3b82f6"         // Blue
-        : order.order_status === "Out for Delivery"
-        ? "#f97316"         // Orange
-        : order.order_status === "Delivered"
-        ? "#22c55e"         // Green
-        : "#ef4444"         // Red (Cancelled)
-  }}
->
-  {order.order_status}
-</span>
 
+            <span
+              style={{
+                padding: "6px 12px",
+                borderRadius: "20px",
+                fontSize: "13px",
+                fontWeight: "bold",
+                color: "white",
+                backgroundColor:
+                  order.order_status === "Pending"
+                    ? "#facc15"
+                    : order.order_status === "Shipped"
+                    ? "#3b82f6"
+                    : order.order_status === "Out for Delivery"
+                    ? "#f97316"
+                    : order.order_status === "Delivered"
+                    ? "#22c55e"
+                    : "#ef4444"
+              }}
+            >
+              {order.order_status}
+            </span>
           </div>
 
           <div className="order-details">
@@ -147,82 +152,68 @@ function Orders({ user }) {
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
 
             {order.payment_method === "ONLINE" && (
-  <p style={{ color: "#22c55e", fontWeight: "bold" }}>
-    💳 Paid Online
-  </p>
-)}
+              <p style={{ color: "#22c55e", fontWeight: "bold" }}>
+                💳 Paid Online
+              </p>
+            )}
 
-{order.payment_method === "COD" && (
-  <p style={{ color: "#facc15", fontWeight: "bold" }}>
-    🚚 Cash on Delivery
-  </p>
-)}
-
+            {order.payment_method === "COD" && (
+              <p style={{ color: "#facc15", fontWeight: "bold" }}>
+                🚚 Cash on Delivery
+              </p>
+            )}
 
             <p>
               <strong>Date:</strong>{" "}
-              {new Date(order.created_at).toLocaleString("en-IN", {
-                day: "numeric",
-                month: "numeric",
-                year: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true
-              })}
+              {new Date(order.created_at).toLocaleString("en-IN")}
             </p>
           </div>
 
+          {/* ACTION BUTTONS */}
           <div className="order-actions">
 
-  {/* 🔹 Pending */}
-  {order.order_status === "Pending" && (
-    <>
-      <button
-        className="button"
-        onClick={() => updateStatus(order.id, "Shipped")}
-      >
-        Mark Shipped
-      </button>
+            {["Pending", "Shipped", "Out for Delivery"].includes(order.order_status) && (
+              <>
+                {order.order_status === "Pending" && (
+                  <button
+                    className="button"
+                    onClick={() => updateStatus(order.id, "Shipped")}
+                  >
+                    Mark Shipped
+                  </button>
+                )}
 
-      <button
-        className="button delete-btn"
-        style={{ marginLeft: "10px" }}
-        onClick={() =>
-          updateStatus(
-            order.id,
-            "Cancelled",
-            "Order cancelled due to out of stock.\nIf prepaid, the amount will be refunded."
-          )
-        }
-      >
-        Cancel Order
-      </button>
-    </>
-  )}
+                {order.order_status === "Shipped" && (
+                  <button
+                    className="button"
+                    onClick={() => updateStatus(order.id, "Out for Delivery")}
+                  >
+                    Out for Delivery
+                  </button>
+                )}
 
-  {/* 🔹 Shipped */}
-  {order.order_status === "Shipped" && (
-    <button
-      className="button"
-      onClick={() => updateStatus(order.id, "Out for Delivery")}
-    >
-      Out for Delivery
-    </button>
-  )}
+                {order.order_status === "Out for Delivery" && (
+                  <button
+                    className="button"
+                    onClick={() => updateStatus(order.id, "Delivered")}
+                  >
+                    Mark Delivered
+                  </button>
+                )}
 
-  {/* 🔹 Out for Delivery */}
-  {order.order_status === "Out for Delivery" && (
-    <button
-      className="button"
-      onClick={() => updateStatus(order.id, "Delivered")}
-    >
-      Mark Delivered
-    </button>
-  )}
-
-</div>
-
+                <button
+                  className="button delete-btn"
+                  style={{ marginLeft: "10px" }}
+                  onClick={() => {
+                    setSelectedOrderId(order.id);
+                    setShowCancelModal(true);
+                  }}
+                >
+                  Cancel Order
+                </button>
+              </>
+            )}
+          </div>
 
           {order.order_status === "Delivered" && (
             <p className="delivered-text">
@@ -233,29 +224,132 @@ function Orders({ user }) {
           {order.order_status === "Cancelled" && (
             <div className="cancelled-text">
               ✕ Order Cancelled
-
               {order.cancel_reason && (
                 <div
                   style={{
-                  fontSize: "13px",
-                  color: "#f87171",
-                  marginTop: "4px",
-                  whiteSpace: "pre-line"   // 🔥 IMPORTANT
-                }}
-              >
-                {order.cancel_reason}
-              </div>
-            )}
+                    fontSize: "13px",
+                    color: "#f87171",
+                    marginTop: "4px",
+                    whiteSpace: "pre-line"
+                  }}
+                >
+                  {order.cancel_reason}
+                </div>
+              )}
             </div>
           )}
 
         </div>
       ))}
-      
+
+      {/* CANCEL MODAL */}
+      {showCancelModal && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          background: "rgba(0,0,0,0.6)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }}>
+          <div style={{
+            background: "#1e293b",
+            padding: "25px",
+            borderRadius: "10px",
+            width: "400px"
+          }}>
+            <h3>Select Cancel Reason</h3>
+
+            <div>
+              <label>
+                <input
+                  type="radio"
+                  value="Out of Stock"
+                  onChange={(e) => setCancelReasonType(e.target.value)}
+                />
+                {" "}Out of Stock
+              </label>
+            </div>
+
+            <div>
+              <label>
+                <input
+                  type="radio"
+                  value="Cancelled on Customer Request"
+                  onChange={(e) => setCancelReasonType(e.target.value)}
+                />
+                {" "}Customer Request
+              </label>
+            </div>
+
+            <div>
+              <label>
+                <input
+                  type="radio"
+                  value="Other"
+                  onChange={(e) => setCancelReasonType(e.target.value)}
+                />
+                {" "}Other
+              </label>
+            </div>
+
+            {cancelReasonType === "Other" && (
+              <textarea
+                placeholder="Enter custom reason..."
+                value={customReason}
+                onChange={(e) => setCustomReason(e.target.value)}
+                style={{ width: "100%", marginTop: "10px" }}
+              />
+            )}
+
+            <div style={{ marginTop: "15px", textAlign: "right" }}>
+              <button
+                className="button"
+                onClick={() => {
+
+                  let finalReason = "";
+
+                  if (cancelReasonType === "Cancelled on Customer Request") {
+                    finalReason = "Cancelled on Customer Request";
+                  } else {
+                    const baseReason =
+                      cancelReasonType === "Other"
+                        ? customReason
+                        : cancelReasonType;
+
+                    finalReason = `${baseReason}
+
+Order cancelled by IZ.
+If prepaid, refund will be processed.`;
+                  }
+
+                  updateStatus(selectedOrderId, "Cancelled", finalReason);
+
+                  setShowCancelModal(false);
+                  setCancelReasonType("");
+                  setCustomReason("");
+                }}
+              >
+                Confirm Cancel
+              </button>
+
+              <button
+                className="button"
+                style={{ marginLeft: "10px" }}
+                onClick={() => setShowCancelModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
 }
-
 
 export default Orders;
