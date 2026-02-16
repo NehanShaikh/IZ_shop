@@ -316,7 +316,7 @@ function Products({ user }) {
             />
 
             {editMode ? (
-              <>
+            <div className="edit-form">
                 <input
                   value={editProduct.name}
                   onChange={(e) =>
@@ -367,13 +367,13 @@ function Products({ user }) {
                 />
 
                 <button
-                  className="button"
-                  style={{ marginTop: "10px", background: "#22c55e" }}
-                  onClick={handleUpdateProduct}
-                >
-                  Save Changes
-                </button>
-              </>
+  className="button save-btn"
+  onClick={handleUpdateProduct}
+>
+  Save Changes
+</button>
+
+              </div>
             ) : (
               <>
                 <h3>{selectedProduct.name}</h3>

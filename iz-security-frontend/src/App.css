@@ -881,17 +881,38 @@ html, body {
   color: white;
 }
 
-.edit-form input {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 8px;
-  border: 1px solid #334155;
-  background: #0f172a;
-  color: white;
+/* ================= EDIT FORM ================= */
+
+.edit-form {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
+.edit-form input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background-color: #0f172a;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.edit-form input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 5px rgba(56, 189, 248, 0.5);
+}
+
+/* Save button */
 .save-btn {
-  margin-top: 15px;
+  margin-top: 10px;
   background-color: #22c55e;
+}
+
+.save-btn:hover {
+  background-color: #16a34a;
 }
