@@ -323,7 +323,7 @@ function Orders({ user }) {
                     finalReason = `${baseReason}
 
 Order cancelled by IZ.
-If prepaid, refund will be processed.`;
+Any prepaid amount will be refunded to your account within a few working days.`;
                   }
 
                   updateStatus(selectedOrderId, "Cancelled", finalReason);
