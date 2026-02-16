@@ -632,7 +632,7 @@ html, body {
   }
 
    body {
-    padding-top: 0 !important;   /* 🔥 remove navbar space for login */
+    padding-top: 5px !important;   /* 🔥 remove navbar space for login */
   }
 
   /* Login Fix - remove overlapping */
