@@ -270,7 +270,7 @@ ${productList}
 
 app.get("/test-email", async (req, res) => {
   try {
-    await sendFirstLoginEmail("yourpersonalemail@gmail.com", "Test User");
+    await sendFirstLoginEmail("nehanshaikh@gmail.com", "Test User");
     res.send("Email test sent");
   } catch (err) {
   console.log("========== TEST MAIL ERROR ==========");
