@@ -271,16 +271,15 @@ ${productList}
               const customerEmail = userResult[0].email;
 
               try {
-                sendOrderConfirmationEmail(
-  customerEmail,
-  name,
-  orderId,
-  productList,
-  total,
-  paymentMethod,
-  address
-).catch(err => console.log("Order mail error:", err));
-
+                await sendOrderConfirmationEmail(
+                  customerEmail,
+                  name,
+                  orderId,
+                  productList,
+                  total,
+                  paymentMethod,
+                  address
+                );
               } catch (mailError) {
                 console.log("Order mail error:", mailError);
               }
