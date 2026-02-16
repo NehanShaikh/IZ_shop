@@ -1,8 +1,8 @@
 import { useState } from "react";
 import {
+  signInWithPopup,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signInWithPopup
+  createUserWithEmailAndPassword
 } from "firebase/auth";
 import { auth, provider } from "../firebase";
 import { useNavigate } from "react-router-dom";
@@ -14,22 +14,38 @@ function Login({ setUser }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // ---------------- LOGIN ----------------
+  // ---------------- SAVE USER TO BACKEND ----------------
+  const saveUser = async (firebaseUser) => {
+    const response = await fetch("https://iz-shop.onrender.com/save-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: firebaseUser.displayName || "User",
+        email: firebaseUser.email
+      })
+    });
+
+    const userData = await response.json();
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+  };
+
+  // ---------------- EMAIL LOGIN ----------------
   const handleLogin = async () => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
-      await saveUserToBackend(result.user);
+      await saveUser(result.user);
       navigate("/");
     } catch (error) {
       alert("Invalid Email or Password");
     }
   };
 
-  // ---------------- SIGNUP ----------------
+  // ---------------- EMAIL SIGNUP ----------------
   const handleSignup = async () => {
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
-      await saveUserToBackend(result.user, true); // true = signup
+      await saveUser(result.user);
       navigate("/");
     } catch (error) {
       alert("Signup failed");
@@ -40,58 +56,60 @@ function Login({ setUser }) {
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      await saveUserToBackend(result.user);
+      await saveUser(result.user);
       navigate("/");
     } catch (error) {
       alert("Google login failed");
     }
   };
 
-  // ---------------- COMMON FUNCTION ----------------
-  const saveUserToBackend = async (firebaseUser, isSignup = false) => {
-
-    const response = await fetch("https://iz-shop.onrender.com/save-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: firebaseUser.displayName || "User",
-        email: firebaseUser.email,
-        isSignup
-      })
-    });
-
-    const userData = await response.json();
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
-  };
-
   return (
-    <div className="login-card">
+    <div className="login-page">
 
-      <h2>Account Access</h2>
+      <div className="login-header">
+        <h1>IZ Security System</h1>
 
-      <input
-        type="email"
-        placeholder="Enter Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+        {/* KEEPING YOUR LOGO SECTION */}
+        <div className="login-logo">
+          <img src="/logo.png" alt="Logo" />
+        </div>
+      </div>
 
-      <input
-        type="password"
-        placeholder="Enter Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+      <div className="login-center">
+        <div className="login-card">
+          <h2>Account Access</h2>
+          <p>Secure access to your account</p>
 
-      <button onClick={handleLogin}>Login</button>
-      <button onClick={handleSignup}>Signup</button>
+          <input
+            type="email"
+            placeholder="Enter Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-      <hr />
+          <input
+            type="password"
+            placeholder="Enter Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-      <button onClick={handleGoogleLogin}>
-        Login with Google
-      </button>
+          <button className="login-btn" onClick={handleLogin}>
+            Login
+          </button>
+
+          <button className="signup-btn" onClick={handleSignup}>
+            Signup
+          </button>
+
+          <div className="divider">OR</div>
+
+          <button className="google-btn" onClick={handleGoogleLogin}>
+            Login with Google
+          </button>
+
+        </div>
+      </div>
 
     </div>
   );
