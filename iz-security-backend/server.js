@@ -23,6 +23,28 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+async function sendFirstLoginEmail(email, name) {
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "Welcome to IZ Security System 🎉",
+    html: `
+      <h2>Welcome ${name}!</h2>
+      <p>You have successfully logged in for the first time.</p>
+      <p>We’re glad to have you with IZ Security System.</p>
+    `
+  });
+}
 
 // Connect to MySQL
 const db = mysql.createConnection(process.env.DATABASE_URL);
@@ -39,38 +61,38 @@ db.connect((err) => {
 // Save or Get User
 app.post("/save-user", (req, res) => {
 
-  const { name, email } = req.body;
+  const { name, email, isSignup } = req.body;
 
   const checkUser = "SELECT * FROM users WHERE email = ?";
 
   db.query(checkUser, [email], (err, results) => {
 
-    if (err) {
-      return res.status(500).send("Database error");
-    }
+    if (err) return res.status(500).send("Database error");
 
     if (results.length > 0) {
-      // User already exists
       return res.json(results[0]);
-    } else {
-      // Insert new user as customer
-      const insertUser = "INSERT INTO users (name, email) VALUES (?, ?)";
-
-      db.query(insertUser, [name, email], (err2, result2) => {
-        if (err2) {
-          return res.status(500).send("Insert error");
-        }
-
-        res.json({
-          id: result2.insertId,
-          name,
-          email,
-          role: "customer"
-        });
-      });
     }
+
+    const insertUser = "INSERT INTO users (name, email) VALUES (?, ?)";
+
+    db.query(insertUser, [name, email], async (err2, result2) => {
+
+      if (err2) return res.status(500).send("Insert error");
+
+      if (isSignup) {
+        await sendFirstLoginEmail(email, name);
+      }
+
+      res.json({
+        id: result2.insertId,
+        name,
+        email,
+        role: "customer"
+      });
+    });
   });
 });
+
 
 // Configure Storage
 const fs = require("fs");
