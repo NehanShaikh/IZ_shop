@@ -3,6 +3,7 @@ const mysql = require("mysql2");
 const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
+const crypto = require("crypto");
 require("dotenv").config();
 
 const twilio = require("twilio");
@@ -25,51 +26,84 @@ const razorpay = new Razorpay({
 
 const nodemailer = require("nodemailer");
 
+// 🔥 SMTP Transporter (Render Safe)
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,              // ✅ Use 587 (NOT 465)
+  secure: false,          // ✅ false for 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   }
 });
 
+// 🔍 Optional: Verify SMTP connection
+transporter.verify(function (error, success) {
+  if (error) {
+    console.log("SMTP Connection Error:", error);
+  } else {
+    console.log("SMTP Server is ready to send emails ✅");
+  }
+});
+
+// 🎉 Welcome / First Login Email
 async function sendFirstLoginEmail(email, name) {
   await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+    from: `"IZ Security System" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Welcome to IZ Security System 🎉",
     html: `
-      <h2>Welcome ${name}!</h2>
-      <p>You have successfully logged in for the first time.</p>
-      <p>We’re glad to have you with IZ Security System.</p>
+      <div style="font-family: Arial; padding: 20px;">
+        <h2>Hello ${name}, 👋</h2>
+        <p>Welcome to <strong>IZ Security System</strong>.</p>
+        <p>Your account has been successfully created.</p>
+        <br/>
+        <p>We’re excited to have you with us!</p>
+        <hr/>
+        <small>This is an automated message.</small>
+      </div>
     `
   });
 }
 
-async function sendOrderConfirmationEmail(email, name, orderId, productList, total, paymentMethod, address) {
-
+// 🛒 Order Confirmation Email
+async function sendOrderConfirmationEmail(
+  email,
+  name,
+  orderId,
+  productList,
+  total,
+  paymentMethod,
+  address
+) {
   await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+    from: `"IZ Security System" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: `Order Confirmation - IZ Security System (#${orderId})`,
     html: `
-      <h2>Thank you for your order, ${name}! 🎉</h2>
+      <div style="font-family: Arial; padding: 20px;">
+        <h2>Thank you for your order, ${name}! 🎉</h2>
 
-      <p><strong>Order ID:</strong> ${orderId}</p>
-      <p><strong>Delivery Address:</strong> ${address}</p>
-      <p><strong>Payment Method:</strong> ${paymentMethod}</p>
+        <p><strong>Order ID:</strong> ${orderId}</p>
+        <p><strong>Delivery Address:</strong> ${address}</p>
+        <p><strong>Payment Method:</strong> ${paymentMethod}</p>
 
-      <h3>Products Ordered:</h3>
-      <pre>${productList}</pre>
+        <h3>Products Ordered:</h3>
+        <pre style="background:#f3f4f6;padding:10px;border-radius:6px;">
+${productList}
+        </pre>
 
-      <h3>Total Amount: ₹${total}</h3>
+        <h3>Total Amount: ₹${total}</h3>
 
-      <p>Your order is being processed.</p>
-      <p>Thank you for shopping with IZ Security System.</p>
+        <p>Your order is being processed.</p>
+        <br/>
+        <p>Thank you for shopping with IZ Security System.</p>
+        <hr/>
+        <small>This is an automated confirmation email.</small>
+      </div>
     `
   });
 }
-
 
 // Connect to MySQL
 const db = mysql.createConnection(process.env.DATABASE_URL);
@@ -147,8 +181,9 @@ const upload = multer({ storage });
 app.use("/uploads", express.static(uploadDir));
 
 
-// Save Order API
-app.post("/place-order", async (req, res) => {
+// 🔥 Common Order Logic Function
+// 🔥 Common Order Logic Function
+async function placeOrderLogic(req, res) {
 
   const { userId, name, phone, address, paymentMethod } = req.body;
 
@@ -191,7 +226,7 @@ app.post("/place-order", async (req, res) => {
 
           const orderId = result.insertId;
 
-          // WhatsApp to Admin
+          // WhatsApp
           await client.messages.create({
             body: `
 🛒 NEW ORDER
@@ -211,32 +246,33 @@ ${productList}
             to: process.env.ADMIN_WHATSAPP
           });
 
-          // 🔥 Get customer email
-db.query("SELECT email FROM users WHERE id = ?", [userId], async (err3, userResult) => {
+          // Customer email
+          db.query("SELECT email FROM users WHERE id = ?", [userId], async (err3, userResult) => {
 
-  if (!err3 && userResult.length > 0) {
+            if (!err3 && userResult.length > 0) {
 
-    const customerEmail = userResult[0].email;
+              const customerEmail = userResult[0].email;
 
-    try {
-      await sendOrderConfirmationEmail(
-        customerEmail,
-        name,
-        orderId,
-        productList,
-        total,
-        paymentMethod,
-        address
-      );
-    } catch (mailError) {
-      console.log("Order mail error:", mailError);
-    }
-  }
-});
+              try {
+                await sendOrderConfirmationEmail(
+                  customerEmail,
+                  name,
+                  orderId,
+                  productList,
+                  total,
+                  paymentMethod,
+                  address
+                );
+              } catch (mailError) {
+                console.log("Order mail error:", mailError);
+              }
+            }
+          });
 
           db.query("DELETE FROM cart WHERE user_id = ?", [userId]);
 
           res.send("Order placed successfully!");
+
         });
 
     });
@@ -245,6 +281,18 @@ db.query("SELECT email FROM users WHERE id = ?", [userId], async (err3, userResu
     console.error(error);
     res.status(500).send("Server error");
   }
+}
+
+
+// Save Order API
+app.post("/place-order", async (req, res) => {
+
+  if (req.body.paymentMethod === "COD") {
+    await placeOrderLogic(req, res);
+  } else {
+    res.status(400).send("Invalid payment method");
+  }
+
 });
 
 
@@ -268,6 +316,43 @@ app.post("/create-payment", async (req, res) => {
 
 });
 
+
+app.post("/verify-payment", async (req, res) => {
+
+  const {
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+    userId,
+    name,
+    phone,
+    address
+  } = req.body;
+
+  try {
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body.toString())
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).send("Payment verification failed ❌");
+    }
+
+    console.log("Payment verified successfully ✅");
+
+    // After verification, place order
+    req.body.paymentMethod = "ONLINE";
+    await placeOrderLogic(req, res);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Verification error");
+  }
+});
 
 app.post("/upload-product", upload.single("image"), (req, res) => {
 

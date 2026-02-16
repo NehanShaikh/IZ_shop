@@ -228,12 +228,14 @@ html, body {
 .cart-card {
   display: flex;
   align-items: center;
+  justify-content: space-between; /* 🔥 important */
   background: rgba(30,41,59,0.6);
-  padding: 15px;
+  padding: 20px;
   border-radius: 12px;
   margin-bottom: 20px;
   border: 1px solid #1e293b;
   transition: 0.3s;
+  gap: 20px; /* 🔥 spacing */
 }
 
 .cart-card:hover {
@@ -246,7 +248,6 @@ html, body {
   height: 120px;
   overflow: hidden;
   border-radius: 10px;
-  margin-right: 20px;
 }
 
 .cart-img img {
@@ -257,30 +258,53 @@ html, body {
 
 .cart-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* 🔥 space between name & price */
+}
+
+.cart-info h3 {
+  margin: 0;
+}
+
+.cart-info p {
+  margin: 0;
+  color: #cbd5e1;
 }
 
 .qty-controls {
   display: flex;
   align-items: center;
+  gap: 8px; /* 🔥 spacing between - 1 + */
   margin-top: 10px;
 }
 
 .qty-controls button {
   background: #1e293b;
-  border: none;
-  padding: 6px 10px;
+  border: 1px solid #334155;
+  padding: 6px 12px;
   color: white;
-  margin: 0 5px;
+  border-radius: 6px;
   cursor: pointer;
+  transition: 0.2s;
+}
+
+.qty-controls button:hover {
+  background: #38bdf8;
 }
 
 .remove-btn {
   background: #ef4444;
   border: none;
-  padding: 8px 12px;
+  padding: 8px 14px;
   color: white;
   border-radius: 6px;
   cursor: pointer;
+  transition: 0.2s;
+}
+
+.remove-btn:hover {
+  background: #dc2626;
 }
 
 .checkout-section {
@@ -290,11 +314,12 @@ html, body {
 
 .checkout-btn {
   background: linear-gradient(90deg, #2563eb, #38bdf8);
-  padding: 10px 16px;
+  padding: 12px 20px;
   border: none;
   border-radius: 8px;
   color: white;
   cursor: pointer;
+  font-weight: 600;
 }
 
 /* ================= ORDERS ================= */
