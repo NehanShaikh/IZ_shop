@@ -173,6 +173,7 @@ const upload = multer({ storage });
 app.use("/uploads", express.static(uploadDir));
 
 
+
 // 🔥 Common Order Logic Function
 // 🔥 Common Order Logic Function
 async function placeOrderLogic(req, res) {
