@@ -18,14 +18,16 @@ function Products({ user }) {
   const [editMode, setEditMode] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
 
-  // ================= FETCH PRODUCTS =================
+  // ==========================
+  // FETCH PRODUCTS
+  // ==========================
   const fetchProducts = async () => {
     try {
       const res = await fetch(`${API}/products`);
       const data = await res.json();
       setProducts(data);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching products:", error);
     }
   };
 
@@ -33,12 +35,16 @@ function Products({ user }) {
     fetchProducts();
   }, []);
 
-  // ================= SEARCH =================
+  // ==========================
+  // SEARCH FILTER
+  // ==========================
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // ================= ADD PRODUCT =================
+  // ==========================
+  // ADD PRODUCT (ADMIN)
+  // ==========================
   const handleAddProduct = async () => {
     try {
       const formData = new FormData();
@@ -66,17 +72,28 @@ function Products({ user }) {
       alert("Product Added Successfully");
 
     } catch (error) {
-      console.error(error);
+      console.error("Error adding product:", error);
     }
   };
 
-  // ================= UPDATE PRODUCT =================
+  // ==========================
+  // UPDATE PRODUCT (ADMIN)
+  // ==========================
   const handleUpdateProduct = async () => {
     try {
+      const formData = new FormData();
+      formData.append("name", editProduct.name);
+      formData.append("description", editProduct.description);
+      formData.append("price", editProduct.price);
+      formData.append("stock", editProduct.stock);
+
+      if (editProduct.image instanceof File) {
+        formData.append("image", editProduct.image);
+      }
+
       await fetch(`${API}/products/${editProduct.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editProduct)
+        body: formData
       });
 
       setEditMode(false);
@@ -86,11 +103,13 @@ function Products({ user }) {
       alert("Product Updated Successfully");
 
     } catch (error) {
-      console.error(error);
+      console.error("Update error:", error);
     }
   };
 
-  // ================= DELETE =================
+  // ==========================
+  // DELETE PRODUCT (ADMIN)
+  // ==========================
   const handleDelete = async (id) => {
     try {
       await fetch(`${API}/products/${id}`, {
@@ -101,13 +120,15 @@ function Products({ user }) {
       setSelectedProduct(null);
 
     } catch (error) {
-      console.error(error);
+      console.error("Delete error:", error);
     }
   };
 
-  // ================= ADD TO CART =================
+  // ==========================
+  // ADD TO CART (CUSTOMER)
+  // ==========================
   const addToCart = async (product) => {
-    if (!user?.id) {
+    if (!user || !user.id) {
       alert("Please login properly");
       return;
     }
@@ -125,7 +146,7 @@ function Products({ user }) {
       alert("Added to Cart");
 
     } catch (error) {
-      console.error(error);
+      console.error("Cart error:", error);
     }
   };
 
@@ -152,7 +173,7 @@ function Products({ user }) {
       </div>
 
       {/* ADMIN ADD */}
-      {user?.role === "admin" && (
+      {user && user.role === "admin" && (
         <div className="admin-card">
           <h3>Add Product</h3>
 
@@ -223,7 +244,7 @@ function Products({ user }) {
         })}
       </div>
 
-      {/* MODAL */}
+      {/* PRODUCT MODAL */}
       {selectedProduct && (
         <div
           onClick={() => {
@@ -232,7 +253,10 @@ function Products({ user }) {
           }}
           style={{
             position: "fixed",
-            inset: 0,
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
             background: "rgba(0,0,0,0.7)",
             display: "flex",
             justifyContent: "center",
@@ -252,6 +276,7 @@ function Products({ user }) {
               position: "relative"
             }}
           >
+            {/* CLOSE BUTTON */}
             <button
               onClick={() => {
                 setSelectedProduct(null);
@@ -281,8 +306,9 @@ function Products({ user }) {
               style={{ width: "100%", borderRadius: "10px" }}
             />
 
+            {/* EDIT OR VIEW */}
             {editMode ? (
-              <div className="edit-form">
+              <>
                 <input
                   value={editProduct.name}
                   onChange={(e) =>
@@ -309,14 +335,22 @@ function Products({ user }) {
                     setEditProduct({ ...editProduct, stock: e.target.value })
                   }
                 />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) =>
+                    setEditProduct({ ...editProduct, image: e.target.files[0] })
+                  }
+                />
 
                 <button
-                  className="button save-btn"
+                  className="button"
+                  style={{ marginTop: "10px", background: "#22c55e" }}
                   onClick={handleUpdateProduct}
                 >
                   Save Changes
                 </button>
-              </div>
+              </>
             ) : (
               <>
                 <h3>{selectedProduct.name}</h3>
@@ -326,7 +360,7 @@ function Products({ user }) {
                 </h3>
                 <p>Stock: {selectedProduct.stock}</p>
 
-                {user?.role === "customer" && (
+                {user && user.role === "customer" && (
                   <button
                     className="button"
                     onClick={() => addToCart(selectedProduct)}
@@ -335,7 +369,7 @@ function Products({ user }) {
                   </button>
                 )}
 
-                {user?.role === "admin" && (
+                {user && user.role === "admin" && (
                   <>
                     <button
                       className="button delete-btn"
