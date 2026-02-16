@@ -32,7 +32,7 @@ function MyOrders({ user }) {
     await fetch(`${API}/update-order-status/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "Cancelled" }) // no reason
+      body: JSON.stringify({ status: "Cancelled" })
     });
 
     const res = await fetch(`${API}/my-orders/${user.id}`);
@@ -49,6 +49,22 @@ function MyOrders({ user }) {
     });
 
     setOrders(uniqueOrders);
+  };
+
+  // 🔥 Progress Step Index Function
+  const getStepIndex = (status) => {
+    switch (status) {
+      case "Pending":
+        return 0; // Ordered
+      case "Shipped":
+        return 1;
+      case "Out for Delivery":
+        return 2;
+      case "Delivered":
+        return 3;
+      default:
+        return -1; // Cancelled
+    }
   };
 
   return (
@@ -83,6 +99,73 @@ function MyOrders({ user }) {
             }}
           >
             <h4>Order #{orders.length - index}</h4>
+
+            {/* 🔥 ORDER PROGRESS BAR */}
+            {order.order_status !== "Cancelled" && (
+              <div
+                style={{
+                  margin: "25px 0",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  position: "relative"
+                }}
+              >
+                {["Ordered", "Shipped", "Out for Delivery", "Delivered"].map(
+                  (step, i) => {
+                    const activeStep = getStepIndex(order.order_status);
+
+                    return (
+                      <div
+                        key={i}
+                        style={{
+                          textAlign: "center",
+                          flex: 1,
+                          position: "relative"
+                        }}
+                      >
+                        {/* Circle */}
+                        <div
+                          style={{
+                            width: "28px",
+                            height: "28px",
+                            borderRadius: "50%",
+                            margin: "0 auto",
+                            backgroundColor:
+                              i <= activeStep ? "#22c55e" : "#475569",
+                            color: "white",
+                            lineHeight: "28px",
+                            fontSize: "14px"
+                          }}
+                        >
+                          ✓
+                        </div>
+
+                        {/* Label */}
+                        <div style={{ marginTop: "8px", fontSize: "13px" }}>
+                          {step}
+                        </div>
+
+                        {/* Line */}
+                        {i !== 3 && (
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "14px",
+                              left: "50%",
+                              width: "100%",
+                              height: "3px",
+                              backgroundColor:
+                                i < activeStep ? "#22c55e" : "#475569",
+                              zIndex: -1
+                            }}
+                          />
+                        )}
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            )}
 
             <div style={{ marginTop: "10px" }}>
               <strong>Products:</strong>
@@ -144,7 +227,6 @@ function MyOrders({ user }) {
                 {order.order_status}
               </span>
 
-              {/* 🔥 Show reason only if exists (admin cancel) */}
               {order.cancel_reason && (
                 <div
                   style={{
@@ -160,23 +242,23 @@ function MyOrders({ user }) {
             </p>
 
             <p>
-  <strong>Payment:</strong>{" "}
-  <span
-    style={{
-      fontWeight: "bold",
-      color:
-        order.payment_status === "Paid"
-          ? "#22c55e"
-          : "#facc15"
-    }}
-  >
-    {order.payment_status === "Paid"
-      ? "Paid Online"
-      : order.payment_method === "COD"
-      ? "Cash on Delivery"
-      : "Pending"}
-  </span>
-</p>
+              <strong>Payment:</strong>{" "}
+              <span
+                style={{
+                  fontWeight: "bold",
+                  color:
+                    order.payment_status === "Paid"
+                      ? "#22c55e"
+                      : "#facc15"
+                }}
+              >
+                {order.payment_status === "Paid"
+                  ? "Paid Online"
+                  : order.payment_method === "COD"
+                  ? "Cash on Delivery"
+                  : "Pending"}
+              </span>
+            </p>
 
             <p>
               <strong>Date:</strong>{" "}

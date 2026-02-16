@@ -146,32 +146,56 @@ function Orders({ user }) {
             </p>
           </div>
 
-          {order.order_status === "Pending" && (
-            <div className="order-actions">
-              <button
-                className="button delete-btn"
-                onClick={() =>
-                  updateStatus(
-                    order.id,
-                    "Cancelled",
-                    "Order cancelled due to out of stock.\nIf prepaid, the amount will be refunded."
-                  )
-                }
-              >
-                Cancel Order
-              </button>
+          <div className="order-actions">
 
+  {/* 🔹 Pending */}
+  {order.order_status === "Pending" && (
+    <>
+      <button
+        className="button"
+        onClick={() => updateStatus(order.id, "Shipped")}
+      >
+        Mark Shipped
+      </button>
 
+      <button
+        className="button delete-btn"
+        style={{ marginLeft: "10px" }}
+        onClick={() =>
+          updateStatus(
+            order.id,
+            "Cancelled",
+            "Order cancelled due to out of stock.\nIf prepaid, the amount will be refunded."
+          )
+        }
+      >
+        Cancel Order
+      </button>
+    </>
+  )}
 
-              <button
-                className="button"
-                style={{ marginLeft: "10px" }}
-                onClick={() => updateStatus(order.id, "Delivered")}
-              >
-                Mark Delivered
-              </button>
-            </div>
-          )}
+  {/* 🔹 Shipped */}
+  {order.order_status === "Shipped" && (
+    <button
+      className="button"
+      onClick={() => updateStatus(order.id, "Out for Delivery")}
+    >
+      Out for Delivery
+    </button>
+  )}
+
+  {/* 🔹 Out for Delivery */}
+  {order.order_status === "Out for Delivery" && (
+    <button
+      className="button"
+      onClick={() => updateStatus(order.id, "Delivered")}
+    >
+      Mark Delivered
+    </button>
+  )}
+
+</div>
+
 
           {order.order_status === "Delivered" && (
             <p className="delivered-text">
