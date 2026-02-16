@@ -281,8 +281,10 @@ ${productList}
                   address
                 );
               } catch (mailError) {
-                console.log("Order mail error:", mailError);
-              }
+  console.log("========== BREVO ERROR ==========");
+  console.log(JSON.stringify(mailError, null, 2));
+  console.log("=================================");
+}
             }
           });
 
@@ -299,6 +301,18 @@ ${productList}
     res.status(500).send("Server error");
   }
 }
+
+app.get("/test-email", async (req, res) => {
+  try {
+    await sendFirstLoginEmail("yourpersonalemail@gmail.com", "Test User");
+    res.send("Email test sent");
+  } catch (err) {
+  console.log("========== TEST MAIL ERROR ==========");
+  console.log(JSON.stringify(err, null, 2));
+  console.log("=====================================");
+  res.send("Error sending email");
+  }
+});
 
 
 // Save Order API
