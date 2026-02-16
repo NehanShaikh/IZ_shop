@@ -301,19 +301,27 @@ app.post("/products", (req, res) => {
   });
 });
 
-app.put("/products/:id", (req, res) => {
-  const { name, description, price, image, stock } = req.body;
+app.put("/products/:id", upload.single("image"), (req, res) => {
+
+  const { name, description, price, stock, imageUrl } = req.body;
+
+  let imagePath = imageUrl || null;
+
+  if (req.file) {
+    imagePath = `/uploads/${req.file.filename}`;
+  }
 
   const sql = `
     UPDATE products 
     SET name=?, description=?, price=?, image=?, stock=? 
     WHERE id=?`;
 
-  db.query(sql, [name, description, price, image, stock, req.params.id], (err) => {
+  db.query(sql, [name, description, price, imagePath, stock, req.params.id], (err) => {
     if (err) return res.status(500).send("Error");
     res.send("Product updated");
   });
 });
+
 
 app.delete("/products/:id", (req, res) => {
   db.query("DELETE FROM products WHERE id=?", [req.params.id], (err) => {
