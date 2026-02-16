@@ -272,7 +272,6 @@ function Products({ user }) {
             alignItems: "flex-start",   // 🔥 changed
             padding: "40px 15px",       // 🔥 more top space
             overflowY: "auto",   
-            padding: "15px",
             zIndex: 5000
           }}
         >
