@@ -68,7 +68,14 @@ function Orders({ user }) {
 
       {/* FILTER BUTTONS */}
       <div style={{ marginBottom: "25px" }}>
-        {["All", "Pending", "Delivered", "Cancelled"].map(status => (
+        {[
+  "All",
+  "Pending",
+  "Shipped",
+  "Out for Delivery",
+  "Delivered",
+  "Cancelled"
+].map(status => (
           <button
             key={status}
             className="button"
@@ -96,9 +103,29 @@ function Orders({ user }) {
 
           <div className="order-header">
             <h3>Order #{order.id}</h3>
-            <span className={`status-badge ${order.order_status.toLowerCase()}`}>
-              {order.order_status}
-            </span>
+            <span
+  className="status-badge"
+  style={{
+    padding: "6px 12px",
+    borderRadius: "20px",
+    fontSize: "13px",
+    fontWeight: "bold",
+    color: "white",
+    backgroundColor:
+      order.order_status === "Pending"
+        ? "#facc15"         // Yellow
+        : order.order_status === "Shipped"
+        ? "#3b82f6"         // Blue
+        : order.order_status === "Out for Delivery"
+        ? "#f97316"         // Orange
+        : order.order_status === "Delivered"
+        ? "#22c55e"         // Green
+        : "#ef4444"         // Red (Cancelled)
+  }}
+>
+  {order.order_status}
+</span>
+
           </div>
 
           <div className="order-details">

@@ -224,7 +224,11 @@ function MyOrders({ user }) {
                       : "orange"
                 }}
               >
-                {order.order_status}
+                {
+    order.order_status === "Pending"
+      ? "Ordered"
+      : order.order_status
+  }
               </span>
 
               {order.cancel_reason && (
