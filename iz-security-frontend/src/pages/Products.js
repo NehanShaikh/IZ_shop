@@ -232,9 +232,27 @@ function Products({ user }) {
       width: "100%",
       maxWidth: "500px",
       maxHeight: "90vh",
-      overflowY: "auto"
+      overflowY: "auto",
+      position: "relative"
     }}
   >
+
+    {/* ❌ Close Button */}
+  <button
+    onClick={() => setSelectedProduct(null)}
+    style={{
+      position: "absolute",
+      top: "10px",
+      right: "10px",
+      background: "transparent",
+      border: "none",
+      fontSize: "20px",
+      color: "white",
+      cursor: "pointer"
+    }}
+  >
+    ✕
+  </button>
 
             <img
               src={
