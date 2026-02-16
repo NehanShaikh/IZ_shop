@@ -631,14 +631,19 @@ html, body {
     padding: 25px;
   }
 
+   body {
+    padding-top: 0 !important;   /* 🔥 remove navbar space for login */
+  }
+
   /* Login Fix - remove overlapping */
   /* Login Mobile Fix */
   .login-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding-top: 10px;
+    margin-top: -60px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 0;
   }
 
   .login-header {
