@@ -632,26 +632,46 @@ html, body {
   }
 
   /* Login Fix - remove overlapping */
+  /* Login Mobile Fix */
+  .login-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 20px;
+  }
+
   .login-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: static;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
   }
 
   .login-logo {
-    position: static;   /* 🔥 removes overlap */
-    margin-top: 10px;
+  position: static;
+  margin-top: 10px;
   }
 
   .login-logo img {
-    width: 80px;
-    height: auto;
+  width: 75px;
+  height: auto;
   }
 
   .login-card {
-    width: 95%;
-    padding: 25px;
+  width: 95%;
+  padding: 20px;
+  margin-top: 10px;
+  }
+
+  .login-card h2 {
+  margin-bottom: 5px;
+  font-size: 20px;
+  }
+
+  .login-card p {
+  margin-bottom: 12px;
+  font-size: 14px;
   }
 
 }
