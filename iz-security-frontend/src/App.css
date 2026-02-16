@@ -343,7 +343,7 @@ html, body {
 
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  background: linear-gradient(135deg, #0f2027, #0f172a, #0b1120);
   display: flex;
   flex-direction: column;
 }
@@ -367,7 +367,7 @@ html, body {
 }
 
 .login-card {
-  background: white;
+  background: rgba(30, 41, 59, 0.75);
   padding: 40px;
   width: 350px;
   border-radius: 12px;
