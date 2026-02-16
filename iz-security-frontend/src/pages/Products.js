@@ -269,7 +269,9 @@ function Products({ user }) {
             background: "rgba(0,0,0,0.7)",
             display: "flex",
             justifyContent: "center",
-            alignItems: "center",
+            alignItems: "flex-start",   // 🔥 changed
+            padding: "40px 15px",       // 🔥 more top space
+            overflowY: "auto",   
             padding: "15px",
             zIndex: 5000
           }}
@@ -278,11 +280,14 @@ function Products({ user }) {
             onClick={(e) => e.stopPropagation()}
             style={{
               background: "#1e293b",
-              borderRadius: "12px",
-              padding: "20px",
-              width: "100%",
-              maxWidth: "500px",
-              position: "relative"
+  borderRadius: "12px",
+  padding: "20px",
+  paddingTop: "50px",
+  width: "100%",
+  maxWidth: "500px",
+  position: "relative",
+  maxHeight: "90vh",
+  overflowY: "auto"
             }}
           >
             <button
