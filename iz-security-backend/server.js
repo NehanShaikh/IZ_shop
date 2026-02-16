@@ -201,17 +201,28 @@ app.post("/upload-product", upload.single("image"), (req, res) => {
   console.log("Body:", req.body);
   console.log("File:", req.file);
 
-  const { name, description, price, stock } = req.body;
+  const { name, description, price, stock, imageUrl } = req.body;
 
-  if (!req.file) {
-    return res.status(400).json({ error: "Image not uploaded" });
-  }
-
+  // Basic validation
   if (!name || !price) {
     return res.status(400).json({ error: "Name and price required" });
   }
 
-  const imagePath = `/uploads/${req.file.filename}`;
+  let imagePath = null;
+
+  // If file uploaded
+  if (req.file) {
+    imagePath = `/uploads/${req.file.filename}`;
+  }
+  // If image URL provided
+  else if (imageUrl) {
+    imagePath = imageUrl;
+  }
+  // If neither provided
+  else {
+    return res.status(400).json({ error: "Image (file or URL) required" });
+  }
+
   const priceNum = Number(price);
   const stockNum = Number(stock || 0);
 
@@ -231,6 +242,7 @@ app.post("/upload-product", upload.single("image"), (req, res) => {
   });
 
 });
+
 
 
 // 🔥 Get orders for specific user

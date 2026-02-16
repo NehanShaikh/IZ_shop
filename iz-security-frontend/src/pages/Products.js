@@ -12,22 +12,21 @@ function Products({ user }) {
     description: "",
     price: "",
     image: null,
+    imageUrl: "",
     stock: ""
   });
 
   const [editMode, setEditMode] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
 
-  // ==========================
-  // FETCH PRODUCTS
-  // ==========================
+  // ================= FETCH PRODUCTS =================
   const fetchProducts = async () => {
     try {
       const res = await fetch(`${API}/products`);
       const data = await res.json();
       setProducts(data);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error(error);
     }
   };
 
@@ -35,16 +34,12 @@ function Products({ user }) {
     fetchProducts();
   }, []);
 
-  // ==========================
-  // SEARCH FILTER
-  // ==========================
+  // ================= SEARCH =================
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // ==========================
-  // ADD PRODUCT (ADMIN)
-  // ==========================
+  // ================= ADD PRODUCT =================
   const handleAddProduct = async () => {
     try {
       const formData = new FormData();
@@ -52,7 +47,14 @@ function Products({ user }) {
       formData.append("description", newProduct.description);
       formData.append("price", newProduct.price);
       formData.append("stock", newProduct.stock);
-      formData.append("image", newProduct.image);
+
+      if (newProduct.image) {
+        formData.append("image", newProduct.image);
+      }
+
+      if (newProduct.imageUrl) {
+        formData.append("imageUrl", newProduct.imageUrl);
+      }
 
       await fetch(`${API}/upload-product`, {
         method: "POST",
@@ -66,19 +68,18 @@ function Products({ user }) {
         description: "",
         price: "",
         image: null,
+        imageUrl: "",
         stock: ""
       });
 
       alert("Product Added Successfully");
 
     } catch (error) {
-      console.error("Error adding product:", error);
+      console.error(error);
     }
   };
 
-  // ==========================
-  // UPDATE PRODUCT (ADMIN)
-  // ==========================
+  // ================= UPDATE PRODUCT =================
   const handleUpdateProduct = async () => {
     try {
       const formData = new FormData();
@@ -89,6 +90,10 @@ function Products({ user }) {
 
       if (editProduct.image instanceof File) {
         formData.append("image", editProduct.image);
+      }
+
+      if (editProduct.imageUrl) {
+        formData.append("imageUrl", editProduct.imageUrl);
       }
 
       await fetch(`${API}/products/${editProduct.id}`, {
@@ -107,9 +112,7 @@ function Products({ user }) {
     }
   };
 
-  // ==========================
-  // DELETE PRODUCT (ADMIN)
-  // ==========================
+  // ================= DELETE =================
   const handleDelete = async (id) => {
     try {
       await fetch(`${API}/products/${id}`, {
@@ -120,15 +123,13 @@ function Products({ user }) {
       setSelectedProduct(null);
 
     } catch (error) {
-      console.error("Delete error:", error);
+      console.error(error);
     }
   };
 
-  // ==========================
-  // ADD TO CART (CUSTOMER)
-  // ==========================
+  // ================= ADD TO CART =================
   const addToCart = async (product) => {
-    if (!user || !user.id) {
+    if (!user?.id) {
       alert("Please login properly");
       return;
     }
@@ -146,7 +147,7 @@ function Products({ user }) {
       alert("Added to Cart");
 
     } catch (error) {
-      console.error("Cart error:", error);
+      console.error(error);
     }
   };
 
@@ -173,7 +174,7 @@ function Products({ user }) {
       </div>
 
       {/* ADMIN ADD */}
-      {user && user.role === "admin" && (
+      {user?.role === "admin" && (
         <div className="admin-card">
           <h3>Add Product</h3>
 
@@ -203,11 +204,22 @@ function Products({ user }) {
             onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })}
           />
 
+          {/* File Upload */}
           <input
             type="file"
             accept="image/*"
             onChange={(e) =>
               setNewProduct({ ...newProduct, image: e.target.files[0] })
+            }
+          />
+
+          {/* Image URL */}
+          <input
+            type="text"
+            placeholder="Or Enter Image URL"
+            value={newProduct.imageUrl}
+            onChange={(e) =>
+              setNewProduct({ ...newProduct, imageUrl: e.target.value })
             }
           />
 
@@ -244,7 +256,7 @@ function Products({ user }) {
         })}
       </div>
 
-      {/* PRODUCT MODAL */}
+      {/* MODAL */}
       {selectedProduct && (
         <div
           onClick={() => {
@@ -253,10 +265,7 @@ function Products({ user }) {
           }}
           style={{
             position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
+            inset: 0,
             background: "rgba(0,0,0,0.7)",
             display: "flex",
             justifyContent: "center",
@@ -276,7 +285,6 @@ function Products({ user }) {
               position: "relative"
             }}
           >
-            {/* CLOSE BUTTON */}
             <button
               onClick={() => {
                 setSelectedProduct(null);
@@ -296,6 +304,7 @@ function Products({ user }) {
               ✕
             </button>
 
+            {/* IMAGE */}
             <img
               src={
                 selectedProduct.image?.startsWith("/uploads")
@@ -306,7 +315,6 @@ function Products({ user }) {
               style={{ width: "100%", borderRadius: "10px" }}
             />
 
-            {/* EDIT OR VIEW */}
             {editMode ? (
               <>
                 <input
@@ -315,12 +323,14 @@ function Products({ user }) {
                     setEditProduct({ ...editProduct, name: e.target.value })
                   }
                 />
+
                 <input
                   value={editProduct.description}
                   onChange={(e) =>
                     setEditProduct({ ...editProduct, description: e.target.value })
                   }
                 />
+
                 <input
                   type="number"
                   value={editProduct.price}
@@ -328,6 +338,7 @@ function Products({ user }) {
                     setEditProduct({ ...editProduct, price: e.target.value })
                   }
                 />
+
                 <input
                   type="number"
                   value={editProduct.stock}
@@ -335,11 +346,23 @@ function Products({ user }) {
                     setEditProduct({ ...editProduct, stock: e.target.value })
                   }
                 />
+
+                {/* Change Image File */}
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(e) =>
                     setEditProduct({ ...editProduct, image: e.target.files[0] })
+                  }
+                />
+
+                {/* Change Image URL */}
+                <input
+                  type="text"
+                  placeholder="Or Enter Image URL"
+                  value={editProduct.imageUrl || ""}
+                  onChange={(e) =>
+                    setEditProduct({ ...editProduct, imageUrl: e.target.value })
                   }
                 />
 
@@ -360,7 +383,7 @@ function Products({ user }) {
                 </h3>
                 <p>Stock: {selectedProduct.stock}</p>
 
-                {user && user.role === "customer" && (
+                {user?.role === "customer" && (
                   <button
                     className="button"
                     onClick={() => addToCart(selectedProduct)}
@@ -369,7 +392,7 @@ function Products({ user }) {
                   </button>
                 )}
 
-                {user && user.role === "admin" && (
+                {user?.role === "admin" && (
                   <>
                     <button
                       className="button delete-btn"
@@ -383,7 +406,12 @@ function Products({ user }) {
                       style={{ marginTop: "10px", background: "#f59e0b" }}
                       onClick={() => {
                         setEditMode(true);
-                        setEditProduct(selectedProduct);
+                        setEditProduct({
+                          ...selectedProduct,
+                          imageUrl: selectedProduct.image?.startsWith("/uploads")
+                            ? ""
+                            : selectedProduct.image
+                        });
                       }}
                     >
                       Edit
