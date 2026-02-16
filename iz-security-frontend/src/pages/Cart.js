@@ -68,7 +68,7 @@ function Cart({ user }) {
       {cart.length === 0 && <p>Your cart is empty.</p>}
 
       {cart.map((item) => (
-        <div className="card" key={item.id}>
+        <div className="cart-card" key={item.id}>
 
           {/* 🔥 Product Image Added */}
           {item.image && (
