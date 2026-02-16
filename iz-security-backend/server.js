@@ -24,22 +24,18 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 const nodemailer = require("nodemailer");
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
 
 // 🔥 SMTP Transporter (Render Safe)
 
 
 // 🎉 Welcome / First Login Email
 async function sendFirstLoginEmail(email, name) {
-  const mailOptions = {
-    from: `"IZ Security System" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: "IZ Security System <onboarding@resend.dev>", 
     to: email,
     subject: "Welcome to IZ Security System 🎉",
     html: `
@@ -47,15 +43,11 @@ async function sendFirstLoginEmail(email, name) {
         <h2>Hello ${name}, 👋</h2>
         <p>Welcome to <strong>IZ Security System</strong>.</p>
         <p>Your account has been successfully created.</p>
-        <br/>
-        <p>We’re excited to have you with us!</p>
         <hr/>
         <small>This is an automated message.</small>
       </div>
     `
-  };
-
-  await transporter.sendMail(mailOptions);
+  });
 }
 
 
@@ -69,8 +61,8 @@ async function sendOrderConfirmationEmail(
   paymentMethod,
   address
 ) {
-  await transporter.sendMail({
-    from: `"IZ Security System" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: "IZ Security System <onboarding@resend.dev>",
     to: email,
     subject: `Order Confirmation - IZ Security System (#${orderId})`,
     html: `
@@ -82,9 +74,7 @@ async function sendOrderConfirmationEmail(
         <p><strong>Payment Method:</strong> ${paymentMethod}</p>
 
         <h3>Products Ordered:</h3>
-        <pre style="background:#f3f4f6;padding:10px;border-radius:6px;">
-${productList}
-        </pre>
+        <pre>${productList}</pre>
 
         <h3>Total Amount: ₹${total}</h3>
 
