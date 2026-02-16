@@ -25,34 +25,24 @@ const razorpay = new Razorpay({
 });
 
 const nodemailer = require("nodemailer");
-
-const SibApiV3Sdk = require("sib-api-v3-sdk");
-
-const defaultClient = SibApiV3Sdk.ApiClient.instance;
-
-const apiKey = defaultClient.authentications["api-key"];
-apiKey.apiKey = process.env.BREVO_API_KEY;  // Your Brevo API Key
-
-const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
 // 🔥 SMTP Transporter (Render Safe)
 
 
 // 🎉 Welcome / First Login Email
 async function sendFirstLoginEmail(email, name) {
-  const emailData = {
-    sender: {
-      name: process.env.BREVO_SENDER_NAME,
-      email: process.env.BREVO_SENDER_EMAIL
-    },
-    to: [
-      {
-        email: email,
-        name: name
-      }
-    ],
+  const mailOptions = {
+    from: `"IZ Security System" <${process.env.EMAIL_USER}>`,
+    to: email,
     subject: "Welcome to IZ Security System 🎉",
-    htmlContent: `
+    html: `
       <div style="font-family: Arial; padding: 20px;">
         <h2>Hello ${name}, 👋</h2>
         <p>Welcome to <strong>IZ Security System</strong>.</p>
@@ -65,7 +55,7 @@ async function sendFirstLoginEmail(email, name) {
     `
   };
 
-  await apiInstance.sendTransacEmail(emailData);
+  await transporter.sendMail(mailOptions);
 }
 
 
@@ -79,19 +69,11 @@ async function sendOrderConfirmationEmail(
   paymentMethod,
   address
 ) {
-  const emailData = {
-    sender: {
-      name: process.env.BREVO_SENDER_NAME,
-      email: process.env.BREVO_SENDER_EMAIL
-    },
-    to: [
-      {
-        email: email,
-        name: name
-      }
-    ],
+  await transporter.sendMail({
+    from: `"IZ Security System" <${process.env.EMAIL_USER}>`,
+    to: email,
     subject: `Order Confirmation - IZ Security System (#${orderId})`,
-    htmlContent: `
+    html: `
       <div style="font-family: Arial; padding: 20px;">
         <h2>Thank you for your order, ${name}! 🎉</h2>
 
@@ -106,14 +88,11 @@ ${productList}
 
         <h3>Total Amount: ₹${total}</h3>
 
-        <p>Your order is being processed.</p>
         <hr/>
         <small>This is an automated confirmation email.</small>
       </div>
     `
-  };
-
-  await apiInstance.sendTransacEmail(emailData);
+  });
 }
 
 
