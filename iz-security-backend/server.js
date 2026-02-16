@@ -27,30 +27,17 @@ const razorpay = new Razorpay({
 const nodemailer = require("nodemailer");
 
 // 🔥 SMTP Transporter (Render Safe)
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,              // ✅ Use 587 (NOT 465)
-  secure: false,          // ✅ false for 587
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+const sgMail = require('@sendgrid/mail');
 
-// 🔍 Optional: Verify SMTP connection
-transporter.verify(function (error, success) {
-  if (error) {
-    console.log("SMTP Connection Error:", error);
-  } else {
-    console.log("SMTP Server is ready to send emails ✅");
-  }
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 
 // 🎉 Welcome / First Login Email
 async function sendFirstLoginEmail(email, name) {
-  await transporter.sendMail({
-    from: `"IZ Security System" <${process.env.EMAIL_USER}>`,
+
+  const msg = {
     to: email,
+    from: process.env.EMAIL_USER,  // must be verified sender in SendGrid
     subject: "Welcome to IZ Security System 🎉",
     html: `
       <div style="font-family: Arial; padding: 20px;">
@@ -63,7 +50,9 @@ async function sendFirstLoginEmail(email, name) {
         <small>This is an automated message.</small>
       </div>
     `
-  });
+  };
+
+  await sgMail.send(msg);
 }
 
 // 🛒 Order Confirmation Email
@@ -76,9 +65,9 @@ async function sendOrderConfirmationEmail(
   paymentMethod,
   address
 ) {
-  await transporter.sendMail({
-    from: `"IZ Security System" <${process.env.EMAIL_USER}>`,
+  const msg = {
     to: email,
+    from: `"IZ Security System" <${process.env.EMAIL_USER}>`, // verified sender
     subject: `Order Confirmation - IZ Security System (#${orderId})`,
     html: `
       <div style="font-family: Arial; padding: 20px;">
@@ -90,7 +79,7 @@ async function sendOrderConfirmationEmail(
 
         <h3>Products Ordered:</h3>
         <pre style="background:#f3f4f6;padding:10px;border-radius:6px;">
-${productList}
+        ${productList}
         </pre>
 
         <h3>Total Amount: ₹${total}</h3>
@@ -102,8 +91,11 @@ ${productList}
         <small>This is an automated confirmation email.</small>
       </div>
     `
-  });
+  };
+
+  await sgMail.send(msg);
 }
+
 
 // Connect to MySQL
 const db = mysql.createConnection(process.env.DATABASE_URL);
