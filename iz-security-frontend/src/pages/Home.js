@@ -23,7 +23,7 @@ function Home() {
           <p>
           🚚 <strong>Note:</strong> Delivery is currently available only within Mangalore City, Karnataka.</p>
         <p>
-        In case of order cancellation by the customer and Paid online, only 80% of the paid amount will be refunded.</p>
+        In case of order cancellation by the customer and Prepaid online, only 80% of the paid amount will be refunded.</p>
         </div>
 
       </div>
