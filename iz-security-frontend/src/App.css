@@ -548,7 +548,8 @@ html, body {
 
   /* Cart - keep row layout */
   .cart-card {
-    flex-direction: row;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .cart-img {
