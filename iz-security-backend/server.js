@@ -247,7 +247,7 @@ ${productList}
                   address
                 );
               } catch (mailError) {
-  console.log("========== BREVO ERROR ==========");
+  console.log("========== ERROR ==========");
   console.log(JSON.stringify(mailError, null, 2));
   console.log("=================================");
 }
