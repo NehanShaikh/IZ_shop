@@ -46,6 +46,31 @@ async function sendFirstLoginEmail(email, name) {
   });
 }
 
+async function sendOrderConfirmationEmail(email, name, orderId, productList, total, paymentMethod, address) {
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: `Order Confirmation - IZ Security System (#${orderId})`,
+    html: `
+      <h2>Thank you for your order, ${name}! 🎉</h2>
+
+      <p><strong>Order ID:</strong> ${orderId}</p>
+      <p><strong>Delivery Address:</strong> ${address}</p>
+      <p><strong>Payment Method:</strong> ${paymentMethod}</p>
+
+      <h3>Products Ordered:</h3>
+      <pre>${productList}</pre>
+
+      <h3>Total Amount: ₹${total}</h3>
+
+      <p>Your order is being processed.</p>
+      <p>Thank you for shopping with IZ Security System.</p>
+    `
+  });
+}
+
+
 // Connect to MySQL
 const db = mysql.createConnection(process.env.DATABASE_URL);
 
@@ -61,7 +86,7 @@ db.connect((err) => {
 // Save or Get User
 app.post("/save-user", (req, res) => {
 
-  const { name, email, isSignup } = req.body;
+  const { name, email } = req.body;
 
   const checkUser = "SELECT * FROM users WHERE email = ?";
 
@@ -70,7 +95,7 @@ app.post("/save-user", (req, res) => {
     if (err) return res.status(500).send("Database error");
 
     if (results.length > 0) {
-      return res.json(results[0]);
+      return res.json(results[0]); // Already exists
     }
 
     const insertUser = "INSERT INTO users (name, email) VALUES (?, ?)";
@@ -79,8 +104,11 @@ app.post("/save-user", (req, res) => {
 
       if (err2) return res.status(500).send("Insert error");
 
-      if (isSignup) {
+      // 🔥 Send mail for ANY first-time user
+      try {
         await sendFirstLoginEmail(email, name);
+      } catch (e) {
+        console.log("Mail error:", e);
       }
 
       res.json({
@@ -182,6 +210,29 @@ ${productList}
             from: process.env.TWILIO_WHATSAPP_NUMBER,
             to: process.env.ADMIN_WHATSAPP
           });
+
+          // 🔥 Get customer email
+db.query("SELECT email FROM users WHERE id = ?", [userId], async (err3, userResult) => {
+
+  if (!err3 && userResult.length > 0) {
+
+    const customerEmail = userResult[0].email;
+
+    try {
+      await sendOrderConfirmationEmail(
+        customerEmail,
+        name,
+        orderId,
+        productList,
+        total,
+        paymentMethod,
+        address
+      );
+    } catch (mailError) {
+      console.log("Order mail error:", mailError);
+    }
+  }
+});
 
           db.query("DELETE FROM cart WHERE user_id = ?", [userId]);
 
