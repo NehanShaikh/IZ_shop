@@ -26,6 +26,15 @@ const razorpay = new Razorpay({
 
 const nodemailer = require("nodemailer");
 
+const SibApiV3Sdk = require("sib-api-v3-sdk");
+
+const defaultClient = SibApiV3Sdk.ApiClient.instance;
+
+const apiKey = defaultClient.authentications["api-key"];
+apiKey.apiKey = process.env.BREVO_API_KEY;  // Your Brevo API Key
+
+const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
 // 🔥 SMTP Transporter (Render Safe)
 const sgMail = require('@sendgrid/mail');
 
@@ -34,12 +43,19 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // 🎉 Welcome / First Login Email
 async function sendFirstLoginEmail(email, name) {
-
-  const msg = {
-    to: email,
-    from: process.env.EMAIL_USER,  // must be verified sender in SendGrid
+  const emailData = {
+    sender: {
+      name: process.env.BREVO_SENDER_NAME,
+      email: process.env.BREVO_SENDER_EMAIL
+    },
+    to: [
+      {
+        email: email,
+        name: name
+      }
+    ],
     subject: "Welcome to IZ Security System 🎉",
-    html: `
+    htmlContent: `
       <div style="font-family: Arial; padding: 20px;">
         <h2>Hello ${name}, 👋</h2>
         <p>Welcome to <strong>IZ Security System</strong>.</p>
@@ -52,8 +68,9 @@ async function sendFirstLoginEmail(email, name) {
     `
   };
 
-  await sgMail.send(msg);
+  await apiInstance.sendTransacEmail(emailData);
 }
+
 
 // 🛒 Order Confirmation Email
 async function sendOrderConfirmationEmail(
@@ -65,11 +82,19 @@ async function sendOrderConfirmationEmail(
   paymentMethod,
   address
 ) {
-  const msg = {
-    to: email,
-    from: `"IZ Security System" <${process.env.EMAIL_USER}>`, // verified sender
+  const emailData = {
+    sender: {
+      name: process.env.BREVO_SENDER_NAME,
+      email: process.env.BREVO_SENDER_EMAIL
+    },
+    to: [
+      {
+        email: email,
+        name: name
+      }
+    ],
     subject: `Order Confirmation - IZ Security System (#${orderId})`,
-    html: `
+    htmlContent: `
       <div style="font-family: Arial; padding: 20px;">
         <h2>Thank you for your order, ${name}! 🎉</h2>
 
@@ -79,22 +104,21 @@ async function sendOrderConfirmationEmail(
 
         <h3>Products Ordered:</h3>
         <pre style="background:#f3f4f6;padding:10px;border-radius:6px;">
-        ${productList}
+${productList}
         </pre>
 
         <h3>Total Amount: ₹${total}</h3>
 
         <p>Your order is being processed.</p>
-        <br/>
-        <p>Thank you for shopping with IZ Security System.</p>
         <hr/>
         <small>This is an automated confirmation email.</small>
       </div>
     `
   };
 
-  await sgMail.send(msg);
+  await apiInstance.sendTransacEmail(emailData);
 }
+
 
 
 // Connect to MySQL
