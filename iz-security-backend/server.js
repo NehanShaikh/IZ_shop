@@ -36,9 +36,6 @@ apiKey.apiKey = process.env.BREVO_API_KEY;  // Your Brevo API Key
 const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
 // 🔥 SMTP Transporter (Render Safe)
-const sgMail = require('@sendgrid/mail');
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 
 // 🎉 Welcome / First Login Email
