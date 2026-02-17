@@ -41,6 +41,11 @@ function Home() {
           <p>Dedicated after-sales support and maintenance services.</p>
         </div>
 
+        <div className="feature-card">
+          <h3>💰 Affordable Pricing</h3>
+          <p>Competitive prices with transparent billing and no hidden charges.</p>
+        </div>
+
       </div>
 
     </div>
