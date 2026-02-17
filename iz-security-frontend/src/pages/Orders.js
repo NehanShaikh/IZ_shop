@@ -280,23 +280,38 @@ function Orders({ user }) {
           </div>
 
           {order.order_status === "Delivered" && (
-            <>
-              <p className="delivered-text">
-                ✓ Order Delivered Successfully
-              </p>
+  <>
+    <p className="delivered-text">
+      ✓ Order Delivered Successfully
+    </p>
 
-              {/* 📎 Upload Invoice PDF */}
-              <div style={{ marginTop: "10px" }}>
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={(e) =>
-                    uploadInvoice(order.id, e.target.files[0])
-                  }
-                />
-              </div>
-            </>
-          )}
+    {/* 📎 Upload Invoice PDF OR Show Receipt Sent */}
+    <div style={{ marginTop: "10px" }}>
+      {order.invoice_pdf ? (
+        <div
+          style={{
+            padding: "8px 12px",
+            backgroundColor: "#22c55e",
+            color: "white",
+            borderRadius: "6px",
+            display: "inline-block",
+            fontWeight: "bold"
+          }}
+        >
+          📄 Receipt Sent ✅
+        </div>
+      ) : (
+        <input
+          type="file"
+          accept="application/pdf"
+          onChange={(e) =>
+            uploadInvoice(order.id, e.target.files[0])
+          }
+        />
+      )}
+    </div>
+  </>
+)}
 
           {order.order_status === "Cancelled" && (
             <div className="cancelled-text">
