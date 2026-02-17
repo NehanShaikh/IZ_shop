@@ -52,6 +52,8 @@ function Navbar({ user, setUser }) {
 
         <Link to="/" onClick={closeMenu}>Home</Link>
         <Link to="/products" onClick={closeMenu}>Products</Link>
+        <Link to="/about" onClick={closeMenu}>About</Link>
+        <Link to="/faq" onClick={closeMenu}>FAQ</Link>
 
         {user && user.role === "admin" && (
           <Link to="/orders" onClick={closeMenu}>All Orders</Link>
@@ -61,11 +63,15 @@ function Navbar({ user, setUser }) {
           <>
             <Link to="/cart" onClick={closeMenu}>Cart</Link>
             <Link to="/my-orders" onClick={closeMenu}>My Orders</Link>
-            <Link to="/contact" onClick={closeMenu}>Contact Us</Link>
+            <Link to="/contact" onClick={closeMenu}>Contact</Link>
           </>
         )}
 
-        {user && (
+        {/* Policy Links */}
+        <Link to="/privacy" onClick={closeMenu}>Privacy</Link>
+        <Link to="/terms" onClick={closeMenu}>Terms</Link>
+
+        {user ? (
           <button
             className="button"
             onClick={() => {
@@ -75,6 +81,10 @@ function Navbar({ user, setUser }) {
           >
             Logout
           </button>
+        ) : (
+          <Link to="/login" onClick={closeMenu}>
+            <button className="button">Login</button>
+          </Link>
         )}
 
       </div>

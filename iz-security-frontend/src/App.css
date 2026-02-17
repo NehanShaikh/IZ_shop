@@ -995,3 +995,39 @@ html, body {
 .save-btn:hover {
   background-color: #16a34a;
 }
+
+/* ================= INFO PAGES (About, Privacy, Terms, FAQ) ================= */
+
+.info-card {
+  background: rgba(30, 41, 59, 0.6);
+  padding: 30px;
+  border-radius: 14px;
+  border: 1px solid #1e293b;
+  backdrop-filter: blur(12px);
+  max-width: 750px;
+  margin: auto;
+}
+
+.info-section {
+  margin-bottom: 25px;
+  padding: 18px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  transition: 0.3s ease;
+}
+
+.info-section:hover {
+  border: 1px solid #38bdf8;
+  box-shadow: 0 0 18px rgba(56,189,248,0.3);
+  transform: translateY(-3px);
+}
+
+.info-section h3 {
+  color: #38bdf8;
+  margin-bottom: 8px;
+}
+
+.info-section p {
+  color: #e2e8f0;
+  line-height: 1.6;
+}

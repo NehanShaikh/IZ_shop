@@ -11,6 +11,10 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import MyOrders from "./pages/MyOrders";
 import Contact from "./pages/Contact";
+import About from "./pages/About";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Terms from "./pages/Terms";
+import FAQ from "./pages/FAQ";
 
 function App() {
 
@@ -65,6 +69,12 @@ function App() {
                     : <Navigate to="/" />
                 }
             />
+
+            <Route path="/about" element={<About />} />
+<Route path="/privacy" element={<PrivacyPolicy />} />
+<Route path="/terms" element={<Terms />} />
+<Route path="/faq" element={<FAQ />} />
+
 
             <Route path="*" element={<Navigate to="/" />} />
           </>
