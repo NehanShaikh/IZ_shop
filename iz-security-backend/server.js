@@ -32,11 +32,12 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 
 // 🎉 Welcome / First Login Email
+// 🎉 Welcome / First Login Email
 async function sendFirstLoginEmail(email, name) {
   try {
     const msg = {
       to: email,
-      from: "yourverifiedemail@gmail.com", // ⚠ MUST be verified in SendGrid
+      from: process.env.EMAIL_USER,  // ✅ Verified sender from Render
       subject: "Welcome to IZ Security System 🎉",
       html: `
         <div style="font-family: Arial; padding: 20px;">
@@ -58,7 +59,6 @@ async function sendFirstLoginEmail(email, name) {
 }
 
 
-
 // 🛒 Order Confirmation Email
 async function sendOrderConfirmationEmail(
   email,
@@ -69,32 +69,37 @@ async function sendOrderConfirmationEmail(
   paymentMethod,
   address
 ) {
-  const msg = {
-    to: email,
-    from: "yourverifiedemail@gmail.com", // must be verified
-    subject: `Order Confirmation - IZ Security System (#${orderId})`,
-    html: `
-      <div style="font-family: Arial; padding: 20px;">
-        <h2>Thank you for your order, ${name}! 🎉</h2>
+  try {
+    const msg = {
+      to: email,
+      from: process.env.EMAIL_USER,  // ✅ Verified sender from Render
+      subject: `Order Confirmation - IZ Security System (#${orderId})`,
+      html: `
+        <div style="font-family: Arial; padding: 20px;">
+          <h2>Thank you for your order, ${name}! 🎉</h2>
 
-        <p><strong>Order ID:</strong> ${orderId}</p>
-        <p><strong>Delivery Address:</strong> ${address}</p>
-        <p><strong>Payment Method:</strong> ${paymentMethod}</p>
+          <p><strong>Order ID:</strong> ${orderId}</p>
+          <p><strong>Delivery Address:</strong> ${address}</p>
+          <p><strong>Payment Method:</strong> ${paymentMethod}</p>
 
-        <h3>Products Ordered:</h3>
-        <pre>${productList}</pre>
+          <h3>Products Ordered:</h3>
+          <pre>${productList}</pre>
 
-        <h3>Total Amount: ₹${total}</h3>
+          <h3>Total Amount: ₹${total}</h3>
 
-        <hr/>
-        <small>This is an automated confirmation email.</small>
-      </div>
-    `
-  };
+          <hr/>
+          <small>This is an automated confirmation email.</small>
+        </div>
+      `
+    };
 
-  await sgMail.send(msg);
+    await sgMail.send(msg);
+    console.log("Order confirmation email sent ✅");
+
+  } catch (error) {
+    console.error("SendGrid Order Email Error:", error.response?.body || error);
+  }
 }
-
 
 
 // Connect to MySQL

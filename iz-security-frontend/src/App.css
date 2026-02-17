@@ -367,6 +367,7 @@ html, body {
 /* ========================= */
 
 .login-page {
+  margin-top: -70px;
   min-height: 100vh;
   background: linear-gradient(135deg, #0f2027, #0f172a, #0b1120);
   display: flex;
