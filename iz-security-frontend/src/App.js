@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
 
 import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
 import Cart from "./pages/Cart";
@@ -41,6 +42,7 @@ function App() {
         ) : (
           <>
             <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard user={user} />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/products" element={<Products user={user} cart={cart} setCart={setCart} />} />
             <Route path="/orders" element={<Orders user={user} />} />

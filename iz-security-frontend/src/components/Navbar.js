@@ -26,12 +26,14 @@ function Navbar({ user, setUser }) {
   return (
     <div className="navbar">
 
-      {/* Left Side - Brand */}
+      {/* Brand */}
       <div className="nav-left">
-        <h2 className="brand-name">IZ Security System</h2>
+        <Link to="/" className="brand-link" onClick={closeMenu}>
+  <h2 className="brand-name">IZ Security System</h2>
+</Link>
       </div>
 
-      {/* Hamburger Icon (Mobile Only) */}
+      {/* Hamburger */}
       <div
         className="hamburger"
         onClick={() => setMenuOpen(!menuOpen)}
@@ -47,30 +49,34 @@ function Navbar({ user, setUser }) {
         ></div>
       )}
 
-      {/* Right Side - Navigation */}
+      {/* Navigation */}
       <div className={`nav-right ${menuOpen ? "active" : ""}`}>
 
+        {/* Main Pages */}
         <Link to="/" onClick={closeMenu}>Home</Link>
+        {user && (
+        <Link to="/dashboard" onClick={closeMenu}>Dashboard</Link>
+        )}
+
         <Link to="/products" onClick={closeMenu}>Products</Link>
         <Link to="/about" onClick={closeMenu}>About</Link>
         <Link to="/faq" onClick={closeMenu}>FAQ</Link>
+        <Link to="/contact" onClick={closeMenu}>Contact</Link>
 
+        {/* Admin */}
         {user && user.role === "admin" && (
           <Link to="/orders" onClick={closeMenu}>All Orders</Link>
         )}
 
+        {/* Customer */}
         {user && user.role !== "admin" && (
           <>
             <Link to="/cart" onClick={closeMenu}>Cart</Link>
             <Link to="/my-orders" onClick={closeMenu}>My Orders</Link>
-            <Link to="/contact" onClick={closeMenu}>Contact</Link>
           </>
         )}
 
-        {/* Policy Links */}
-        <Link to="/privacy" onClick={closeMenu}>Privacy</Link>
-        <Link to="/terms" onClick={closeMenu}>Terms</Link>
-
+        {/* Auth */}
         {user ? (
           <button
             className="button"

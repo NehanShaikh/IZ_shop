@@ -1031,3 +1031,40 @@ html, body {
   color: #e2e8f0;
   line-height: 1.6;
 }
+
+/* ================= DASHBOARD ================= */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 25px;
+}
+
+.dashboard-card {
+  background: rgba(30, 41, 59, 0.6);
+  padding: 25px;
+  border-radius: 14px;
+  border: 1px solid #1e293b;
+  backdrop-filter: blur(12px);
+  transition: 0.3s ease;
+}
+
+.dashboard-card:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 0 20px rgba(56,189,248,0.3);
+  transform: translateY(-5px);
+}
+
+.dashboard-card h3 {
+  color: #38bdf8;
+  margin-bottom: 10px;
+}
+
+.dashboard-card p {
+  color: #e2e8f0;
+  margin-bottom: 15px;
+}
+
+.brand-link {
+  text-decoration: none;
+}
