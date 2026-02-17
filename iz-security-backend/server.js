@@ -710,20 +710,22 @@ app.put("/update-order-status/:id", async (req, res) => {
 
   try {
 
-    // ===============================
-    // 🔐 DELIVERED (VERIFY OTP)
-    // ===============================
+    // =====================================================
+    // 🔐 DELIVERED (VERIFY OTP + FULL EMAIL)
+    // =====================================================
     if (status === "Delivered") {
 
       const [rows] = await db.promise().query(
-        "SELECT delivery_otp FROM orders WHERE id = ?",
+        "SELECT * FROM orders WHERE id = ?",
         [orderId]
       );
 
       if (!rows.length)
         return res.status(400).json({ message: "Order not found" });
 
-      if (rows[0].delivery_otp !== enteredOtp)
+      const order = rows[0];
+
+      if (order.delivery_otp !== enteredOtp)
         return res.status(400).json({ message: "Invalid OTP ❌" });
 
       await db.promise().query(
@@ -731,12 +733,36 @@ app.put("/update-order-status/:id", async (req, res) => {
         ["Delivered", orderId]
       );
 
+      // 🔥 Get customer email
+      const [userRows] = await db.promise().query(
+        "SELECT email FROM users WHERE id = ?",
+        [order.user_id]
+      );
+
+      // 🔥 Get personal order number
+      const [countRows] = await db.promise().query(
+        "SELECT COUNT(*) as total FROM orders WHERE user_id = ? AND id <= ?",
+        [order.user_id, orderId]
+      );
+
+      const customerOrderNumber = countRows[0].total;
+
+      if (userRows.length > 0) {
+
+        await sendStatusUpdateEmail(
+          userRows[0].email,
+          order.customer_name,
+          customerOrderNumber,
+          "Delivered"
+        );
+      }
+
       return res.json({ message: "Delivered Successfully ✅" });
     }
 
-    // ===============================
-    // 🚚 OUT FOR DELIVERY (FIXED)
-    // ===============================
+    // =====================================================
+    // 🚚 OUT FOR DELIVERY (GENERATE OTP + FULL EMAIL)
+    // =====================================================
     if (status === "Out for Delivery") {
 
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -750,46 +776,42 @@ app.put("/update-order-status/:id", async (req, res) => {
         ["Out for Delivery", otp, orderId]
       );
 
-      const [orderRows] = await db.promise().query(
-        "SELECT customer_name, user_id FROM orders WHERE id = ?",
+      const [rows] = await db.promise().query(
+        "SELECT * FROM orders WHERE id = ?",
         [orderId]
       );
 
-      if (orderRows.length > 0) {
+      const order = rows[0];
 
-        const { customer_name, user_id } = orderRows[0];
+      const [userRows] = await db.promise().query(
+        "SELECT email FROM users WHERE id = ?",
+        [order.user_id]
+      );
 
-        const [userRows] = await db.promise().query(
-          "SELECT email FROM users WHERE id = ?",
-          [user_id]
+      const [countRows] = await db.promise().query(
+        "SELECT COUNT(*) as total FROM orders WHERE user_id = ? AND id <= ?",
+        [order.user_id, orderId]
+      );
+
+      const customerOrderNumber = countRows[0].total;
+
+      if (userRows.length > 0) {
+
+        await sendStatusUpdateEmail(
+          userRows[0].email,
+          order.customer_name,
+          customerOrderNumber,
+          "Out for Delivery",
+          otp
         );
-
-        if (userRows.length > 0) {
-
-          const customerEmail = userRows[0].email;
-
-          await sgMail.send({
-            to: customerEmail,
-            from: process.env.EMAIL_USER,
-            subject: "Delivery OTP - IZ Security System",
-            html: `
-              <div style="font-family: Arial; padding: 20px;">
-                <h2>Hello ${customer_name},</h2>
-                <p>Your order is out for delivery.</p>
-                <h3 style="color:#ef4444;">Delivery OTP: ${otp}</h3>
-                <p>Please share this OTP with the delivery person.</p>
-              </div>
-            `
-          });
-        }
       }
 
       return res.json({ message: "Out for Delivery", otp });
     }
 
-    // ===============================
-    // 🚚 SHIPPED
-    // ===============================
+    // =====================================================
+    // 🚚 SHIPPED (FULL EMAIL)
+    // =====================================================
     if (status === "Shipped") {
 
       await db.promise().query(
@@ -797,43 +819,41 @@ app.put("/update-order-status/:id", async (req, res) => {
         ["Shipped", orderId]
       );
 
-      const [orderRows] = await db.promise().query(
-        "SELECT customer_name, user_id FROM orders WHERE id = ?",
+      const [rows] = await db.promise().query(
+        "SELECT * FROM orders WHERE id = ?",
         [orderId]
       );
 
-      if (orderRows.length > 0) {
+      const order = rows[0];
 
-        const { customer_name, user_id } = orderRows[0];
+      const [userRows] = await db.promise().query(
+        "SELECT email FROM users WHERE id = ?",
+        [order.user_id]
+      );
 
-        const [userRows] = await db.promise().query(
-          "SELECT email FROM users WHERE id = ?",
-          [user_id]
+      const [countRows] = await db.promise().query(
+        "SELECT COUNT(*) as total FROM orders WHERE user_id = ? AND id <= ?",
+        [order.user_id, orderId]
+      );
+
+      const customerOrderNumber = countRows[0].total;
+
+      if (userRows.length > 0) {
+
+        await sendStatusUpdateEmail(
+          userRows[0].email,
+          order.customer_name,
+          customerOrderNumber,
+          "Shipped"
         );
-
-        if (userRows.length > 0) {
-
-          await sgMail.send({
-            to: userRows[0].email,
-            from: process.env.EMAIL_USER,
-            subject: "Your Order Has Been Shipped 🚚",
-            html: `
-              <div style="font-family: Arial; padding: 20px;">
-                <h2>Hello ${customer_name},</h2>
-                <p>Your order has been shipped successfully.</p>
-                <p>It will reach you soon.</p>
-              </div>
-            `
-          });
-        }
       }
 
       return res.json({ message: "Shipped Successfully" });
     }
 
-    // ===============================
+    // =====================================================
     // ❌ CANCELLED (WITH WHATSAPP)
-    // ===============================
+    // =====================================================
     if (status === "Cancelled") {
 
       await db.promise().query(
@@ -841,7 +861,6 @@ app.put("/update-order-status/:id", async (req, res) => {
         ["Cancelled", reason || null, orderId]
       );
 
-      // 🔥 WhatsApp notification if customer cancelled (no reason)
       if (!reason) {
 
         const [results] = await db.promise().query(
