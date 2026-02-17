@@ -28,6 +28,15 @@ const sgMail = require("@sendgrid/mail");
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
+const cloudinary = require("cloudinary").v2;
+const streamifier = require("streamifier");
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 // 🔥 SMTP Transporter (Render Safe)
 
 
@@ -199,11 +208,7 @@ const fs = require("fs");
 
 const uploadDir = path.join(__dirname, "uploads");
 
-const invoiceDir = path.join(__dirname, "uploads/invoices");
 
-if (!fs.existsSync(invoiceDir)) {
-  fs.mkdirSync(invoiceDir, { recursive: true });
-}
 
 
 // Create uploads folder if not exists
@@ -222,16 +227,28 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-const invoiceStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, invoiceDir);
-  },
-  filename: function (req, file, cb) {
-    cb(null, `invoice_${Date.now()}${path.extname(file.originalname)}`);
-  }
+const uploadInvoice = multer({
+  storage: multer.memoryStorage()
 });
 
-const uploadInvoice = multer({ storage: invoiceStorage });
+
+
+const uploadBufferToCloudinary = (buffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: "raw",   // IMPORTANT for PDF
+        folder: "invoices"
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+};
 
 
 // Serve uploaded images
@@ -358,28 +375,32 @@ ${productList}
   }
 }
 
+// Example: if you receive invoice file from admin
 app.post("/upload-invoice/:orderId", uploadInvoice.single("invoice"), async (req, res) => {
 
-  const orderId = req.params.orderId;
-
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
-
-  const filePath = `/uploads/invoices/${req.file.filename}`;
-
   try {
+    const orderId = req.params.orderId;
 
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    // Upload to Cloudinary
+    const result = await uploadBufferToCloudinary(req.file.buffer);
+
+    const invoiceUrl = result.secure_url;
+
+    // Save URL in DB
     await db.promise().query(
       "UPDATE orders SET invoice_pdf = ? WHERE id = ?",
-      [filePath, orderId]
+      [invoiceUrl, orderId]
     );
 
-    res.json({ message: "Invoice uploaded successfully", filePath });
+    res.json({ success: true, invoiceUrl });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Upload failed" });
+    res.status(500).json({ error: "Upload failed" });
   }
 
 });
