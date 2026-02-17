@@ -711,22 +711,20 @@ app.put("/update-order-status/:id", async (req, res) => {
   try {
 
     // ===============================
-    // 🔥 HANDLE DELIVERED (OTP VERIFY)
+    // 🔐 DELIVERED (VERIFY OTP)
     // ===============================
     if (status === "Delivered") {
 
-      const [orderRows] = await db.promise().query(
+      const [rows] = await db.promise().query(
         "SELECT delivery_otp FROM orders WHERE id = ?",
         [orderId]
       );
 
-      if (orderRows.length === 0) {
+      if (!rows.length)
         return res.status(400).json({ message: "Order not found" });
-      }
 
-      if (orderRows[0].delivery_otp !== enteredOtp) {
+      if (rows[0].delivery_otp !== enteredOtp)
         return res.status(400).json({ message: "Invalid OTP ❌" });
-      }
 
       await db.promise().query(
         "UPDATE orders SET order_status = ?, otp_verified = TRUE WHERE id = ?",
@@ -737,23 +735,19 @@ app.put("/update-order-status/:id", async (req, res) => {
     }
 
     // ===============================
-    // 🔥 NORMAL STATUS UPDATE
-    // ===============================
-    await db.promise().query(
-      `UPDATE orders SET order_status = ?, cancel_reason = ? WHERE id = ?`,
-      [status, reason || null, orderId]
-    );
-
-    // ===============================
-    // 🔥 OUT FOR DELIVERY (GENERATE OTP)
+    // 🚚 OUT FOR DELIVERY (FIXED)
     // ===============================
     if (status === "Out for Delivery") {
 
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
       await db.promise().query(
-        "UPDATE orders SET delivery_otp = ? WHERE id = ?",
-        [otp, orderId]
+        `UPDATE orders 
+         SET order_status = ?, 
+             delivery_otp = ?, 
+             otp_verified = FALSE 
+         WHERE id = ?`,
+        ["Out for Delivery", otp, orderId]
       );
 
       const [orderRows] = await db.promise().query(
@@ -790,14 +784,18 @@ app.put("/update-order-status/:id", async (req, res) => {
         }
       }
 
-      // Send OTP back to admin
       return res.json({ message: "Out for Delivery", otp });
     }
 
     // ===============================
-    // 🔥 STATUS EMAIL (Shipped only)
+    // 🚚 SHIPPED
     // ===============================
     if (status === "Shipped") {
+
+      await db.promise().query(
+        "UPDATE orders SET order_status = ? WHERE id = ?",
+        ["Shipped", orderId]
+      );
 
       const [orderRows] = await db.promise().query(
         "SELECT customer_name, user_id FROM orders WHERE id = ?",
@@ -815,10 +813,8 @@ app.put("/update-order-status/:id", async (req, res) => {
 
         if (userRows.length > 0) {
 
-          const customerEmail = userRows[0].email;
-
           await sgMail.send({
-            to: customerEmail,
+            to: userRows[0].email,
             from: process.env.EMAIL_USER,
             subject: "Your Order Has Been Shipped 🚚",
             html: `
@@ -831,23 +827,33 @@ app.put("/update-order-status/:id", async (req, res) => {
           });
         }
       }
+
+      return res.json({ message: "Shipped Successfully" });
     }
 
     // ===============================
-    // 🔥 CUSTOMER CANCELLED (WhatsApp)
+    // ❌ CANCELLED (WITH WHATSAPP)
     // ===============================
-    if (status === "Cancelled" && !reason) {
+    if (status === "Cancelled") {
 
-      const [results] = await db.promise().query(
-        "SELECT * FROM orders WHERE id = ?",
-        [orderId]
+      await db.promise().query(
+        "UPDATE orders SET order_status = ?, cancel_reason = ? WHERE id = ?",
+        ["Cancelled", reason || null, orderId]
       );
 
-      if (results.length > 0) {
+      // 🔥 WhatsApp notification if customer cancelled (no reason)
+      if (!reason) {
 
-        const order = results[0];
+        const [results] = await db.promise().query(
+          "SELECT * FROM orders WHERE id = ?",
+          [orderId]
+        );
 
-        const message = `
+        if (results.length > 0) {
+
+          const order = results[0];
+
+          const message = `
 🚨 ORDER CANCELLED BY CUSTOMER
 
 🆔 Order ID: ${order.id}
@@ -860,25 +866,26 @@ app.put("/update-order-status/:id", async (req, res) => {
 
 📦 Products:
 ${order.products}
-        `;
+          `;
 
-        await client.messages.create({
-          from: process.env.TWILIO_WHATSAPP_NUMBER,
-          to: process.env.ADMIN_WHATSAPP,
-          body: message
-        });
+          await client.messages.create({
+            from: process.env.TWILIO_WHATSAPP_NUMBER,
+            to: process.env.ADMIN_WHATSAPP,
+            body: message
+          });
+        }
       }
+
+      return res.json({ message: "Order Cancelled" });
     }
 
-    return res.json({ message: "Order status updated" });
+    return res.json({ message: "No changes made" });
 
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
   }
-
 });
-
 
 
 app.listen(process.env.PORT, () => {
