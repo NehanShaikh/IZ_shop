@@ -24,31 +24,39 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
-const { Resend } = require("resend");
-const resend = new Resend(process.env.RESEND_API_KEY);
+const sgMail = require("@sendgrid/mail");
 
-const nodemailer = require("nodemailer");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // 🔥 SMTP Transporter (Render Safe)
 
 
 // 🎉 Welcome / First Login Email
 async function sendFirstLoginEmail(email, name) {
-  await resend.emails.send({
-    from: "IZ Security System <onboarding@resend.dev>", 
-    to: email,
-    subject: "Welcome to IZ Security System 🎉",
-    html: `
-      <div style="font-family: Arial; padding: 20px;">
-        <h2>Hello ${name}, 👋</h2>
-        <p>Welcome to <strong>IZ Security System</strong>.</p>
-        <p>Your account has been successfully created.</p>
-        <hr/>
-        <small>This is an automated message.</small>
-      </div>
-    `
-  });
+  try {
+    const msg = {
+      to: email,
+      from: "yourverifiedemail@gmail.com", // ⚠ MUST be verified in SendGrid
+      subject: "Welcome to IZ Security System 🎉",
+      html: `
+        <div style="font-family: Arial; padding: 20px;">
+          <h2>Hello ${name}, 👋</h2>
+          <p>Welcome to <strong>IZ Security System</strong>.</p>
+          <p>Your account has been successfully created.</p>
+          <hr/>
+          <small>This is an automated message.</small>
+        </div>
+      `
+    };
+
+    await sgMail.send(msg);
+    console.log("Welcome email sent successfully ✅");
+
+  } catch (error) {
+    console.error("SendGrid Welcome Email Error:", error.response?.body || error);
+  }
 }
+
 
 
 // 🛒 Order Confirmation Email
@@ -61,9 +69,9 @@ async function sendOrderConfirmationEmail(
   paymentMethod,
   address
 ) {
-  await resend.emails.send({
-    from: "IZ Security System <onboarding@resend.dev>",
+  const msg = {
     to: email,
+    from: "yourverifiedemail@gmail.com", // must be verified
     subject: `Order Confirmation - IZ Security System (#${orderId})`,
     html: `
       <div style="font-family: Arial; padding: 20px;">
@@ -82,7 +90,9 @@ async function sendOrderConfirmationEmail(
         <small>This is an automated confirmation email.</small>
       </div>
     `
-  });
+  };
+
+  await sgMail.send(msg);
 }
 
 
