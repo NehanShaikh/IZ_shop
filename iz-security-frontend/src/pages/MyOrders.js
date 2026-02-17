@@ -292,6 +292,27 @@ function MyOrders({ user }) {
               })}
             </p>
 
+            {/* ✅ ADDED: DOWNLOAD RECEIPT BUTTON */}
+            {order.order_status === "Delivered" && order.invoice_pdf && (
+              <div style={{ marginTop: "15px" }}>
+                <a
+                  href={`${API}${order.invoice_pdf}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    backgroundColor: "#22c55e",
+                    color: "white",
+                    padding: "8px 15px",
+                    borderRadius: "6px",
+                    textDecoration: "none",
+                    display: "inline-block"
+                  }}
+                >
+                  📄 Download Receipt
+                </a>
+              </div>
+            )}
+
             {canCancel && (
               <>
                 <button

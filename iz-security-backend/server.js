@@ -199,6 +199,13 @@ const fs = require("fs");
 
 const uploadDir = path.join(__dirname, "uploads");
 
+const invoiceDir = path.join(__dirname, "uploads/invoices");
+
+if (!fs.existsSync(invoiceDir)) {
+  fs.mkdirSync(invoiceDir, { recursive: true });
+}
+
+
 // Create uploads folder if not exists
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
@@ -214,6 +221,18 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+
+const invoiceStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, invoiceDir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, `invoice_${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
+
+const uploadInvoice = multer({ storage: invoiceStorage });
+
 
 // Serve uploaded images
 app.use("/uploads", express.static(uploadDir));
@@ -338,6 +357,32 @@ ${productList}
     res.status(500).send("Server error");
   }
 }
+
+app.post("/upload-invoice/:orderId", uploadInvoice.single("invoice"), async (req, res) => {
+
+  const orderId = req.params.orderId;
+
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  const filePath = `/uploads/invoices/${req.file.filename}`;
+
+  try {
+
+    await db.promise().query(
+      "UPDATE orders SET invoice_pdf = ? WHERE id = ?",
+      [filePath, orderId]
+    );
+
+    res.json({ message: "Invoice uploaded successfully", filePath });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Upload failed" });
+  }
+
+});
 
 
 
@@ -476,7 +521,7 @@ app.post("/upload-product", upload.single("image"), (req, res) => {
 // 🔥 Get orders for specific user
 app.get("/my-orders/:userId", (req, res) => {
   const ordersSql = `
-    SELECT id, products, total_amount, order_status, payment_method, payment_status, created_at, cancel_reason, delivery_otp, otp_verified
+    SELECT id, products, total_amount, order_status, payment_method, payment_status, created_at, cancel_reason, delivery_otp, otp_verified, invoice_pdf
     FROM orders
     WHERE user_id = ?
     ORDER BY id DESC

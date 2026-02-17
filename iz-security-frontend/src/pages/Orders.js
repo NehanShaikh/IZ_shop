@@ -78,6 +78,38 @@ function Orders({ user }) {
     }
   };
 
+  // =============================
+  // 📎 UPLOAD INVOICE PDF
+  // =============================
+  const uploadInvoice = async (orderId, file) => {
+
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("invoice", file);
+
+    try {
+
+      const res = await fetch(`${API}/upload-invoice/${orderId}`, {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message);
+        return;
+      }
+
+      alert("Invoice uploaded successfully ✅");
+      fetchOrders();
+
+    } catch (error) {
+      console.error("Upload error:", error);
+    }
+  };
+
   const filteredOrders =
     filter === "All"
       ? orders
@@ -248,9 +280,22 @@ function Orders({ user }) {
           </div>
 
           {order.order_status === "Delivered" && (
-            <p className="delivered-text">
-              ✓ Order Delivered Successfully
-            </p>
+            <>
+              <p className="delivered-text">
+                ✓ Order Delivered Successfully
+              </p>
+
+              {/* 📎 Upload Invoice PDF */}
+              <div style={{ marginTop: "10px" }}>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) =>
+                    uploadInvoice(order.id, e.target.files[0])
+                  }
+                />
+              </div>
+            </>
           )}
 
           {order.order_status === "Cancelled" && (
@@ -274,7 +319,7 @@ function Orders({ user }) {
         </div>
       ))}
 
-      {/* CANCEL MODAL (UNCHANGED) */}
+      {/* CANCEL MODAL — UNCHANGED */}
       {showCancelModal && (
         <div style={{
           position: "fixed",
