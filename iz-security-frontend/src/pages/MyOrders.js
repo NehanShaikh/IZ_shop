@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 function MyOrders({ user }) {
 
   const [orders, setOrders] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null); // ✅ ADDED
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const API = "https://iz-shop.onrender.com";
 
   useEffect(() => {
@@ -100,6 +100,7 @@ function MyOrders({ user }) {
           >
             <h4>Order #{orders.length - index}</h4>
 
+            {/* Order Progress */}
             {order.order_status !== "Cancelled" && (
               <div
                 style={{
@@ -163,6 +164,7 @@ function MyOrders({ user }) {
               </div>
             )}
 
+            {/* Products */}
             <div style={{ marginTop: "10px" }}>
               <strong>Products:</strong>
 
@@ -185,7 +187,9 @@ function MyOrders({ user }) {
                         const res = await fetch(`${API}/products`);
                         const allProducts = await res.json();
 
-                        const cleanName = product.name.replace(/\s*x\s*\d+$/i, "").trim();
+                        const cleanName = product.name
+                          .replace(/\s*x\s*\d+$/i, "")
+                          .trim();
 
                         const fullProduct = allProducts.find(p =>
                           p.name.toLowerCase() === cleanName.toLowerCase()
@@ -224,6 +228,7 @@ function MyOrders({ user }) {
               </div>
             </div>
 
+            {/* OTP */}
             {order.order_status === "Out for Delivery" && order.delivery_otp && (
               <div
                 style={{
@@ -262,6 +267,7 @@ function MyOrders({ user }) {
               </span>
             </p>
 
+            {/* Receipt */}
             {order.order_status === "Delivered" && order.invoice_pdf && (
               <div style={{ marginTop: "15px" }}>
                 <a
@@ -280,6 +286,38 @@ function MyOrders({ user }) {
                   📄 Download Receipt
                 </a>
               </div>
+            )}
+
+            {/* Cancel */}
+            {canCancel && (
+              <>
+                <button
+                  style={{
+                    marginTop: "10px",
+                    backgroundColor: "red",
+                    color: "white",
+                    padding: "8px 15px",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer"
+                  }}
+                  onClick={() => cancelOrder(order.id)}
+                >
+                  Cancel Order
+                </button>
+
+                <p
+                  style={{
+                    fontSize: "12px",
+                    color: "gray",
+                    marginTop: "5px"
+                  }}
+                >
+                  You can cancel this order within 24 hours.
+                  <br />
+                  Time remaining: {hoursLeft} hours
+                </p>
+              </>
             )}
 
           </div>
@@ -351,6 +389,7 @@ function MyOrders({ user }) {
             </h3>
 
             <p>Stock: {selectedProduct.stock}</p>
+
           </div>
         </div>
       )}
