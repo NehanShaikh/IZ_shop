@@ -23,7 +23,7 @@ function FAQ() {
         <div className="info-section">
           <h3>💳 What payment methods are available?</h3>
           <p>
-            We accept UPI, Debit Card, Credit Card, and Net Banking.
+            We accept UPI, Debit Card, Credit Card, Net Banking and Cash on Delivery.
           </p>
         </div>
 

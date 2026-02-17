@@ -16,7 +16,7 @@ function Terms() {
         <div className="info-section">
           <h3>🚚 Delivery Policy</h3>
           <p>
-            Orders are delivered within 3-7 working days depending on location.
+            Orders are delivered within 3-7 working days depending on Product Availability.
           </p>
         </div>
 
@@ -32,7 +32,8 @@ function Terms() {
           <h3>💳 Payment Terms</h3>
           <p>
             We accept secure online payments. Orders are confirmed only
-            after successful payment verification.
+            after successful payment verification incase of online.
+            COD also available.
           </p>
         </div>
 
