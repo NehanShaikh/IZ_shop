@@ -680,17 +680,18 @@ html, body {
 
   /* 🔥 FIX ORDER FILTER BUTTONS IN MOBILE */
   .order-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 25px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;   /* 2 buttons per row */
+    gap: 12px;
+    margin-bottom: 25px;
   }
 
   .order-filters button {
-  flex: 0 0 auto;      /* ❗ prevent full width stretch */
-  width: auto;         /* ❗ prevent 100% width */
-  font-size: 13px;
-  padding: 8px 14px;
+    width: 100%;
+    font-size: 13px;
+    padding: 10px;
+    text-align: center;
+    white-space: normal;   /* allow wrapping if text is long */
   }
 
 
