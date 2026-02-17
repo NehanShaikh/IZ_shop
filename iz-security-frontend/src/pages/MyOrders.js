@@ -284,9 +284,8 @@ function MyOrders({ user }) {
 {order.order_status === "Delivered" && order.invoice_pdf && (
   <div style={{ marginTop: "15px" }}>
     <a
-      href={`${order.invoice_pdf}?fl_attachment=Invoice_${order.id}.pdf`}
-      target="_blank"
-      rel="noopener noreferrer"
+      href={`${order.invoice_pdf}?fl_attachment=true`}
+      download={`Invoice_${order.id}.pdf`}
       style={{
         backgroundColor: "#22c55e",
         color: "white",
@@ -300,6 +299,7 @@ function MyOrders({ user }) {
     </a>
   </div>
 )}
+
 
             {/* Cancel */}
             {canCancel && (
