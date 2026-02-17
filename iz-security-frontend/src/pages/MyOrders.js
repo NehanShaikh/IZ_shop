@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 function MyOrders({ user }) {
 
   const [orders, setOrders] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null); // ✅ ADDED
   const API = "https://iz-shop.onrender.com";
 
   useEffect(() => {
@@ -176,7 +177,26 @@ function MyOrders({ user }) {
                       marginBottom: "12px",
                       background: "#0f172a",
                       padding: "12px",
-                      borderRadius: "8px"
+                      borderRadius: "8px",
+                      cursor: "pointer"
+                    }}
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`${API}/products`);
+                        const allProducts = await res.json();
+
+                        const cleanName = product.name.replace(/\s*x\s*\d+$/i, "").trim();
+
+                        const fullProduct = allProducts.find(p =>
+                          p.name.toLowerCase() === cleanName.toLowerCase()
+                        );
+
+                        if (fullProduct) {
+                          setSelectedProduct(fullProduct);
+                        }
+                      } catch (error) {
+                        console.error(error);
+                      }
                     }}
                   >
                     <img
@@ -204,7 +224,6 @@ function MyOrders({ user }) {
               </div>
             </div>
 
-            {/* 🔥 OTP SHOWN TO CUSTOMER */}
             {order.order_status === "Out for Delivery" && order.delivery_otp && (
               <div
                 style={{
@@ -219,10 +238,6 @@ function MyOrders({ user }) {
                 }}
               >
                 Delivery OTP: {order.delivery_otp}
-                <br />
-                <span style={{ fontSize: "12px", fontWeight: "normal" }}>
-                  Share this OTP with delivery person.
-                </span>
               </div>
             )}
 
@@ -245,54 +260,8 @@ function MyOrders({ user }) {
                   ? "Ordered"
                   : order.order_status}
               </span>
-
-              {order.cancel_reason && (
-                <div
-                  style={{
-                    fontSize: "13px",
-                    color: "#f87171",
-                    marginTop: "4px",
-                    whiteSpace: "pre-line"
-                  }}
-                >
-                  {order.cancel_reason}
-                </div>
-              )}
             </p>
 
-            <p>
-              <strong>Payment:</strong>{" "}
-              <span
-                style={{
-                  fontWeight: "bold",
-                  color:
-                    order.payment_status === "Paid"
-                      ? "#22c55e"
-                      : "#facc15"
-                }}
-              >
-                {order.payment_status === "Paid"
-                  ? "Paid Online"
-                  : order.payment_method === "COD"
-                  ? "Cash on Delivery"
-                  : "Pending"}
-              </span>
-            </p>
-
-            <p>
-              <strong>Date:</strong>{" "}
-              {new Date(order.created_at).toLocaleString("en-IN", {
-                day: "numeric",
-                month: "numeric",
-                year: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: true
-              })}
-            </p>
-
-            {/* ✅ ADDED: DOWNLOAD RECEIPT BUTTON */}
             {order.order_status === "Delivered" && order.invoice_pdf && (
               <div style={{ marginTop: "15px" }}>
                 <a
@@ -313,40 +282,79 @@ function MyOrders({ user }) {
               </div>
             )}
 
-            {canCancel && (
-              <>
-                <button
-                  style={{
-                    marginTop: "10px",
-                    backgroundColor: "red",
-                    color: "white",
-                    padding: "8px 15px",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer"
-                  }}
-                  onClick={() => cancelOrder(order.id)}
-                >
-                  Cancel Order
-                </button>
-
-                <p
-                  style={{
-                    fontSize: "12px",
-                    color: "gray",
-                    marginTop: "5px"
-                  }}
-                >
-                  You can cancel this order within 24 hours.
-                  <br />
-                  Time remaining: {hoursLeft} hours
-                </p>
-              </>
-            )}
-
           </div>
         );
       })}
+
+      {/* ================= PRODUCT DETAILS MODAL ================= */}
+      {selectedProduct && (
+        <div
+          onClick={() => setSelectedProduct(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.7)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            padding: "40px 15px",
+            overflowY: "auto",
+            zIndex: 5000
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "#1e293b",
+              borderRadius: "12px",
+              padding: "20px",
+              paddingTop: "50px",
+              width: "100%",
+              maxWidth: "500px",
+              position: "relative"
+            }}
+          >
+            <button
+              onClick={() => setSelectedProduct(null)}
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                background: "transparent",
+                border: "none",
+                fontSize: "20px",
+                color: "white",
+                cursor: "pointer"
+              }}
+            >
+              ✕
+            </button>
+
+            <img
+              src={
+                selectedProduct.image?.startsWith("/uploads")
+                  ? `${API}${selectedProduct.image}`
+                  : selectedProduct.image
+              }
+              alt={selectedProduct.name}
+              style={{ width: "100%", borderRadius: "10px" }}
+            />
+
+            <h3 style={{ marginTop: "15px" }}>
+              {selectedProduct.name}
+            </h3>
+
+            <p>{selectedProduct.description}</p>
+
+            <h3 style={{ color: "#38bdf8" }}>
+              ₹{selectedProduct.price}
+            </h3>
+
+            <p>Stock: {selectedProduct.stock}</p>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
