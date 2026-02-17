@@ -22,52 +22,81 @@ function App() {
 
   const [user, setUser] = useState(null);
   const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(true); // ✅ Important
 
+  // Load user from localStorage
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
+
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
+
+    setLoading(false); // ✅ Wait before rendering routes
   }, []);
+
+  // 🔥 Prevent render until user check finishes
+  if (loading) {
+    return <div style={{ padding: "40px", textAlign: "center" }}>Loading...</div>;
+  }
 
   return (
     <Router>
 
+      {/* Navbar only when logged in */}
       {user && <Navbar user={user} setUser={setUser} />}
 
       <Routes>
 
-        {/* Public Routes */}
+        {/* ================= PUBLIC ROUTES ================= */}
+
         {!user && (
-          <Route path="/login" element={<Login setUser={setUser} />} />
+          <>
+            <Route path="/login" element={<Login setUser={setUser} />} />
+            <Route path="*" element={<Navigate to="/login" />} />
+          </>
         )}
 
+        {/* Legal pages accessible always */}
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/faq" element={<FAQ />} />
 
-        {/* Protected Routes */}
-        {user ? (
+        {/* ================= PROTECTED ROUTES ================= */}
+
+        {user && (
           <>
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard user={user} />} />
             <Route path="/contact" element={<Contact />} />
-            <Route 
-              path="/products" 
-              element={<Products user={user} cart={cart} setCart={setCart} />} 
-            />
-            <Route path="/orders" element={<Orders user={user} />} />
+            <Route path="/about" element={<About />} />
 
-            <Route 
-              path="/cart" 
+            <Route
+              path="/products"
+              element={<Products user={user} cart={cart} setCart={setCart} />}
+            />
+
+            {/* Admin only */}
+            <Route
+              path="/orders"
+              element={
+                user.role === "admin"
+                  ? <Orders user={user} />
+                  : <Navigate to="/" />
+              }
+            />
+
+            {/* Customer only */}
+            <Route
+              path="/cart"
               element={
                 user.role !== "admin"
                   ? <Cart user={user} />
                   : <Navigate to="/" />
-              } 
+              }
             />
 
-            <Route 
+            <Route
               path="/checkout"
               element={
                 user.role !== "admin"
@@ -76,7 +105,7 @@ function App() {
               }
             />
 
-            <Route 
+            <Route
               path="/my-orders"
               element={
                 user.role !== "admin"
@@ -85,12 +114,9 @@ function App() {
               }
             />
 
-            <Route path="/about" element={<About />} />
-
+            {/* Fallback for logged user */}
             <Route path="*" element={<Navigate to="/" />} />
           </>
-        ) : (
-          <Route path="*" element={<Navigate to="/login" />} />
         )}
 
       </Routes>
