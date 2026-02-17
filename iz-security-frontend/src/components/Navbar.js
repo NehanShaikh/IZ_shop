@@ -29,11 +29,11 @@ function Navbar({ user, setUser }) {
       {/* Brand */}
       <div className="nav-left">
         <Link to="/" className="brand-link" onClick={closeMenu}>
-  <h2 className="brand-name">IZ Security System</h2>
-</Link>
+          <h2 className="brand-name">IZ Security System</h2>
+        </Link>
       </div>
 
-      {/* Hamburger */}
+      {/* Hamburger (Mobile) */}
       <div
         className="hamburger"
         onClick={() => setMenuOpen(!menuOpen)}
@@ -54,21 +54,26 @@ function Navbar({ user, setUser }) {
 
         {/* Main Pages */}
         <Link to="/" onClick={closeMenu}>Home</Link>
-        {user && (
-        <Link to="/dashboard" onClick={closeMenu}>Dashboard</Link>
-        )}
-
         <Link to="/products" onClick={closeMenu}>Products</Link>
         <Link to="/about" onClick={closeMenu}>About</Link>
         <Link to="/faq" onClick={closeMenu}>FAQ</Link>
         <Link to="/contact" onClick={closeMenu}>Contact</Link>
 
-        {/* Admin */}
+        {/* Legal Pages */}
+        <Link to="/privacy" onClick={closeMenu}>Privacy Policy</Link>
+        <Link to="/terms" onClick={closeMenu}>Terms & Conditions</Link>
+
+        {/* Dashboard */}
+        {user && (
+          <Link to="/dashboard" onClick={closeMenu}>Dashboard</Link>
+        )}
+
+        {/* Admin Only */}
         {user && user.role === "admin" && (
           <Link to="/orders" onClick={closeMenu}>All Orders</Link>
         )}
 
-        {/* Customer */}
+        {/* Customer Only */}
         {user && user.role !== "admin" && (
           <>
             <Link to="/cart" onClick={closeMenu}>Cart</Link>
