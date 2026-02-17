@@ -8,7 +8,7 @@ function About() {
         <div className="info-section">
           <h3>👤 Who We Are</h3>
           <p>
-            IZ Shop is a modern online shopping platform based in Mangalore,
+            IZ Security System is a modern online shopping platform based in Mangalore,
             providing high-quality products at affordable prices.
           </p>
         </div>
