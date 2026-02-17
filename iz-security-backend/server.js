@@ -217,16 +217,16 @@ async function placeOrderLogic(req, res) {
       `;
 
       db.query(orderQuery,
-        [userId, name, phone, address, productList, total, paymentMethod, paymentStatus],
-        async (err2, result) => {
+  [userId, name, phone, address, productList, total, paymentMethod, paymentStatus],
+  async (err2, result) => {
 
-          if (err2) return res.status(500).send("Order save error");
+    if (err2) return res.status(500).send("Order save error");
 
-          const orderId = result.insertId;
+    const orderId = result.insertId; // ✅ Global ID (for admin & WhatsApp)
 
-          // WhatsApp
-          await client.messages.create({
-            body: `
+    // WhatsApp (UNCHANGED)
+    await client.messages.create({
+      body: `
 🛒 NEW ORDER
 
 🆔 Order ID: ${orderId}
@@ -239,49 +239,66 @@ async function placeOrderLogic(req, res) {
 
 📦 Products:
 ${productList}
-            `,
-            from: process.env.TWILIO_WHATSAPP_NUMBER,
-            to: process.env.ADMIN_WHATSAPP
-          });
-
-          // Customer email
-          db.query("SELECT email FROM users WHERE id = ?", [userId], async (err3, userResult) => {
-
-            if (!err3 && userResult.length > 0) {
-
-              const customerEmail = userResult[0].email;
-
-              try {
-                await sendOrderConfirmationEmail(
-                  customerEmail,
-                  name,
-                  orderId,
-                  productList,
-                  total,
-                  paymentMethod,
-                  address
-                );
-              } catch (mailError) {
-  console.log("========== ERROR ==========");
-  console.log(JSON.stringify(mailError, null, 2));
-  console.log("=================================");
-}
-            }
-          });
-
-          db.query("DELETE FROM cart WHERE user_id = ?", [userId]);
-
-          res.send("Order placed successfully!");
-
-        });
-
+      `,
+      from: process.env.TWILIO_WHATSAPP_NUMBER,
+      to: process.env.ADMIN_WHATSAPP
     });
 
+    // 🔥 Calculate customer-specific order number
+    db.query(
+      "SELECT COUNT(*) AS total FROM orders WHERE user_id = ?",
+      [userId],
+      (countErr, countResult) => {
+
+        if (countErr) {
+          console.error("Count error:", countErr);
+          return;
+        }
+
+        const customerOrderNumber = countResult[0].total;
+
+        // Customer email (ONLY THIS PART MODIFIED)
+        db.query("SELECT email FROM users WHERE id = ?", [userId], async (err3, userResult) => {
+
+          if (!err3 && userResult.length > 0) {
+
+            const customerEmail = userResult[0].email;
+
+            try {
+              await sendOrderConfirmationEmail(
+                customerEmail,
+                name,
+                customerOrderNumber, // 🔥 SEND PERSONAL ORDER NUMBER
+                productList,
+                total,
+                paymentMethod,
+                address
+              );
+            } catch (mailError) {
+              console.log("========== EMAIL ERROR ==========");
+              console.log(JSON.stringify(mailError, null, 2));
+              console.log("=================================");
+            }
+          }
+        });
+
+      }
+    );
+
+    db.query("DELETE FROM cart WHERE user_id = ?", [userId]);
+
+    res.send("Order placed successfully!");
+
+  });
+
+});
   } catch (error) {
     console.error(error);
     res.status(500).send("Server error");
   }
 }
+
+
 
 app.get("/test-email", async (req, res) => {
   try {
