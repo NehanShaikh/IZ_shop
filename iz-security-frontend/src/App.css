@@ -275,7 +275,7 @@ html, body {
 .qty-controls {
   display: flex;
   align-items: center;
-  gap: 8px; /* 🔥 spacing between - 1 + */
+  gap: 2px; /* 🔥 spacing between - 1 + */
   margin-top: 10px;
 }
 
