@@ -45,20 +45,30 @@ function Orders({ user }) {
   // =============================
   const updateStatus = async (id, newStatus, reason = null) => {
     try {
+
+      let bodyData = {
+        status: newStatus,
+        reason: reason
+      };
+
+      // 🔥 Ask OTP when marking Delivered
+      if (newStatus === "Delivered") {
+        const enteredOtp = prompt("Enter Delivery OTP:");
+        if (!enteredOtp) return;
+        bodyData.enteredOtp = enteredOtp;
+      }
+
       const res = await fetch(`${API}/update-order-status/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status: newStatus,
-          reason: reason
-        })
+        body: JSON.stringify(bodyData)
       });
 
       const data = await res.json();
 
-      // 🔥 SHOW OTP IF OUT FOR DELIVERY
-      if (newStatus === "Out for Delivery" && data.otp) {
-        alert(`Delivery OTP for Order #${id} is: ${data.otp}`);
+      if (!res.ok) {
+        alert(data.message);
+        return;
       }
 
       fetchOrders();
@@ -157,6 +167,20 @@ function Orders({ user }) {
               </ul>
             </div>
 
+            {/* 🔥 SHOW OTP INSIDE ORDER */}
+            {order.order_status === "Out for Delivery" && order.delivery_otp && (
+              <div style={{
+                marginTop: "10px",
+                padding: "10px",
+                background: "#0f172a",
+                borderRadius: "6px",
+                color: "#facc15",
+                fontWeight: "bold"
+              }}>
+                Delivery OTP: {order.delivery_otp}
+              </div>
+            )}
+
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
 
             {order.payment_method === "ONLINE" && (
@@ -250,7 +274,7 @@ function Orders({ user }) {
         </div>
       ))}
 
-      {/* CANCEL MODAL */}
+      {/* CANCEL MODAL (UNCHANGED) */}
       {showCancelModal && (
         <div style={{
           position: "fixed",

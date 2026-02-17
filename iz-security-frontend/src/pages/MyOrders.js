@@ -51,11 +51,10 @@ function MyOrders({ user }) {
     setOrders(uniqueOrders);
   };
 
-  // 🔥 Progress Step Index Function
   const getStepIndex = (status) => {
     switch (status) {
       case "Pending":
-        return 0; // Ordered
+        return 0;
       case "Shipped":
         return 1;
       case "Out for Delivery":
@@ -63,7 +62,7 @@ function MyOrders({ user }) {
       case "Delivered":
         return 3;
       default:
-        return -1; // Cancelled
+        return -1;
     }
   };
 
@@ -100,7 +99,6 @@ function MyOrders({ user }) {
           >
             <h4>Order #{orders.length - index}</h4>
 
-            {/* 🔥 ORDER PROGRESS BAR */}
             {order.order_status !== "Cancelled" && (
               <div
                 style={{
@@ -123,7 +121,6 @@ function MyOrders({ user }) {
                           position: "relative"
                         }}
                       >
-                        {/* Circle */}
                         <div
                           style={{
                             width: "28px",
@@ -140,12 +137,10 @@ function MyOrders({ user }) {
                           ✓
                         </div>
 
-                        {/* Label */}
                         <div style={{ marginTop: "8px", fontSize: "13px" }}>
                           {step}
                         </div>
 
-                        {/* Line */}
                         {i !== 3 && (
                           <div
                             style={{
@@ -209,6 +204,28 @@ function MyOrders({ user }) {
               </div>
             </div>
 
+            {/* 🔥 OTP SHOWN TO CUSTOMER */}
+            {order.order_status === "Out for Delivery" && order.delivery_otp && (
+              <div
+                style={{
+                  marginTop: "15px",
+                  padding: "12px",
+                  backgroundColor: "#0f172a",
+                  borderRadius: "8px",
+                  border: "1px solid #facc15",
+                  color: "#facc15",
+                  fontWeight: "bold",
+                  textAlign: "center"
+                }}
+              >
+                Delivery OTP: {order.delivery_otp}
+                <br />
+                <span style={{ fontSize: "12px", fontWeight: "normal" }}>
+                  Share this OTP with delivery person.
+                </span>
+              </div>
+            )}
+
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
 
             <p>
@@ -224,11 +241,9 @@ function MyOrders({ user }) {
                       : "orange"
                 }}
               >
-                {
-    order.order_status === "Pending"
-      ? "Ordered"
-      : order.order_status
-  }
+                {order.order_status === "Pending"
+                  ? "Ordered"
+                  : order.order_status}
               </span>
 
               {order.cancel_reason && (
