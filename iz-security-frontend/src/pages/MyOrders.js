@@ -284,10 +284,9 @@ function MyOrders({ user }) {
 {order.order_status === "Delivered" && order.invoice_pdf && (
   <div style={{ marginTop: "15px" }}>
     <a
-      href={order.invoice_pdf}   // ✅ IMPORTANT CHANGE
+      href={`${order.invoice_pdf}?fl_attachment=Invoice_${order.id}.pdf`}
       target="_blank"
       rel="noopener noreferrer"
-      download
       style={{
         backgroundColor: "#22c55e",
         color: "white",
