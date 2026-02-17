@@ -237,9 +237,9 @@ const uploadBufferToCloudinary = (buffer) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        resource_type: "raw",
-        folder: "invoices",                        // ✅ force pdf
-        public_id: `invoice_${Date.now()}.pdf`,   // ✅ clean filename
+        resource_type: "raw",     // ✅ correct for PDF
+        folder: "invoices",
+        public_id: `invoice_${Date.now()}`,  // ❗ NO .pdf here
       },
       (error, result) => {
         if (error) reject(error);
