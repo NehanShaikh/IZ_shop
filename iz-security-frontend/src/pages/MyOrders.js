@@ -247,6 +247,26 @@ function MyOrders({ user }) {
             )}
 
             <p><strong>Total:</strong> ₹{order.total_amount}</p>
+            
+            <p>
+  <strong>Payment:</strong>{" "}
+  <span
+    style={{
+      fontWeight: "bold",
+      color:
+        order.payment_status === "Paid"
+          ? "#22c55e"
+          : "#facc15"
+    }}
+  >
+    {order.payment_status === "Paid"
+      ? "Paid Online"
+      : order.payment_method === "COD"
+      ? "Cash on Delivery"
+      : "Pending"}
+  </span>
+</p>
+
 
             <p>
               <strong>Status:</strong>{" "}
