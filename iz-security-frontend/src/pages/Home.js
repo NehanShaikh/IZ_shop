@@ -11,22 +11,38 @@ function Home() {
           <img src="/logo.png" alt="IZ Security System Logo" />
         </div>
 
-        <p>Advanced CCTV • DVR • Biometric • Surveillance Solutions</p>
+        <h1>Smart Security Solutions for Modern Spaces</h1>
 
-        {/* Use Link instead of <a> */}
+        <p>
+          Advanced CCTV • DVR • Biometric Systems • Surveillance Installation
+        </p>
+
         <Link to="/products" className="hero-btn">
           Explore Products
         </Link>
 
-        {/* 🔥 Delivery Notice */}
-        <div className="delivery-notice">
-          <p>
-          🚚 <strong>Note:</strong> Delivery is currently available only within Mangalore City, Karnataka.</p>
-        <p>
-        In case of order cancellation by the customer and Prepaid online, only 80% of the paid amount will be refunded.</p>
+      </div>
+
+      {/* Why Choose Us Section */}
+      <div className="home-features">
+
+        <div className="feature-card">
+          <h3>🔒 Trusted Security</h3>
+          <p>High-quality surveillance systems for homes and businesses.</p>
+        </div>
+
+        <div className="feature-card">
+          <h3>⚡ Fast Installation</h3>
+          <p>Quick and professional setup across Mangalore.</p>
+        </div>
+
+        <div className="feature-card">
+          <h3>🛠 Reliable Support</h3>
+          <p>Dedicated after-sales support and maintenance services.</p>
         </div>
 
       </div>
+
     </div>
   );
 }
