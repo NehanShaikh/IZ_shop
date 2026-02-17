@@ -7,6 +7,8 @@ function Cart({ user }) {
 
   // 🔥 Load cart from database
   useEffect(() => {
+    if (!user) return;
+
     fetch(`https://iz-shop.onrender.com/cart/${user.id}`)
       .then(res => res.json())
       .then(data => setCart(data));
@@ -21,11 +23,14 @@ function Cart({ user }) {
       body: JSON.stringify({ quantity: currentQty + 1 })
     });
 
-    setCart(cart.map(item =>
-      item.id === id
-        ? { ...item, quantity: currentQty + 1 }
-        : item
-    ));
+    // ✅ Safer state update
+    setCart(prev =>
+      prev.map(item =>
+        item.id === id
+          ? { ...item, quantity: currentQty + 1 }
+          : item
+      )
+    );
   };
 
   // 🔥 Decrease Quantity
@@ -39,11 +44,14 @@ function Cart({ user }) {
       body: JSON.stringify({ quantity: currentQty - 1 })
     });
 
-    setCart(cart.map(item =>
-      item.id === id
-        ? { ...item, quantity: currentQty - 1 }
-        : item
-    ));
+    // ✅ Safer state update
+    setCart(prev =>
+      prev.map(item =>
+        item.id === id
+          ? { ...item, quantity: currentQty - 1 }
+          : item
+      )
+    );
   };
 
   // 🔥 Remove Item
@@ -53,7 +61,7 @@ function Cart({ user }) {
       method: "DELETE"
     });
 
-    setCart(cart.filter(item => item.id !== id));
+    setCart(prev => prev.filter(item => item.id !== id));
   };
 
   const total = cart.reduce(
@@ -70,7 +78,7 @@ function Cart({ user }) {
       {cart.map((item) => (
         <div className="cart-card" key={item.id}>
 
-          {/* 🔥 Product Image Added */}
+          {/* 🔥 Product Image */}
           {item.image && (
             <img
               src={
@@ -83,22 +91,38 @@ function Cart({ user }) {
                 width: "120px",
                 height: "120px",
                 objectFit: "cover",
-                borderRadius: "8px",
-                marginBottom: "10px"
+                borderRadius: "8px"
               }}
             />
           )}
 
-          <h4>{item.name}</h4>
-          <p>₹{item.price}</p>
-          <p>Quantity: {item.quantity}</p>
+          <div>
+            <h4>{item.name}</h4>
+            <p>₹{item.price}</p>
 
-          <div className="qty-controls">
-  <button className="button">-</button>
-  <span>{item.quantity}</span>
-  <button className="button">+</button>
-</div>
+            {/* 🔥 Grouped Quantity Controls (No CSS change needed) */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              
+              <button
+                className="button"
+                onClick={() => decreaseQty(item.id, item.quantity)}
+              >
+                -
+              </button>
 
+              <span style={{ minWidth: "20px", textAlign: "center" }}>
+                {item.quantity}
+              </span>
+
+              <button
+                className="button"
+                onClick={() => increaseQty(item.id, item.quantity)}
+              >
+                +
+              </button>
+
+            </div>
+          </div>
 
           <button
             className="button"
