@@ -45,7 +45,7 @@ function Orders({ user }) {
   // =============================
   const updateStatus = async (id, newStatus, reason = null) => {
     try {
-      await fetch(`${API}/update-order-status/${id}`, {
+      const res = await fetch(`${API}/update-order-status/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -54,7 +54,15 @@ function Orders({ user }) {
         })
       });
 
+      const data = await res.json();
+
+      // 🔥 SHOW OTP IF OUT FOR DELIVERY
+      if (newStatus === "Out for Delivery" && data.otp) {
+        alert(`Delivery OTP for Order #${id} is: ${data.otp}`);
+      }
+
       fetchOrders();
+
     } catch (error) {
       console.error("Update error:", error);
     }

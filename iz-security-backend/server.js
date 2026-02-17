@@ -102,6 +102,47 @@ async function sendOrderConfirmationEmail(
 }
 
 
+async function sendStatusUpdateEmail(email, name, orderId, status, otp = null) {
+  try {
+    const msg = {
+      to: email,
+      from: process.env.EMAIL_USER,
+      subject: `Your Order #${orderId} is now ${status}`,
+      html: `
+        <div style="font-family: Arial; padding: 20px;">
+          <h2>Hello ${name},</h2>
+
+          <p>Your order <strong>#${orderId}</strong> status has been updated.</p>
+
+          <h3 style="color:#38bdf8;">Current Status: ${status}</h3>
+
+          ${
+            status === "Shipped"
+              ? "<p>Your order has been shipped 🚚</p>"
+              : status === "Out for Delivery"
+              ? `<p>Your order is out for delivery today 📦</p>
+                 <h2 style="color:#ef4444;">Delivery OTP: ${otp}</h2>
+                 <p>Please share this OTP with delivery agent to confirm delivery.</p>`
+              : status === "Delivered"
+              ? "<p>Your order has been delivered successfully ✅</p>"
+              : ""
+          }
+
+          <hr/>
+          <small>Thank you for shopping with IZ Security System.</small>
+        </div>
+      `
+    };
+
+    await sgMail.send(msg);
+    console.log("Status email sent ✅");
+
+  } catch (error) {
+    console.error("Status Email Error:", error.response?.body || error);
+  }
+}
+
+
 // Connect to MySQL
 const db = mysql.createConnection(process.env.DATABASE_URL);
 
@@ -664,40 +705,149 @@ app.get("/orders", (req, res) => {
 // 🔥 Update order status (Admin)
 app.put("/update-order-status/:id", async (req, res) => {
 
-  const { status, reason } = req.body;
+  const { status, reason, enteredOtp } = req.body;
   const orderId = req.params.id;
 
-  const sql = `
-    UPDATE orders
-    SET order_status = ?, cancel_reason = ?
-    WHERE id = ?
-  `;
+  try {
 
-  db.query(sql, [status, reason || null, orderId], async (err) => {
+    // ===============================
+    // 🔥 HANDLE DELIVERED (OTP VERIFY)
+    // ===============================
+    if (status === "Delivered") {
 
-    if (err) {
-      console.error(err);
-      return res.status(500).send("Error updating order");
+      const [orderRows] = await db.promise().query(
+        "SELECT delivery_otp FROM orders WHERE id = ?",
+        [orderId]
+      );
+
+      if (orderRows.length === 0) {
+        return res.status(400).json({ message: "Order not found" });
+      }
+
+      if (orderRows[0].delivery_otp !== enteredOtp) {
+        return res.status(400).json({ message: "Invalid OTP ❌" });
+      }
+
+      await db.promise().query(
+        "UPDATE orders SET order_status = ?, otp_verified = TRUE WHERE id = ?",
+        ["Delivered", orderId]
+      );
+
+      return res.json({ message: "Delivered Successfully ✅" });
     }
 
-    // 🔥 If customer cancelled (no reason provided)
+    // ===============================
+    // 🔥 NORMAL STATUS UPDATE
+    // ===============================
+    await db.promise().query(
+      `UPDATE orders SET order_status = ?, cancel_reason = ? WHERE id = ?`,
+      [status, reason || null, orderId]
+    );
+
+    // ===============================
+    // 🔥 OUT FOR DELIVERY (GENERATE OTP)
+    // ===============================
+    if (status === "Out for Delivery") {
+
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+      await db.promise().query(
+        "UPDATE orders SET delivery_otp = ? WHERE id = ?",
+        [otp, orderId]
+      );
+
+      const [orderRows] = await db.promise().query(
+        "SELECT customer_name, user_id FROM orders WHERE id = ?",
+        [orderId]
+      );
+
+      if (orderRows.length > 0) {
+
+        const { customer_name, user_id } = orderRows[0];
+
+        const [userRows] = await db.promise().query(
+          "SELECT email FROM users WHERE id = ?",
+          [user_id]
+        );
+
+        if (userRows.length > 0) {
+
+          const customerEmail = userRows[0].email;
+
+          await sgMail.send({
+            to: customerEmail,
+            from: process.env.EMAIL_USER,
+            subject: "Delivery OTP - IZ Security System",
+            html: `
+              <div style="font-family: Arial; padding: 20px;">
+                <h2>Hello ${customer_name},</h2>
+                <p>Your order is out for delivery.</p>
+                <h3 style="color:#ef4444;">Delivery OTP: ${otp}</h3>
+                <p>Please share this OTP with the delivery person.</p>
+              </div>
+            `
+          });
+        }
+      }
+
+      // Send OTP back to admin
+      return res.json({ message: "Out for Delivery", otp });
+    }
+
+    // ===============================
+    // 🔥 STATUS EMAIL (Shipped only)
+    // ===============================
+    if (status === "Shipped") {
+
+      const [orderRows] = await db.promise().query(
+        "SELECT customer_name, user_id FROM orders WHERE id = ?",
+        [orderId]
+      );
+
+      if (orderRows.length > 0) {
+
+        const { customer_name, user_id } = orderRows[0];
+
+        const [userRows] = await db.promise().query(
+          "SELECT email FROM users WHERE id = ?",
+          [user_id]
+        );
+
+        if (userRows.length > 0) {
+
+          const customerEmail = userRows[0].email;
+
+          await sgMail.send({
+            to: customerEmail,
+            from: process.env.EMAIL_USER,
+            subject: "Your Order Has Been Shipped 🚚",
+            html: `
+              <div style="font-family: Arial; padding: 20px;">
+                <h2>Hello ${customer_name},</h2>
+                <p>Your order has been shipped successfully.</p>
+                <p>It will reach you soon.</p>
+              </div>
+            `
+          });
+        }
+      }
+    }
+
+    // ===============================
+    // 🔥 CUSTOMER CANCELLED (WhatsApp)
+    // ===============================
     if (status === "Cancelled" && !reason) {
 
-      db.query(
+      const [results] = await db.promise().query(
         "SELECT * FROM orders WHERE id = ?",
-        [orderId],
-        async (err2, results) => {
+        [orderId]
+      );
 
-          if (err2) {
-            console.error(err2);
-            return;
-          }
+      if (results.length > 0) {
 
-          if (results.length > 0) {
+        const order = results[0];
 
-            const order = results[0];
-
-            const message = `
+        const message = `
 🚨 ORDER CANCELLED BY CUSTOMER
 
 🆔 Order ID: ${order.id}
@@ -710,26 +860,25 @@ app.put("/update-order-status/:id", async (req, res) => {
 
 📦 Products:
 ${order.products}
-            `;
+        `;
 
-            try {
-              await client.messages.create({
-                from: process.env.TWILIO_WHATSAPP_NUMBER,
-                to: process.env.ADMIN_WHATSAPP,
-                body: message
-              });
-            } catch (twilioError) {
-              console.error("Twilio Error:", twilioError);
-            }
-          }
-        }
-      );
+        await client.messages.create({
+          from: process.env.TWILIO_WHATSAPP_NUMBER,
+          to: process.env.ADMIN_WHATSAPP,
+          body: message
+        });
+      }
     }
 
-    res.send("Order status updated");
-  });
+    return res.json({ message: "Order status updated" });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
 
 });
+
 
 
 app.listen(process.env.PORT, () => {
