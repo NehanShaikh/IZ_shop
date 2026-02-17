@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 
 import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
@@ -22,7 +23,6 @@ function App() {
   const [user, setUser] = useState(null);
   const [cart, setCart] = useState([]);
 
-  // ✅ Load user from localStorage on app start
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
@@ -37,52 +37,66 @@ function App() {
 
       <Routes>
 
-        {!user ? (
-          <Route path="*" element={<Login setUser={setUser} />} />
-        ) : (
+        {/* Public Routes */}
+        {!user && (
+          <Route path="/login" element={<Login setUser={setUser} />} />
+        )}
+
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/faq" element={<FAQ />} />
+
+        {/* Protected Routes */}
+        {user ? (
           <>
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard user={user} />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/products" element={<Products user={user} cart={cart} setCart={setCart} />} />
+            <Route 
+              path="/products" 
+              element={<Products user={user} cart={cart} setCart={setCart} />} 
+            />
             <Route path="/orders" element={<Orders user={user} />} />
+
             <Route 
               path="/cart" 
               element={
-                user && user.role !== "admin"
+                user.role !== "admin"
                   ? <Cart user={user} />
                   : <Navigate to="/" />
-                } 
+              } 
             />
+
             <Route 
               path="/checkout"
               element={
-                user && user.role !== "admin"
+                user.role !== "admin"
                   ? <Checkout user={user} />
                   : <Navigate to="/" />
-                }
+              }
             />
 
             <Route 
-               path="/my-orders"
-                element={
-                  user && user.role !== "admin"
-                    ? <MyOrders user={user} />
-                    : <Navigate to="/" />
-                }
+              path="/my-orders"
+              element={
+                user.role !== "admin"
+                  ? <MyOrders user={user} />
+                  : <Navigate to="/" />
+              }
             />
 
             <Route path="/about" element={<About />} />
-<Route path="/privacy" element={<PrivacyPolicy />} />
-<Route path="/terms" element={<Terms />} />
-<Route path="/faq" element={<FAQ />} />
-
 
             <Route path="*" element={<Navigate to="/" />} />
           </>
+        ) : (
+          <Route path="*" element={<Navigate to="/login" />} />
         )}
 
       </Routes>
+
+      {/* Footer Always Visible */}
+      <Footer />
 
     </Router>
   );

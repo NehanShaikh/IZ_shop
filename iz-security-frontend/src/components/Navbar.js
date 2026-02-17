@@ -33,7 +33,7 @@ function Navbar({ user, setUser }) {
         </Link>
       </div>
 
-      {/* Hamburger (Mobile) */}
+      {/* Hamburger */}
       <div
         className="hamburger"
         onClick={() => setMenuOpen(!menuOpen)}
@@ -43,10 +43,7 @@ function Navbar({ user, setUser }) {
 
       {/* Overlay */}
       {menuOpen && (
-        <div
-          className="overlay"
-          onClick={closeMenu}
-        ></div>
+        <div className="overlay" onClick={closeMenu}></div>
       )}
 
       {/* Navigation */}
@@ -54,26 +51,22 @@ function Navbar({ user, setUser }) {
 
         {/* Main Pages */}
         <Link to="/" onClick={closeMenu}>Home</Link>
+
+        {user && (
+          <Link to="/dashboard" onClick={closeMenu}>Dashboard</Link>
+        )}
+
         <Link to="/products" onClick={closeMenu}>Products</Link>
         <Link to="/about" onClick={closeMenu}>About</Link>
         <Link to="/faq" onClick={closeMenu}>FAQ</Link>
         <Link to="/contact" onClick={closeMenu}>Contact</Link>
 
-        {/* Legal Pages */}
-        <Link to="/privacy" onClick={closeMenu}>Privacy Policy</Link>
-        <Link to="/terms" onClick={closeMenu}>Terms & Conditions</Link>
-
-        {/* Dashboard */}
-        {user && (
-          <Link to="/dashboard" onClick={closeMenu}>Dashboard</Link>
-        )}
-
-        {/* Admin Only */}
+        {/* Admin */}
         {user && user.role === "admin" && (
           <Link to="/orders" onClick={closeMenu}>All Orders</Link>
         )}
 
-        {/* Customer Only */}
+        {/* Customer */}
         {user && user.role !== "admin" && (
           <>
             <Link to="/cart" onClick={closeMenu}>Cart</Link>
