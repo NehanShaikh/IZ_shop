@@ -93,19 +93,12 @@ function Cart({ user }) {
           <p>₹{item.price}</p>
           <p>Quantity: {item.quantity}</p>
 
-          <button
-            className="button"
-            onClick={() => increaseQty(item.id, item.quantity)}
-          >
-            +
-          </button>
+          <div className="qty-controls">
+  <button className="button">-</button>
+  <span>{item.quantity}</span>
+  <button className="button">+</button>
+</div>
 
-          <button
-            className="button"
-            onClick={() => decreaseQty(item.id, item.quantity)}
-          >
-            -
-          </button>
 
           <button
             className="button"
