@@ -363,31 +363,6 @@ html, body {
 }
 
 
-/* ================= ORDER FILTER BUTTONS ================= */
-
-.order-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px; /* 🔥 spacing between buttons */
-  margin-bottom: 25px;
-}
-
-.order-filters button {
-  padding: 10px 18px;
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  background: linear-gradient(90deg, #2563eb, #38bdf8);
-  color: white;
-  transition: 0.3s ease;
-}
-
-.order-filters button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 15px rgba(56,189,248,0.4);
-}
-
 /* ========================= */
 /* LOGIN PAGE */
 /* ========================= */
@@ -702,6 +677,22 @@ html, body {
   margin-bottom: 12px;
   font-size: 14px;
   }
+
+  /* 🔥 FIX ORDER FILTER BUTTONS IN MOBILE */
+  .order-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 25px;
+  }
+
+  .order-filters button {
+  flex: 0 0 auto;      /* ❗ prevent full width stretch */
+  width: auto;         /* ❗ prevent 100% width */
+  font-size: 13px;
+  padding: 8px 14px;
+  }
+
 
 }
 
