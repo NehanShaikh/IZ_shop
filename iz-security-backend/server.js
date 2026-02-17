@@ -239,7 +239,7 @@ const uploadBufferToCloudinary = (buffer) => {
       {
         resource_type: "raw",
         folder: "invoices",                        // ✅ force pdf
-        public_id: `invoice_${Date.now()}`,   // ✅ clean filename
+        public_id: `invoice_${Date.now()}.pdf`,   // ✅ clean filename
       },
       (error, result) => {
         if (error) reject(error);
