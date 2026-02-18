@@ -1343,7 +1343,7 @@ html, body {
 /* Lens */
 .lens {
   position: absolute;
-  right: 10px;
+  right: 30px;
   top: 8px;
   width: 25px;
   height: 25px;
