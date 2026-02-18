@@ -552,6 +552,7 @@ html, body {
   margin-bottom: 25px;
   display: flex;
   justify-content: center;
+  transform: translateY(4px);
 }
 
 .hero-logo img {
@@ -674,7 +675,7 @@ html, body {
   }
 
   .login-logo img {
-  width: 75px;
+  width: 95px;
   height: auto;
   }
 
