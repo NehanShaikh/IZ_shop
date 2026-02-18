@@ -14,8 +14,9 @@ function Home() {
         <h1>Smart Security Solutions for Modern Spaces</h1>
 
         <p>
-  4G & WiFi CCTV Cameras • Solar & Dual Lens Cameras • DVR/NVR Systems • Biometric & Access Control • Alarm Systems • Hidden Cameras • Professional Surveillance Installation
+  4G & WiFi CCTV Cameras • DVR/NVR Systems • Biometric & Access Control • Alarm Systems • Professional Surveillance Installation
 </p>
+
 
 
         <Link to="/products" className="hero-btn">
