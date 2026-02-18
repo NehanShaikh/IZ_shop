@@ -254,7 +254,6 @@ const uploadBufferToCloudinary = (buffer) => {
 
 
 // Serve uploaded images
-app.use("/uploads", express.static(uploadDir));
 
 
 
@@ -492,7 +491,7 @@ app.post("/verify-payment", async (req, res) => {
   }
 });
 
-app.post("/upload-product", upload.single("image"), (req, res) => {
+app.post("/upload-product", upload.single("image"), async (req, res) => {
 
   console.log("Body:", req.body);
   console.log("File:", req.file);
@@ -508,8 +507,12 @@ app.post("/upload-product", upload.single("image"), (req, res) => {
 
   // If file uploaded
   if (req.file) {
-    imagePath = `/uploads/${req.file.filename}`;
-  }
+  const result = await cloudinary.uploader.upload(req.file.path, {
+    folder: "products"
+  });
+  imagePath = result.secure_url;
+}
+
   // If image URL provided
   else if (imageUrl) {
     imagePath = imageUrl;
@@ -609,15 +612,20 @@ app.post("/products", (req, res) => {
   });
 });
 
-app.put("/products/:id", upload.single("image"), (req, res) => {
+app.put("/products/:id", upload.single("image"), async (req, res) => {
 
   const { name, description, price, stock, imageUrl } = req.body;
 
   let imagePath = imageUrl || null;
 
   if (req.file) {
-    imagePath = `/uploads/${req.file.filename}`;
-  }
+  const result = await cloudinary.uploader.upload(req.file.path, {
+    folder: "products"
+  });
+
+  imagePath = result.secure_url;
+}
+
 
   const sql = `
     UPDATE products 
