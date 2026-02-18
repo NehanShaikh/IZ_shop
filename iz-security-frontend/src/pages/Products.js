@@ -69,6 +69,7 @@ function Products({ user }) {
         name: "",
         description: "",
         price: "",
+        original_price: "",
         image: null,
         imageUrl: "",
         stock: ""
