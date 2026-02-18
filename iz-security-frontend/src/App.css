@@ -694,16 +694,20 @@ html, body {
     white-space: normal;   /* allow wrapping if text is long */
   }
 
+}
+
+/* ✅ Mobile fix */
+@media (max-width: 600px) {
   .services-line {
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
   }
 
   .services-line span::after {
-    content: "";
+    content: "";   /* removes bullet on mobile */
   }
-
 }
+
 
 .nav-right a {
   margin-left: 20px;
