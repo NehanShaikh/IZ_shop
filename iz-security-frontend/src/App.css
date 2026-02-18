@@ -1461,8 +1461,8 @@ html, body {
   }
 
   .camera-beam {
-    top: 60px;    /* adjust beam start */
-    right: 30px;
+    top: 55px;    /* adjust beam start */
+    right: 25px;
 
     width: 400px;
     height: 260px;
