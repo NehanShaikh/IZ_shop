@@ -202,6 +202,7 @@ html, body {
 }
 
 .hero-btn {
+  display: inline-block;
   padding: 12px 20px;
   background: linear-gradient(90deg, #2563eb, #38bdf8);
   color: white;
