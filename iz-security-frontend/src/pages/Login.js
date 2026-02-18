@@ -80,6 +80,12 @@ function Login({ setUser }) {
   return (
     <div className="login-page">
 
+      {/* 🔥 CCTV Animated Background */}
+      <div className="cctv-bg">
+        <div className="scan-line"></div>
+        <div className="radar"></div>
+      </div>
+
       <div className="login-header">
         <h1>IZ Security System</h1>
         <div className="login-logo">
