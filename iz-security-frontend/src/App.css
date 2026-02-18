@@ -601,9 +601,10 @@ html, body {
     margin-top: 10px;
   }
 
-  .hero-section p {
-    font-size: 14px;
+  .hero-section p:not(.services-line) {
+  font-size: 14px;
   }
+
 
   
   /* Product Grid - keep same layout */
