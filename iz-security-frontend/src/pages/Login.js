@@ -64,54 +64,55 @@ function Login({ setUser }) {
   };
 
   return (
-    <div className="login-page">
+  <div className="login-page">
 
-      <div className="login-header">
-        <h1>IZ Security System</h1>
+    <div className="login-header">
+      <h1>IZ Security System</h1>
 
-        {/* KEEPING YOUR LOGO SECTION */}
-        <div className="login-logo">
-          <img src="/logo.png" alt="Logo" />
-        </div>
+      <div className="login-logo">
+        <img src="/logo.png" alt="Logo" />
       </div>
-
-      <div className="login-center">
-        <div className="login-card">
-          <h2>Account Access</h2>
-          <p>Secure access to your account</p>
-
-          <input
-            type="email"
-            placeholder="Enter Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <input
-            type="password"
-            placeholder="Enter Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
-          <button className="login-btn" onClick={handleLogin}>
-            Login
-          </button>
-
-          <button className="signup-btn" onClick={handleSignup}>
-            Signup
-          </button>
-
-          <div className="divider">OR</div>
-
-          <button className="google-btn" onClick={handleGoogleLogin}>
-            Login with Google
-          </button>
-
-        </div>
-      </div>
-
     </div>
+
+    <div className="login-center">
+      <div className="login-card">
+
+        <h2>Account Access</h2>
+
+        <input
+          type="email"
+          placeholder="Enter Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          type="password"
+          placeholder="Enter Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button className="login-btn" onClick={handleLogin}>
+          Login
+        </button>
+
+        <button className="signup-btn" onClick={handleSignup}>
+          Create Account
+        </button>
+
+        <div className="divider">
+          <span>OR</span>
+        </div>
+
+        <button className="google-btn" onClick={handleGoogleLogin}>
+          Continue with Google
+        </button>
+
+      </div>
+    </div>
+
+  </div>
   );
 }
 
