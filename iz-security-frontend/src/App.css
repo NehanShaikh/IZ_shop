@@ -1456,7 +1456,7 @@ html, body {
 
   .cctv-wrapper {
     top: 130px;   /* 🔥 move below logo */
-    right: 20px;
+    right: 10px;
     transform: scale(0.75);  /* slightly smaller */
   }
 
