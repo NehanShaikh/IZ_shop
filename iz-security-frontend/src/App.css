@@ -1207,3 +1207,8 @@ html, body {
 .services-line span:last-child::after {
   content: "";
 }
+
+.logout-btn {
+  margin-left: 40px;
+  padding: 8px 18px;
+}

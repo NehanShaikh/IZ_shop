@@ -77,7 +77,7 @@ function Navbar({ user, setUser }) {
         {/* Auth */}
         {user ? (
           <button
-            className="button"
+            className="button logout-btn"
             onClick={() => {
               handleLogout();
               closeMenu();
