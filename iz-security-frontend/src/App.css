@@ -1455,18 +1455,18 @@ html, body {
 @media (max-width: 768px) {
 
   .cctv-wrapper {
-    top: 20px;
+    top: 130px;   /* 🔥 move below logo */
     right: 20px;
-    transform: scale(0.8);   /* smaller camera */
+    transform: scale(0.75);  /* slightly smaller */
   }
 
   .camera-beam {
-    top: 50px;
-    right: 30px;
+    top: 60px;    /* adjust beam start */
+    right: 25px;
 
-    width: 320px;
-    height: 300px;
+    width: 280px;
+    height: 260px;
 
-    transform: rotate(15deg);  /* slight adjust */
+    transform: rotate(18deg);
   }
 }
