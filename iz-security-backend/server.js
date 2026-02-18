@@ -528,10 +528,10 @@ app.post("/upload-product", upload.single("image"), async (req, res) => {
   const sql = `
     INSERT INTO products 
     (name, description, price, original_price, image, stock)
-    VALUES (?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?)
   `;
 
-  db.query(sql, [name, description, priceNum, imagePath, stockNum], (err) => {
+  db.query(sql, [name, description, priceNum, original_price || null, imagePath, stockNum], (err) => {
     if (err) {
       console.error("DB Insert Error:", err);
       return res.status(500).json({ error: err.message });
@@ -632,7 +632,7 @@ app.put("/products/:id", upload.single("image"), async (req, res) => {
     SET name=?, description=?, price=?, original_price=?, image=?, stock=? 
     WHERE id=?`;
 
-  db.query(sql, [name, description, price, imagePath, stock, req.params.id], (err) => {
+  db.query(sql, [name, description, price, original_price || null, imagePath, stock, req.params.id], (err) => {
     if (err) return res.status(500).send("Error");
     res.send("Product updated");
   });
