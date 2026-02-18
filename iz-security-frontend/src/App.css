@@ -1444,7 +1444,7 @@ html, body {
   clip-path: polygon(100% 0%, 0% 100%, 100% 100%);
 
   transform-origin: top right;
-  transform: rotate(18deg);   /* ✅ tilt upward correctly */
+  transform: rotate(22deg);   /* ✅ tilt upward correctly */
 
   animation: beamPulse 3s ease-in-out infinite;
   pointer-events: none;
@@ -1462,7 +1462,7 @@ html, body {
 
   .camera-beam {
     top: 60px;    /* adjust beam start */
-    right: 15px;
+    right: 30px;
 
     width: 400px;
     height: 260px;
