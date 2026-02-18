@@ -702,8 +702,10 @@ html, body {
 
   .services-line {
     flex-direction: column;
+    justify-content: center;
     align-items: flex-start;
     font-size: 12px;
+    color: #cbd5e1;
     gap: 6px;
   }
 
