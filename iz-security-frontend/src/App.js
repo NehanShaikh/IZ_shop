@@ -17,6 +17,7 @@ import About from "./pages/About";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import FAQ from "./pages/FAQ";
+import ScrollToTop from "./ScrollToTop";
 
 function App() {
 
@@ -42,6 +43,8 @@ function App() {
 
   return (
     <Router>
+
+      <ScrollToTop />   {/* 🔥 ADD THIS LINE */}
 
       {/* Navbar only when logged in */}
       {user && <Navbar user={user} setUser={setUser} />}
