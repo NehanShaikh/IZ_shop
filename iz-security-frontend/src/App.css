@@ -707,19 +707,19 @@ html, body {
     gap: 6px;
   }
 
-  /* Remove end bullet */
+  /* REMOVE desktop end bullet */
   .services-line span::after {
-    content: "";
+    content: "" !important;
   }
 
-  /* Add bullet at beginning */
+  /* ADD bullet at beginning */
   .services-line span::before {
     content: "• ";
     color: #38bdf8;
-    margin-right: 4px;
   }
 
 }
+
 
 
 .nav-right a {
