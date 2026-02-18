@@ -1462,7 +1462,7 @@ html, body {
 
   .camera-beam {
     top: 55px;    /* adjust beam start */
-    right: 25px;
+    right: 10px;
 
     width: 400px;
     height: 260px;
