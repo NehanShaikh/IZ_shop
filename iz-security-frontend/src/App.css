@@ -704,8 +704,9 @@ html, body {
     flex-direction: column;
     align-items: center;   /* 🔥 CENTER EVERYTHING */
     justify-content: center;
-    font-size: 14px;       /* keep nice readable size */
+    font-size: 12px;       /* keep nice readable size */
     gap: 6px;
+    color: #bfc9d5a2;
     text-align: center;
   }
 
