@@ -609,7 +609,7 @@ html, body {
   }
 
   .hero-logo img {
-    width: 130px;
+    width: 110px;
   }
 
   .hero-section h1 {
@@ -720,7 +720,7 @@ html, body {
     flex-direction: column;
     align-items: center;   /* 🔥 CENTER EVERYTHING */
     justify-content: center;
-    font-size: 12px;       /* keep nice readable size */
+    font-size: 8px;       /* keep nice readable size */
     gap: 6px;
     color: #bfc9d5a2;
     text-align: center;
