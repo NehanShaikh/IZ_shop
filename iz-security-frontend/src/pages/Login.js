@@ -9,7 +9,6 @@ import { auth, provider } from "../firebase";
 import { useNavigate } from "react-router-dom";
 
 function Login({ setUser }) {
-
   const navigate = useNavigate();
 
   const [isSignup, setIsSignup] = useState(false);
@@ -33,14 +32,12 @@ function Login({ setUser }) {
   };
 
   const handleSubmit = async () => {
-
     if (!email || !password) {
       alert("Please fill all fields");
       return;
     }
 
     try {
-
       if (isSignup) {
         if (!name) {
           alert("Please enter your name");
@@ -54,14 +51,12 @@ function Login({ setUser }) {
         });
 
         await saveUser(result.user, name);
-
       } else {
         const result = await signInWithEmailAndPassword(auth, email, password);
         await saveUser(result.user);
       }
 
       navigate("/");
-
     } catch (error) {
       alert(error.message);
     }
@@ -82,6 +77,17 @@ function Login({ setUser }) {
 
       {/* 🔥 AI Security Animated Background */}
       <div className="ai-bg">
+
+        {/* 🎥 CCTV Camera */}
+        <div className="cctv-wrapper">
+          <div className="cctv-camera">
+            <div className="lens"></div>
+            <div className="rec-light"></div>
+          </div>
+          {/* 🔵 Radar Cone */}
+          <div className="camera-beam"></div>
+        </div>
+
         <div className="grid-overlay"></div>
 
         {/* Floating sensor dots */}
@@ -100,6 +106,9 @@ function Login({ setUser }) {
 
       <div className="login-center">
         <div className="login-card">
+
+          {/* 🔵 Vertical Scan Beam */}
+          <div className="card-scan"></div>
 
           <h2>{isSignup ? "Create Account" : "Login"}</h2>
 

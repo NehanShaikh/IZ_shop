@@ -1294,3 +1294,158 @@ html, body {
   position: relative;
   z-index: 2;
 }
+
+/* ================= CCTV CAMERA ================= */
+
+
+
+/* ================= PURE CSS CCTV ================= */
+
+/* ================= CINEMATIC CCTV ================= */
+
+.cctv-wrapper {
+  position: absolute;
+  top: 40px;
+  right: 80px;
+  z-index: 1;
+}
+
+/* Camera body angled toward login card */
+.cctv-camera {
+  width: 130px;
+  height: 40px;
+  background: linear-gradient(145deg, #e2e8f0, #94a3b8);
+  border-radius: 10px;
+  position: relative;
+  transform-origin: left center;
+  animation: cameraScan 4s ease-in-out infinite alternate;
+ /* 🎯 angled toward card */
+  box-shadow: 0 0 15px rgba(56,189,248,0.4);
+}
+
+@keyframes cameraScan {
+  0% { transform: rotate(20deg); }
+  100% { transform: rotate(32deg); }
+}
+
+/* Mount */
+.cctv-camera::before {
+  content: "";
+  position: absolute;
+  left: -25px;
+  top: 10px;
+  width: 25px;
+  height: 20px;
+  background: #64748b;
+  border-radius: 5px;
+}
+
+/* Lens */
+.lens {
+  position: absolute;
+  right: 10px;
+  top: 8px;
+  width: 25px;
+  height: 25px;
+  background: radial-gradient(circle, #000 40%, #1e293b 70%);
+  border-radius: 50%;
+  box-shadow: 0 0 20px #38bdf8;
+}
+
+/* Recording light */
+.rec-light {
+  position: absolute;
+  top: 5px;
+  left: 10px;
+  width: 8px;
+  height: 8px;
+  background: red;
+  border-radius: 50%;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+/* 🔵 Radar Beam falling on login card */
+/* Make login card relative */
+.login-card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Vertical scanning beam */
+.card-scan {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  background: linear-gradient(
+  to bottom,
+  transparent 0%,
+  rgba(56,189,248,0.05) 30%,
+  rgba(56,189,248,0.4) 50%,
+  rgba(56,189,248,0.05) 70%,
+  transparent 100%
+  );
+
+
+  animation: verticalScan 3s linear infinite;
+  pointer-events: none;
+}
+
+/* Animation */
+@keyframes verticalScan {
+  0% {
+    top: -100%;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
+
+/* Radar pulse animation */
+@keyframes radarPulse {
+  0% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
+
+/* ================= CAMERA RADAR CONE ================= */
+
+/* ================= REAL CONNECTED BEAM ================= */
+.camera-beam {
+  position: absolute;
+  top: 60px;
+  right: 55px;
+
+  width: 500px;
+  height: 400px;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(56,189,248,0.4),
+    rgba(56,189,248,0.15),
+    transparent
+  );
+
+  clip-path: polygon(100% 0%, 0% 100%, 100% 100%);
+
+  transform-origin: top right;
+  transform: rotate(18deg);   /* ✅ tilt upward correctly */
+
+  animation: beamPulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
