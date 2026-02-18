@@ -7,7 +7,7 @@ function Contact() {
 
         <div className="contact-item">
           <h3>📞 Phone</h3>
-          <p>+91 7795131735</p>
+          <p>+91 7411114770</p>
         </div>
 
         <div className="contact-item">
