@@ -11,6 +11,7 @@ function Products({ user }) {
     name: "",
     description: "",
     price: "",
+    original_price: "",
     image: null,
     imageUrl: "",
     stock: ""
@@ -46,6 +47,7 @@ function Products({ user }) {
       formData.append("name", newProduct.name);
       formData.append("description", newProduct.description);
       formData.append("price", newProduct.price);
+      formData.append("original_price", newProduct.original_price);
       formData.append("stock", newProduct.stock);
 
       if (newProduct.image) {
@@ -86,6 +88,7 @@ function Products({ user }) {
       formData.append("name", editProduct.name);
       formData.append("description", editProduct.description);
       formData.append("price", editProduct.price);
+      formData.append("original_price", editProduct.original_price);
       formData.append("stock", editProduct.stock);
 
       if (editProduct.image instanceof File) {
@@ -196,6 +199,14 @@ function Products({ user }) {
             value={newProduct.price}
             onChange={e => setNewProduct({ ...newProduct, price: e.target.value })}
           />
+
+          <input
+            type="number"
+            placeholder="Original Price"
+            value={newProduct.original_price}
+            onChange={e => setNewProduct({ ...newProduct, original_price: e.target.value })}
+          />
+
 
           <input
             type="number"
@@ -345,6 +356,15 @@ function Products({ user }) {
 
                 <input
                   type="number"
+                  value={editProduct.original_price || ""}
+                  onChange={(e) =>
+                    setEditProduct({ ...editProduct, original_price: e.target.value })
+                  }
+                />
+
+
+                <input
+                  type="number"
                   value={editProduct.stock}
                   onChange={(e) =>
                     setEditProduct({ ...editProduct, stock: e.target.value })
@@ -382,9 +402,16 @@ function Products({ user }) {
               <>
                 <h3>{selectedProduct.name}</h3>
                 <p>{selectedProduct.description}</p>
-                <h3 style={{ color: "#38bdf8" }}>
-                  ₹{selectedProduct.price}
-                </h3>
+                {user?.role === "admin" && selectedProduct.original_price && (
+  <p style={{ textDecoration: "line-through", color: "#94a3b8" }}>
+    Original Price: ₹{selectedProduct.original_price}
+  </p>
+)}
+
+<h3 style={{ color: "#38bdf8" }}>
+  ₹{selectedProduct.price}
+</h3>
+
                 <p>Stock: {selectedProduct.stock}</p>
 
                 {user?.role === "customer" && (

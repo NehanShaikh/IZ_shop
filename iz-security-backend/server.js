@@ -496,7 +496,7 @@ app.post("/upload-product", upload.single("image"), async (req, res) => {
   console.log("Body:", req.body);
   console.log("File:", req.file);
 
-  const { name, description, price, stock, imageUrl } = req.body;
+  const { name, description, price, original_price, stock, imageUrl } = req.body;
 
   // Basic validation
   if (!name || !price) {
@@ -527,7 +527,7 @@ app.post("/upload-product", upload.single("image"), async (req, res) => {
 
   const sql = `
     INSERT INTO products 
-    (name, description, price, image, stock)
+    (name, description, price, original_price, image, stock)
     VALUES (?, ?, ?, ?, ?)
   `;
 
@@ -614,7 +614,7 @@ app.post("/products", (req, res) => {
 
 app.put("/products/:id", upload.single("image"), async (req, res) => {
 
-  const { name, description, price, stock, imageUrl } = req.body;
+  const { name, description, price, original_price, stock, imageUrl } = req.body;
 
   let imagePath = imageUrl || null;
 
@@ -629,7 +629,7 @@ app.put("/products/:id", upload.single("image"), async (req, res) => {
 
   const sql = `
     UPDATE products 
-    SET name=?, description=?, price=?, image=?, stock=? 
+    SET name=?, description=?, price=?, original_price=?, image=?, stock=? 
     WHERE id=?`;
 
   db.query(sql, [name, description, price, imagePath, stock, req.params.id], (err) => {
