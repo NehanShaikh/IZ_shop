@@ -195,7 +195,7 @@ html, body {
   color: #38bdf8;
 }
 
-.hero-section p {
+.hero-section p:not(.services-line) {
   font-size: 18px;
   color: #94a3b8;
   margin: 20px 0;
