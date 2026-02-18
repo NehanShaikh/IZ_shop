@@ -1449,3 +1449,24 @@ html, body {
   animation: beamPulse 3s ease-in-out infinite;
   pointer-events: none;
 }
+
+
+/* ================= MOBILE CCTV FIX ================= */
+@media (max-width: 768px) {
+
+  .cctv-wrapper {
+    top: 20px;
+    right: 20px;
+    transform: scale(0.8);   /* smaller camera */
+  }
+
+  .camera-beam {
+    top: 50px;
+    right: 30px;
+
+    width: 320px;
+    height: 300px;
+
+    transform: rotate(15deg);  /* slight adjust */
+  }
+}
