@@ -694,6 +694,14 @@ html, body {
     white-space: normal;   /* allow wrapping if text is long */
   }
 
+  .services-line {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .services-line span::after {
+    content: "";
+  }
 
 }
 
@@ -1144,4 +1152,22 @@ html, body {
 
 .footer-links a:hover {
   text-decoration: underline;
+}
+
+.services-line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+  color: #cbd5e1;
+  text-align: center;
+}
+
+.services-line span::after {
+  content: " •";
+}
+
+.services-line span:last-child::after {
+  content: "";
 }

@@ -13,9 +13,14 @@ function Home() {
 
         <h1>Smart Security Solutions for Modern Spaces</h1>
 
-        <p>
-  4G & WiFi CCTV Cameras • DVR/NVR Systems • Biometric & Access Control • Alarm Systems • Professional Surveillance Installation
+        <p className="services-line">
+  <span>4G & WiFi CCTV Cameras</span>
+  <span>DVR/NVR Systems</span>
+  <span>Biometric & Access Control</span>
+  <span>Alarm Systems</span>
+  <span>Professional Surveillance Installation</span>
 </p>
+
 
 
 
