@@ -123,7 +123,7 @@ function Orders({ user }) {
       </h2>
 
       {/* FILTER BUTTONS */}
-      <div style={{ marginBottom: "25px" }}>
+      <div className="order-filters">
         {[
           "All",
           "Pending",

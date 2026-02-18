@@ -702,10 +702,13 @@ html, body {
 
   /* 🔥 FIX ORDER FILTER BUTTONS IN MOBILE */
   .order-filters {
-    display: grid;
-    grid-template-columns: 1fr 1fr;   /* 2 buttons per row */
-    gap: 12px;
-    margin-bottom: 25px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  column-gap: 12px;   /* space left-right */
+  row-gap: 20px;      /* 🔥 more space top-bottom */
+
+  margin-bottom: 25px;
   }
 
   .order-filters button {
