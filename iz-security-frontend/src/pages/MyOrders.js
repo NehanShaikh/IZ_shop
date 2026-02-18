@@ -315,7 +315,7 @@ function MyOrders({ user }) {
         display: "inline-block"
       }}
     >
-      📄 Download Receipt
+      📄 View Receipt
     </a>
   </div>
 )}
