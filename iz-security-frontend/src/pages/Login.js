@@ -80,10 +80,15 @@ function Login({ setUser }) {
   return (
     <div className="login-page">
 
-      {/* 🔥 CCTV Animated Background */}
-      <div className="cctv-bg">
-        <div className="scan-line"></div>
-        <div className="radar"></div>
+      {/* 🔥 AI Security Animated Background */}
+      <div className="ai-bg">
+        <div className="grid-overlay"></div>
+
+        {/* Floating sensor dots */}
+        <span className="sensor s1"></span>
+        <span className="sensor s2"></span>
+        <span className="sensor s3"></span>
+        <span className="sensor s4"></span>
       </div>
 
       <div className="login-header">

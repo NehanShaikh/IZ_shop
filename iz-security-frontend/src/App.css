@@ -1228,54 +1228,67 @@ html, body {
 }
 
 /* ================= CCTV BACKGROUND ANIMATION ================= */
+/* ================= AI SECURITY BACKGROUND ================= */
 
 .login-page {
   position: relative;
   overflow: hidden;
 }
 
-/* Background Layer */
-.cctv-bg {
+/* Main background */
+.ai-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+  background: radial-gradient(circle at 30% 30%, #0f172a, #020617 70%);
   z-index: 0;
 }
 
-/* Moving Scan Line */
-.scan-line {
+/* Soft animated grid */
+.grid-overlay {
   position: absolute;
-  width: 100%;
-  height: 3px;
-  background: linear-gradient(to right, transparent, #38bdf8, transparent);
-  animation: scanMove 4s linear infinite;
-  opacity: 0.7;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(56,189,248,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,189,248,0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gridMove 15s linear infinite;
 }
 
-@keyframes scanMove {
-  0% { top: 0%; }
-  100% { top: 100%; }
+@keyframes gridMove {
+  0% { transform: translate(0,0); }
+  100% { transform: translate(40px,40px); }
 }
 
-/* Radar Circle */
-.radar {
+/* Floating glowing sensors */
+.sensor {
   position: absolute;
-  width: 400px;
-  height: 400px;
-  border: 2px solid rgba(56, 189, 248, 0.2);
+  width: 14px;
+  height: 14px;
+  background: #38bdf8;
   border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: rotateRadar 8s linear infinite;
+  box-shadow: 0 0 15px #38bdf8;
+  animation: float 6s ease-in-out infinite alternate,
+             pulse 2s infinite;
 }
 
-@keyframes rotateRadar {
-  0% { transform: translate(-50%, -50%) rotate(0deg); }
-  100% { transform: translate(-50%, -50%) rotate(360deg); }
+/* Different positions */
+.s1 { top: 20%; left: 15%; }
+.s2 { top: 60%; left: 80%; }
+.s3 { top: 75%; left: 30%; }
+.s4 { top: 35%; left: 70%; }
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-20px); }
 }
 
-/* Make login content above animation */
+@keyframes pulse {
+  0% { box-shadow: 0 0 10px #38bdf8; }
+  50% { box-shadow: 0 0 25px #38bdf8; }
+  100% { box-shadow: 0 0 10px #38bdf8; }
+}
+
+/* Keep content above background */
 .login-header,
 .login-center {
   position: relative;
