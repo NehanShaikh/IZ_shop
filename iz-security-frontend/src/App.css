@@ -699,16 +699,26 @@ html, body {
 
 /* ✅ Mobile fix */
 @media (max-width: 600px) {
+
   .services-line {
     flex-direction: column;
+    align-items: flex-start;
     font-size: 12px;
-    gap: 10px;
+    gap: 6px;
   }
 
+  /* Remove end bullet */
   .services-line span::after {
-    content: "•" !important;
+    content: "";
   }
-  
+
+  /* Add bullet at beginning */
+  .services-line span::before {
+    content: "• ";
+    color: #38bdf8;
+    margin-right: 4px;
+  }
+
 }
 
 
