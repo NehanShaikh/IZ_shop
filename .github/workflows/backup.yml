@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 name: Daily Database Backup
 
 on:
   schedule:
     - cron: "0 */12 * * *"  # Every 12 hours (FREE & safe)
   workflow_dispatch:        # Allows manual run
+=======
+name: Daily Database Backup to Cloudinary
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"
+  workflow_dispatch:      # Manual run option
+>>>>>>> f387d53413d383ad4104af2016128a211fe99d8e
 
 jobs:
   backup:
@@ -18,10 +27,19 @@ jobs:
         with:
           node-version: 18
 
+<<<<<<< HEAD
       - name: 📦 Install Dependencies
         run: npm install
 
       - name: 🗄️ Run Database Backup Script
+=======
+      - name: 📂 Go to Backend Folder & Install Dependencies
+        working-directory: iz-security-backend
+        run: npm install
+
+      - name: 💾 Run Backup Script (Cloudinary Upload)
+        working-directory: iz-security-backend
+>>>>>>> f387d53413d383ad4104af2016128a211fe99d8e
         run: node backup.js
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
