@@ -6,20 +6,6 @@ function Terms() {
       <div className="info-card">
 
         <div className="info-section">
-          <h3>💰 Refund Policy</h3>
-          <p>
-            Refunds are processed within 5-7 business days in case of
-            cancellations due to damaged or defective products.
-          </p>
-          <p>
-            If a prepaid online order is cancelled by the customer before delivery,
-            only 80% of the paid amount will be refunded.
-            The remaining 20% will be retained towards processing,
-            transaction, and service charges.
-          </p>
-        </div>
-
-        <div className="info-section">
           <h3>🚚 Delivery Policy</h3>
           <p>
             Delivery services are currently available only within
@@ -30,6 +16,27 @@ function Terms() {
             on product availability.
           </p>
         </div>
+
+        {/* 🆕 INSTALLATION POLICY */}
+<div className="info-section">
+  <h3>🛠️ Installation & Service Policy</h3>
+  <p>
+    Installation services are available for selected products such as
+    CCTV cameras and security systems. Installation charges may apply
+    depending on the product type, installation complexity, and location.
+  </p>
+  <p>
+    In some cases, free installation may be provided as part of
+    promotional offers or bulk orders, at the discretion of
+    IZ Security System.
+  </p>
+  <p>
+    Installation services are primarily available within Mangalore city.
+    Customers outside Mangalore may contact us to check service
+    availability and applicable charges.
+  </p>
+</div>
+
 
         {/* 🆕 OUTSIDE MANGALORE ORDER POLICY */}
 <div className="info-section">
@@ -77,13 +84,37 @@ function Terms() {
           </p>
         </div>
 
+        {/* 🆕 RETURN POLICY */}
+<div className="info-section">
+  <h3>🔄 Return Policy</h3>
+  <p>
+    Returns are accepted only if the product is found to be damaged,
+    defective, or not functioning properly at the time of delivery.
+    Customers must report the issue within 5-7 days from the date of delivery.
+  </p>
+  <p>
+    To initiate a return request, customers are required to contact our
+    support team with proper proof such as images or videos of the damaged
+    or defective product. Return requests made after 7 days of delivery
+    will not be accepted.
+  </p>
+  <p>
+    Products that are physically damaged due to misuse, improper installation,
+    or external factors after delivery will not be eligible for return or refund.
+  </p>
+</div>
+
         <div className="info-section">
-          <h3>👤 User Responsibilities</h3>
+          <h3>💰 Refund Policy</h3>
           <p>
-            Users must provide accurate and complete information
-            while placing orders. Any misuse of the platform,
-            fraudulent activity, or false details may result in
-            cancellation of orders or suspension of the account.
+            Refunds are processed within 5-7 business days in case of
+            cancellations due to damaged or defective products.
+          </p>
+          <p>
+            If a prepaid online order is cancelled by the customer before delivery,
+            only 80% of the paid amount will be refunded.
+            The remaining 20% will be retained towards processing,
+            transaction, and service charges.
           </p>
         </div>
 
@@ -96,6 +127,16 @@ function Terms() {
           </p>
           <p>
             Cash on Delivery (COD) is available within eligible service areas.
+          </p>
+        </div>
+
+        <div className="info-section">
+          <h3>👤 User Responsibilities</h3>
+          <p>
+            Users must provide accurate and complete information
+            while placing orders. Any misuse of the platform,
+            fraudulent activity, or false details may result in
+            cancellation of orders or suspension of the account.
           </p>
         </div>
 
