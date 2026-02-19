@@ -56,7 +56,7 @@ function FAQ() {
           <h3>⏳ How long does delivery take?</h3>
           <p>
             Delivery usually takes 3–7 working days depending on product
-            availability and delivery location within Mangalore.
+            availability.
           </p>
         </div>
 
