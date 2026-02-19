@@ -57,6 +57,8 @@ function Terms() {
   <p>
     Bulk discounts are applicable only after order review
     and are not automatically guaranteed for every order.
+    Customer can try Contacting IZ Security System before
+    placing Bulk Orders.
   </p>
 </div>
 
