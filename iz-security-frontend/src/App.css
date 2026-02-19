@@ -1481,3 +1481,21 @@ html, body {
   box-shadow: 0 0 20px #38bdf8;
   }
 }
+
+/* ================= MOBILE PRODUCT IMAGE FIX ================= */
+@media (max-width: 768px) {
+
+  .image-wrapper {
+    aspect-ratio: auto !important;   /* remove square crop */
+    height: auto !important;
+    overflow: visible;
+  }
+
+  .image-wrapper img {
+    width: 100%;
+    height: auto !important;        /* show full image */
+    object-fit: contain !important; /* no cropping */
+    border-radius: 10px;
+  }
+
+}
