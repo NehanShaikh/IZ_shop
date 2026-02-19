@@ -1,0 +1,30 @@
+name: Daily Database Backup
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"  # Every 12 hours (FREE & safe)
+  workflow_dispatch:        # Allows manual run
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 📦 Install Dependencies
+        run: npm install
+
+      - name: 🗄️ Run Database Backup Script
+        run: node backup.js
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
