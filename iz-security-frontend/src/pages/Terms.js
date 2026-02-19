@@ -12,7 +12,7 @@ function Terms() {
             cancellations due to damaged or defective products.
           </p>
           <p>
-            If a prepaid online order is cancelled by the customer,
+            If a prepaid online order is cancelled by the customer before delivery,
             only 80% of the paid amount will be refunded.
             The remaining 20% will be retained towards processing,
             transaction, and service charges.
@@ -57,8 +57,8 @@ function Terms() {
   <p>
     Bulk discounts are applicable only after order review
     and are not automatically guaranteed for every order.
-    Customer can try Contacting IZ Security System before
-    placing Bulk Orders.
+    Customer can try contacting IZ Security System before
+    placing bulk orders.
   </p>
 </div>
 
