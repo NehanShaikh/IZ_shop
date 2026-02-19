@@ -31,6 +31,21 @@ function Terms() {
           </p>
         </div>
 
+        {/* 🆕 ORDER CANCELLATION POLICY */}
+        <div className="info-section">
+          <h3>❌ Order Cancellation Policy</h3>
+          <p>
+            Customers can cancel their orders within 24 hours of placing
+            the order. Cancellation requests made after 24 hours may not
+            be accepted once the order is processed, shipped, or out for delivery.
+          </p>
+          <p>
+            Orders that are already shipped or marked as "Out for Delivery"
+            cannot be cancelled. In such cases, customers may contact support
+            for further assistance.
+          </p>
+        </div>
+
         <div className="info-section">
           <h3>👤 User Responsibilities</h3>
           <p>
