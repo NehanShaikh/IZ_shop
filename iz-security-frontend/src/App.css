@@ -1483,19 +1483,23 @@ html, body {
 }
 
 /* ================= MOBILE PRODUCT IMAGE FIX ================= */
+/* ================= MOBILE PRODUCT IMAGE PREMIUM FIX ================= */
 @media (max-width: 768px) {
 
   .image-wrapper {
-    aspect-ratio: auto !important;   /* remove square crop */
-    height: auto !important;
-    overflow: visible;
+    aspect-ratio: auto;
+    height: 220px;            /* fixed nice height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #020617;      /* dark background for empty space */
   }
 
   .image-wrapper img {
     width: 100%;
-    height: auto !important;        /* show full image */
-    object-fit: contain !important; /* no cropping */
-    border-radius: 10px;
+    height: 100%;
+    object-fit: contain;      /* full image without crop */
   }
 
 }
+
