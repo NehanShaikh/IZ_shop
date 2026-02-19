@@ -31,6 +31,35 @@ function Terms() {
           </p>
         </div>
 
+        {/* 🆕 OUTSIDE MANGALORE ORDER POLICY */}
+<div className="info-section">
+  <h3>📍 Orders Outside Mangalore</h3>
+  <p>
+    Orders from locations outside Mangalore city are accepted
+    only on a self-pickup basis.
+  </p>
+  <p>
+    Customers placing orders from outside Mangalore must
+    collect their products directly from our Mangalore shop.
+    Home delivery is currently limited to Mangalore city only.
+  </p>
+</div>
+
+        {/* 🆕 BULK ORDER DISCOUNT POLICY */}
+<div className="info-section">
+  <h3>📦 Bulk Order Discount Policy</h3>
+  <p>
+    Additional discounts may be provided for bulk orders
+    based on the quantity of products placed in a single order.
+    The discount eligibility and percentage will be decided
+    by the admin depending on order volume and product type.
+  </p>
+  <p>
+    Bulk discounts are applicable only after order review
+    and are not automatically guaranteed for every order.
+  </p>
+</div>
+
         {/* 🆕 ORDER CANCELLATION POLICY */}
         <div className="info-section">
           <h3>❌ Order Cancellation Policy</h3>
