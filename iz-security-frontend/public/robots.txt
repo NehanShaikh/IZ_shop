@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://izshop.netlify.app/sitemap.xml
+Sitemap: https://izsecuritysystem.netlify.app/sitemap.xml
