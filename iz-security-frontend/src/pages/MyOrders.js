@@ -333,6 +333,25 @@ function MyOrders({ user }) {
   })}
 </p>
 
+{/* 🔥 SHOW CANCEL REASON */}
+{order.order_status === "Cancelled" && order.cancel_reason && (
+  <div
+    style={{
+      marginTop: "12px",
+      padding: "12px",
+      backgroundColor: "#0f172a",
+      borderRadius: "8px",
+      border: "1px solid #ef4444",
+      color: "#f87171"
+    }}
+  >
+    <strong>Cancellation Reason:</strong>
+    <div style={{ marginTop: "6px" }}>
+      {order.cancel_reason}
+    </div>
+  </div>
+)}
+
             {/* Receipt */}
 {order.order_status === "Delivered" && order.invoice_pdf && (
   <div style={{ marginTop: "15px" }}>

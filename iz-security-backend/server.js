@@ -988,13 +988,32 @@ if (status === "Cancelled") {
   }
 
   // 🔥 Detect who cancelled
-  const cancelledByAdmin =
-    reason && reason.includes("Order cancelled by IZ");
+  // 🔥 Detect who cancelled
+const cancelledByAdmin =
+  reason && reason.includes("Order cancelled by IZ");
 
-  // ✅ Send WhatsApp ONLY if customer cancelled
-  if (!cancelledByAdmin) {
+// 🔥 Prepare WhatsApp message
+let message = "";
 
-    const message = `
+if (cancelledByAdmin) {
+  message = `
+🚨 ORDER CANCELLED BY IZ
+
+🆔 Order ID: ${order.id}
+👤 Customer: ${order.customer_name}
+📞 Phone: ${order.phone}
+📍 Address: ${order.address}
+
+📝 Reason: ${reason}
+
+💳 Payment: ${order.payment_method}
+💰 Total: ₹${order.total_amount}
+
+📦 Products:
+${order.products}
+  `;
+} else {
+  message = `
 🚨 ORDER CANCELLED BY CUSTOMER
 
 🆔 Order ID: ${order.id}
@@ -1009,14 +1028,15 @@ if (status === "Cancelled") {
 
 📦 Products:
 ${order.products}
-    `;
+  `;
+}
 
-    await client.messages.create({
-      from: process.env.TWILIO_WHATSAPP_NUMBER,
-      to: process.env.ADMIN_WHATSAPP,
-      body: message
-    });
-  }
+// ✅ Send WhatsApp for BOTH cases
+  await client.messages.create({
+  from: process.env.TWILIO_WHATSAPP_NUMBER,
+  to: process.env.ADMIN_WHATSAPP,
+  body: message
+  });
 
   return res.json({ message: "Order Cancelled Successfully" });
 }
