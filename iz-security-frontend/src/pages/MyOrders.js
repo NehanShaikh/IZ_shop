@@ -475,9 +475,21 @@ function MyOrders({ user }) {
 
             <p>{selectedProduct.description}</p>
 
-            <h3 style={{ color: "#38bdf8" }}>
-              ₹{selectedProduct.price}
-            </h3>
+            {/* Show Original Price (if exists) */}
+{selectedProduct.original_price && (
+  <p style={{
+    textDecoration: "line-through",
+    color: "#94a3b8",
+    fontSize: "14px"
+  }}>
+    ₹{selectedProduct.original_price}
+  </p>
+)}
+
+{/* Show Discounted Price */}
+<h3 style={{ color: "#22c55e" }}>
+  ₹{selectedProduct.price}
+</h3>
 
             <p>Stock: {selectedProduct.stock}</p>
 

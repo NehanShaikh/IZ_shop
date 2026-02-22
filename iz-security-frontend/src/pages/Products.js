@@ -142,27 +142,33 @@ function Products({ user }) {
 
   // ================= ADD TO CART =================
   const addToCart = async (product) => {
-    if (!user?.id) {
-      alert("Please login properly");
-      return;
-    }
 
-    try {
-      await fetch(`${API}/cart`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user.id,
-          productId: product.id
-        })
-      });
+  if (product.stock <= 0) {
+    alert("This product is currently unavailable");
+    return;
+  }
 
-      alert("Added to Cart");
+  if (!user?.id) {
+    alert("Please login properly");
+    return;
+  }
 
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  try {
+    await fetch(`${API}/cart`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: user.id,
+        productId: product.id
+      })
+    });
+
+    alert("Added to Cart");
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   if (loading) {
   return (
@@ -472,16 +478,34 @@ function Products({ user }) {
   </div>
 )}
 
-                <p>Stock: {selectedProduct.stock}</p>
+                <p style={{ color: selectedProduct.stock > 0 ? "#22c55e" : "#ef4444" }}>
+  Stock: {selectedProduct.stock > 0 ? selectedProduct.stock : "Out of Stock"}
+</p>
 
                 {user?.role === "customer" && (
-                  <button
-                    className="button"
-                    onClick={() => addToCart(selectedProduct)}
-                  >
-                    Add to Cart
-                  </button>
-                )}
+  <>
+    {selectedProduct.stock > 0 ? (
+      <button
+        className="button"
+        onClick={() => addToCart(selectedProduct)}
+      >
+        Add to Cart
+      </button>
+    ) : (
+      <button
+        className="button"
+        disabled
+        style={{
+          background: "#475569",
+          cursor: "not-allowed",
+          opacity: 0.7
+        }}
+      >
+        Currently Unavailable
+      </button>
+    )}
+  </>
+)}
 
                 {user?.role === "admin" && (
                   <>
