@@ -1,18 +1,35 @@
+import ClipLoader from "react-spinners/ClipLoader";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 function Cart({ user }) {
 
   const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // 🔥 Load cart from database
   useEffect(() => {
-    if (!user) return;
+  if (!user) {
+  setCart([]);
+  setLoading(false);
+  return;
+  }
 
-    fetch(`https://iz-shop.onrender.com/cart/${user.id}`)
-      .then(res => res.json())
-      .then(data => setCart(data));
-  }, [user]);
+  setLoading(true);
+
+  fetch(`https://iz-shop.onrender.com/cart/${user.id}`)
+    .then(res => res.json())
+    .then(data => {
+      setCart(data);
+    })
+    .catch(err => {
+      console.error(err);
+    })
+    .finally(() => {
+      setLoading(false);
+    });
+
+}, [user]);
 
   // 🔥 Increase Quantity
   const increaseQty = async (id, currentQty) => {
@@ -68,6 +85,23 @@ function Cart({ user }) {
     (sum, item) => sum + (item.price * item.quantity),
     0
   );
+
+  if (loading) {
+  return (
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "60vh"
+    }}>
+      <ClipLoader size={60} color="#38bdf8" />
+      <p style={{ marginTop: "15px", color: "#38bdf8" }}>
+        Loading your cart...
+      </p>
+    </div>
+  );
+}
 
   return (
     <div className="container">

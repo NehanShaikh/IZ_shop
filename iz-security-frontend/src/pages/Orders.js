@@ -1,9 +1,11 @@
+import ClipLoader from "react-spinners/ClipLoader";
 import { useEffect, useState } from "react";
 
 function Orders({ user }) {
 
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("All");
+  const [loading, setLoading] = useState(true);
 
   // 🔥 Cancel Modal States
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -18,19 +20,25 @@ function Orders({ user }) {
   // =============================
   const fetchOrders = async () => {
     try {
+      setLoading(true);
       const res = await fetch(`${API}/orders`);
       const data = await res.json();
       setOrders(data);
     } catch (error) {
       console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user && user.role === "admin") {
-      fetchOrders();
-    }
-  }, [user]);
+  if (!user || user.role !== "admin") {
+    setLoading(false);
+    return;
+  }
+
+  fetchOrders();
+}, [user]);
 
   if (!user || user.role !== "admin") {
     return (
@@ -109,6 +117,19 @@ function Orders({ user }) {
       console.error("Upload error:", error);
     }
   };
+
+  if (loading) {
+  return (
+    <div style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "60vh"
+    }}>
+      <ClipLoader size={60} color="#38bdf8" />
+    </div>
+  );
+}
 
   const filteredOrders =
     filter === "All"

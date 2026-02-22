@@ -1,3 +1,4 @@
+import ClipLoader from "react-spinners/ClipLoader";
 import { useState } from "react";
 import {
   signInWithPopup,
@@ -15,6 +16,7 @@ function Login({ setUser }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const saveUser = async (firebaseUser, customName = null) => {
     const response = await fetch("https://iz-shop.onrender.com/save-user", {
@@ -38,9 +40,11 @@ function Login({ setUser }) {
     }
 
     try {
+      setLoading(true); // 🔥 Start loading
       if (isSignup) {
         if (!name) {
           alert("Please enter your name");
+          setLoading(false); // 🔥 FIX
           return;
         }
 
@@ -59,16 +63,21 @@ function Login({ setUser }) {
       navigate("/");
     } catch (error) {
       alert(error.message);
+    } finally {
+      setLoading(false); // 🔥 Stop loading
     }
   };
 
   const handleGoogleLogin = async () => {
     try {
+      setLoading(true);
       const result = await signInWithPopup(auth, provider);
       await saveUser(result.user);
       navigate("/");
     } catch (error) {
       alert(error.message);
+    } finally {
+      setLoading(false); // 🔥 Stop loading
     }
   };
 
@@ -135,9 +144,9 @@ function Login({ setUser }) {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <button className="login-btn" onClick={handleSubmit}>
-            {isSignup ? "Create Account" : "Login"}
-          </button>
+          <button className="login-btn" onClick={handleSubmit} disabled={loading}>
+  {loading ? <ClipLoader size={20} color="#fff" /> : isSignup ? "Create Account" : "Login"}
+</button>
 
           <div style={{ marginTop: "10px", fontSize: "14px" }}>
             {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
@@ -153,9 +162,9 @@ function Login({ setUser }) {
             <span>OR</span>
           </div>
 
-          <button className="google-btn" onClick={handleGoogleLogin}>
-            Continue with Google
-          </button>
+          <button className="google-btn" onClick={handleGoogleLogin} disabled={loading}>
+  {loading ? <ClipLoader size={20} color="#000" /> : "Continue with Google"}
+</button>
 
         </div>
       </div>

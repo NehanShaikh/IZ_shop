@@ -1,9 +1,11 @@
+import ClipLoader from "react-spinners/ClipLoader";
 import { useEffect, useState } from "react";
 
 function Products({ user }) {
   const API = "https://iz-shop.onrender.com";
 
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
 
@@ -23,17 +25,23 @@ function Products({ user }) {
   // ================= FETCH PRODUCTS =================
   const fetchProducts = async () => {
     try {
+      setLoading(true); // 🔥 Start loading
       const res = await fetch(`${API}/products`);
       const data = await res.json();
       setProducts(data);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false); // 🔥 Stop loading
     }
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+  const load = async () => {
+    await fetchProducts();
+  };
+  load();
+}, []);
 
   // ================= SEARCH =================
   const filteredProducts = products.filter(product =>
@@ -154,6 +162,23 @@ function Products({ user }) {
       console.error(error);
     }
   };
+
+  if (loading) {
+  return (
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "60vh"
+    }}>
+      <ClipLoader size={60} color="#38bdf8" />
+      <p style={{ marginTop: "15px", color: "#38bdf8" }}>
+        Loading security products...
+      </p>
+    </div>
+  );
+}
 
   return (
     <div className="container">

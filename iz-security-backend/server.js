@@ -111,7 +111,14 @@ async function sendOrderConfirmationEmail(
 }
 
 
-async function sendStatusUpdateEmail(email, name, orderId, status, otp = null) {
+async function sendStatusUpdateEmail(
+  email,
+  name,
+  orderId,
+  status,
+  otp = null,
+  reason = null
+) {
   try {
     const msg = {
       to: email,
@@ -126,16 +133,21 @@ async function sendStatusUpdateEmail(email, name, orderId, status, otp = null) {
           <h3 style="color:#38bdf8;">Current Status: ${status}</h3>
 
           ${
-            status === "Shipped"
-              ? "<p>Your order has been shipped 🚚</p>"
-              : status === "Out for Delivery"
-              ? `<p>Your order is out for delivery today 📦</p>
-                 <h2 style="color:#ef4444;">Delivery OTP: ${otp}</h2>
-                 <p>Please share this OTP with delivery agent to confirm delivery.</p>`
-              : status === "Delivered"
-              ? "<p>Your order has been delivered successfully ✅</p>"
-              : ""
-          }
+  status === "Shipped"
+    ? "<p>Your order has been shipped 🚚</p>"
+    : status === "Out for Delivery"
+    ? `<p>Your order is out for delivery today 📦</p>
+       <h2 style="color:#ef4444;">Delivery OTP: ${otp}</h2>
+       <p>Please share this OTP with delivery agent to confirm delivery.</p>`
+    : status === "Delivered"
+    ? "<p>Your order has been delivered successfully ✅</p>"
+    : status === "Cancelled"
+    ? `<p style="color:#ef4444;">
+         Your order has been cancelled ❌
+       </p>
+       <p><strong>Reason:</strong> ${reason || "Not specified"}</p>`
+    : ""
+}
 
           <hr/>
           <small>Thank you for shopping with IZ Security System.</small>
@@ -930,25 +942,59 @@ app.put("/update-order-status/:id", async (req, res) => {
     // =====================================================
     // ❌ CANCELLED (WITH WHATSAPP)
     // =====================================================
-    if (status === "Cancelled") {
+    // =====================================================
+// =====================================================
+// ❌ CANCELLED (NO FRONTEND CHANGE REQUIRED)
+// =====================================================
+if (status === "Cancelled") {
 
-      await db.promise().query(
-        "UPDATE orders SET order_status = ?, cancel_reason = ? WHERE id = ?",
-        ["Cancelled", reason || null, orderId]
-      );
+  await db.promise().query(
+    "UPDATE orders SET order_status = ?, cancel_reason = ? WHERE id = ?",
+    ["Cancelled", reason || null, orderId]
+  );
 
-      if (!reason) {
+  const [rows] = await db.promise().query(
+    "SELECT * FROM orders WHERE id = ?",
+    [orderId]
+  );
 
-        const [results] = await db.promise().query(
-          "SELECT * FROM orders WHERE id = ?",
-          [orderId]
-        );
+  if (!rows.length)
+    return res.status(400).json({ message: "Order not found" });
 
-        if (results.length > 0) {
+  const order = rows[0];
 
-          const order = results[0];
+  const [userRows] = await db.promise().query(
+    "SELECT email FROM users WHERE id = ?",
+    [order.user_id]
+  );
 
-          const message = `
+  const [countRows] = await db.promise().query(
+    "SELECT COUNT(*) as total FROM orders WHERE user_id = ? AND id <= ?",
+    [order.user_id, orderId]
+  );
+
+  const customerOrderNumber = countRows[0].total;
+
+  // ✅ Always email customer
+  if (userRows.length > 0) {
+    await sendStatusUpdateEmail(
+  userRows[0].email,
+  order.customer_name,
+  customerOrderNumber,
+  "Cancelled",
+  null,
+  reason
+);
+  }
+
+  // 🔥 Detect who cancelled
+  const cancelledByAdmin =
+    reason && reason.includes("Order cancelled by IZ");
+
+  // ✅ Send WhatsApp ONLY if customer cancelled
+  if (!cancelledByAdmin) {
+
+    const message = `
 🚨 ORDER CANCELLED BY CUSTOMER
 
 🆔 Order ID: ${order.id}
@@ -956,23 +1002,24 @@ app.put("/update-order-status/:id", async (req, res) => {
 📞 Phone: ${order.phone}
 📍 Address: ${order.address}
 
-💳 Payment Method: ${order.payment_method}
+📝 Reason: ${reason}
+
+💳 Payment: ${order.payment_method}
 💰 Total: ₹${order.total_amount}
 
 📦 Products:
 ${order.products}
-          `;
+    `;
 
-          await client.messages.create({
-            from: process.env.TWILIO_WHATSAPP_NUMBER,
-            to: process.env.ADMIN_WHATSAPP,
-            body: message
-          });
-        }
-      }
+    await client.messages.create({
+      from: process.env.TWILIO_WHATSAPP_NUMBER,
+      to: process.env.ADMIN_WHATSAPP,
+      body: message
+    });
+  }
 
-      return res.json({ message: "Order Cancelled" });
-    }
+  return res.json({ message: "Order Cancelled Successfully" });
+}
 
     return res.json({ message: "No changes made" });
 

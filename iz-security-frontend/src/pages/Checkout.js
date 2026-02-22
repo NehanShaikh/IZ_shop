@@ -1,23 +1,35 @@
+import ClipLoader from "react-spinners/ClipLoader";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Checkout({ user }) {
 
   const navigate = useNavigate();
-
   const API = "https://iz-shop.onrender.com";
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [loading, setLoading] = useState(true);        
+  const [processing, setProcessing] = useState(false); 
   const [cart, setCart] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState("COD");
 
   // 🔥 Load cart from database
   useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
     fetch(`${API}/cart/${user.id}`)
       .then(res => res.json())
-      .then(data => setCart(data));
+      .then(data => setCart(data))
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
+
   }, [user]);
 
   const total = cart.reduce(
@@ -32,27 +44,37 @@ function Checkout({ user }) {
       return;
     }
 
+    setProcessing(true);
+
     // =============================
     // CASH ON DELIVERY
     // =============================
     if (paymentMethod === "COD") {
 
-      const response = await fetch(`${API}/place-order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user.id,
-          name,
-          phone,
-          address,
-          paymentMethod: "COD"
-        })
-      });
+      try {
+        const response = await fetch(`${API}/place-order`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: user.id,
+            name,
+            phone,
+            address,
+            paymentMethod: "COD"
+          })
+        });
 
-      const text = await response.text();
-      alert(text);
+        const text = await response.text();
+        alert(text);
 
-      navigate("/");
+        setProcessing(false);
+        navigate("/");
+      } catch (error) {
+        console.error(error);
+        alert("Order failed. Try again.");
+        setProcessing(false);
+      }
+
       return;
     }
 
@@ -70,7 +92,7 @@ function Checkout({ user }) {
       const paymentData = await paymentRes.json();
 
       const options = {
-        key: "rzp_test_SGR2OuhuHLx71x", // 🔥 replace with your test key
+        key: "rzp_test_SGR2OuhuHLx71x",
         amount: paymentData.amount,
         currency: "INR",
         name: "IZ Security System",
@@ -79,25 +101,33 @@ function Checkout({ user }) {
 
         handler: async function (response) {
 
-  const verifyRes = await fetch(`${API}/verify-payment`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      razorpay_order_id: response.razorpay_order_id,
-      razorpay_payment_id: response.razorpay_payment_id,
-      razorpay_signature: response.razorpay_signature,
-      userId: user.id,
-      name,
-      phone,
-      address
-    })
-  });
+          try {
+            const verifyRes = await fetch(`${API}/verify-payment`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                userId: user.id,
+                name,
+                phone,
+                address
+              })
+            });
 
-  const text = await verifyRes.text();
+            const text = await verifyRes.text();
+            alert(text);
 
-  alert(text);
-  navigate("/");
-},
+            setProcessing(false);
+            navigate("/");
+
+          } catch (error) {
+            console.error(error);
+            alert("Payment verification failed.");
+            setProcessing(false);
+          }
+        },
 
         prefill: {
           name: name,
@@ -115,8 +145,45 @@ function Checkout({ user }) {
     } catch (error) {
       console.error(error);
       alert("Payment failed. Try again.");
+      setProcessing(false);
     }
   };
+
+  // 🔥 Loading screen
+  if (loading) {
+    return (
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "60vh"
+      }}>
+        <ClipLoader size={60} color="#0ea5e9" />
+        <p style={{ marginTop: "15px", color: "#0ea5e9" }}>
+          Preparing your checkout...
+        </p>
+      </div>
+    );
+  }
+
+  // 🔥 User safety
+  if (!user) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "50px" }}>
+        <h2>Please login to continue</h2>
+      </div>
+    );
+  }
+
+  // 🔥 Empty cart protection
+  if (cart.length === 0) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "50px" }}>
+        <h2>Your cart is empty</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="checkout-page">
@@ -148,7 +215,6 @@ function Checkout({ user }) {
             onChange={e => setAddress(e.target.value)}
           />
 
-          {/* PAYMENT METHOD */}
           <div style={{ marginTop: "20px" }}>
             <strong>Payment Method:</strong>
 
@@ -163,7 +229,6 @@ function Checkout({ user }) {
                 Cash on Delivery
               </label>
             </div>
-
 
             <div style={{ marginTop: "8px" }}>
               <label>
@@ -188,8 +253,9 @@ function Checkout({ user }) {
         <button
           className="checkout-btn"
           onClick={handleOrder}
+          disabled={processing}
         >
-          Place Order
+          {processing ? <ClipLoader size={20} color="#fff" /> : "Place Order"}
         </button>
 
       </div>

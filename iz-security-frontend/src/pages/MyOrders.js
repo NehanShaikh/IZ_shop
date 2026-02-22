@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
+import ClipLoader from "react-spinners/ClipLoader";
 
 function MyOrders({ user }) {
 
   const [orders, setOrders] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [cancelOrderId, setCancelOrderId] = useState(null);
+  const [cancelReason, setCancelReason] = useState("");
+  const [loading, setLoading] = useState(true);
   const API = "https://iz-shop.onrender.com";
 
   useEffect(() => {
@@ -24,33 +28,62 @@ function MyOrders({ user }) {
         });
 
         setOrders(uniqueOrders);
-      });
+        setLoading(false);
+      })
+      .catch(err => {
+      console.error("Fetch error:", err);
+      setLoading(false); // 🔥 VERY IMPORTANT
+    });
 
   }, [user]);
 
-  const cancelOrder = async (id) => {
+  if (loading) {
+  return (
+    <div style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "60vh"
+    }}>
+      <ClipLoader size={60} />
+    </div>
+  );
+}
 
-    await fetch(`${API}/update-order-status/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "Cancelled" })
-    });
+  const cancelOrder = async () => {
 
-    const res = await fetch(`${API}/my-orders/${user.id}`);
-    const data = await res.json();
+  if (!cancelReason.trim()) {
+    alert("Please enter cancellation reason");
+    return;
+  }
 
-    const uniqueOrders = [];
-    const seenIds = new Set();
+  await fetch(`${API}/update-order-status/${cancelOrderId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      status: "Cancelled",
+      reason: cancelReason
+    })
+  });
 
-    data.forEach(order => {
-      if (!seenIds.has(order.id)) {
-        seenIds.add(order.id);
-        uniqueOrders.push(order);
-      }
-    });
+  setCancelOrderId(null);
+  setCancelReason("");
 
-    setOrders(uniqueOrders);
-  };
+  const res = await fetch(`${API}/my-orders/${user.id}`);
+  const data = await res.json();
+
+  const uniqueOrders = [];
+  const seenIds = new Set();
+
+  data.forEach(order => {
+    if (!seenIds.has(order.id)) {
+      seenIds.add(order.id);
+      uniqueOrders.push(order);
+    }
+  });
+
+  setOrders(uniqueOrders);
+};
 
   const getStepIndex = (status) => {
     switch (status) {
@@ -334,7 +367,10 @@ function MyOrders({ user }) {
                     borderRadius: "6px",
                     cursor: "pointer"
                   }}
-                  onClick={() => cancelOrder(order.id)}
+                  onClick={() => {
+  setCancelOrderId(order.id);
+  setCancelReason("");
+}}
                 >
                   Cancel Order
                 </button>
@@ -426,6 +462,83 @@ function MyOrders({ user }) {
           </div>
         </div>
       )}
+
+      {/* ================= CANCEL MODAL ================= */}
+{cancelOrderId && (
+  <div
+    onClick={() => setCancelOrderId(null)}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.7)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 6000
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        background: "#1e293b",
+        padding: "20px",
+        borderRadius: "10px",
+        width: "90%",
+        maxWidth: "400px"
+      }}
+    >
+      <h3>Cancel Order</h3>
+
+      <textarea
+        value={cancelReason}
+        onChange={(e) => setCancelReason(e.target.value)}
+        placeholder="Enter cancellation reason..."
+        style={{
+          width: "100%",
+          height: "80px",
+          marginTop: "10px",
+          padding: "8px",
+          borderRadius: "6px",
+          border: "1px solid #475569",
+          background: "#0f172a",
+          color: "white"
+        }}
+      />
+
+      <div style={{ marginTop: "15px", display: "flex", gap: "10px" }}>
+        <button
+          onClick={cancelOrder}
+          style={{
+            flex: 1,
+            backgroundColor: "red",
+            color: "white",
+            padding: "8px",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer"
+          }}
+        >
+          Confirm Cancel
+        </button>
+
+        <button
+          onClick={() => setCancelOrderId(null)}
+          style={{
+            flex: 1,
+            backgroundColor: "#475569",
+            color: "white",
+            padding: "8px",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer"
+          }}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
     </div>
   );
