@@ -1,5 +1,5 @@
 import ClipLoader from "react-spinners/ClipLoader";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 function Products({ user }) {
   const API = "https://iz-shop.onrender.com";
@@ -24,7 +24,7 @@ function Products({ user }) {
   const [editProduct, setEditProduct] = useState(null);
 
   // ================= FETCH PRODUCTS =================
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true); // 🔥 Start loading
       const res = await fetch(`${API}/products?role=${user?.role}`);
@@ -35,14 +35,11 @@ function Products({ user }) {
     } finally {
       setLoading(false); // 🔥 Stop loading
     }
-  };
+  }, [user?.role]);
 
   useEffect(() => {
-  const load = async () => {
-    await fetchProducts();
-  };
-  load();
-}, []);
+  fetchProducts();
+}, [fetchProducts]);
 
   // ================= SEARCH =================
   const filteredProducts = products.filter(product =>
