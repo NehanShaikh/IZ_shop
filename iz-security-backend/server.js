@@ -508,7 +508,7 @@ app.post("/upload-product", upload.single("image"), async (req, res) => {
   console.log("Body:", req.body);
   console.log("File:", req.file);
 
-  const { name, description, price, original_price, stock, imageUrl } = req.body;
+  const { name, description, price, original_price, bill_price, stock, imageUrl } = req.body;
 
   // Basic validation
   if (!name || !price) {
@@ -539,11 +539,11 @@ app.post("/upload-product", upload.single("image"), async (req, res) => {
 
   const sql = `
     INSERT INTO products 
-    (name, description, price, original_price, image, stock)
-    VALUES (?, ?, ?, ?, ?, ?)
+    (name, description, price, original_price, bill_price, image, stock)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
 
-  db.query(sql, [name, description, priceNum, original_price || null, imagePath, stockNum], (err) => {
+  db.query(sql, [name, description, priceNum, original_price || null, bill_price || null, imagePath, stockNum], (err) => {
     if (err) {
       console.error("DB Insert Error:", err);
       return res.status(500).json({ error: err.message });
@@ -606,10 +606,28 @@ app.get("/my-orders/:userId", (req, res) => {
 
 
 app.get("/products", (req, res) => {
-  db.query("SELECT * FROM products ORDER BY id DESC", (err, results) => {
+
+  const role = req.query.role;
+
+  let sql;
+
+  if (role === "admin") {
+    // Admin sees everything
+    sql = "SELECT * FROM products ORDER BY id DESC";
+  } else {
+    // Customer does NOT see bill_price
+    sql = `
+      SELECT id, name, description, price, original_price, image, stock
+      FROM products
+      ORDER BY id DESC
+    `;
+  }
+
+  db.query(sql, (err, results) => {
     if (err) return res.status(500).send("Error");
     res.json(results);
   });
+
 });
 
 
@@ -626,7 +644,7 @@ app.post("/products", (req, res) => {
 
 app.put("/products/:id", upload.single("image"), async (req, res) => {
 
-  const { name, description, price, original_price, stock, imageUrl } = req.body;
+  const { name, description, price, original_price, bill_price, stock, imageUrl } = req.body;
 
   let imagePath = imageUrl || null;
 
@@ -641,10 +659,10 @@ app.put("/products/:id", upload.single("image"), async (req, res) => {
 
   const sql = `
     UPDATE products 
-    SET name=?, description=?, price=?, original_price=?, image=?, stock=? 
+    SET name=?, description=?, price=?, original_price=?, bill_price=?, image=?, stock=? 
     WHERE id=?`;
 
-  db.query(sql, [name, description, price, original_price || null, imagePath, stock, req.params.id], (err) => {
+  db.query(sql, [name, description, price, original_price || null, bill_price || null, imagePath, stock, req.params.id], (err) => {
     if (err) return res.status(500).send("Error");
     res.send("Product updated");
   });

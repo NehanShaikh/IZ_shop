@@ -10,13 +10,14 @@ function Products({ user }) {
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const [newProduct, setNewProduct] = useState({
-    name: "",
-    description: "",
-    price: "",
-    original_price: "",
-    image: null,
-    imageUrl: "",
-    stock: ""
+  name: "",
+  description: "",
+  price: "",              // Discounted price
+  original_price: "",     // MRP
+  bill_price: "",         // Invoice price
+  image: null,
+  imageUrl: "",
+  stock: ""
   });
 
   const [editMode, setEditMode] = useState(false);
@@ -26,7 +27,7 @@ function Products({ user }) {
   const fetchProducts = async () => {
     try {
       setLoading(true); // 🔥 Start loading
-      const res = await fetch(`${API}/products`);
+      const res = await fetch(`${API}/products?role=${user?.role}`);
       const data = await res.json();
       setProducts(data);
     } catch (error) {
@@ -56,6 +57,7 @@ function Products({ user }) {
       formData.append("description", newProduct.description);
       formData.append("price", newProduct.price);
       formData.append("original_price", newProduct.original_price);
+      formData.append("bill_price", newProduct.bill_price);
       formData.append("stock", newProduct.stock);
 
       if (newProduct.image) {
@@ -74,14 +76,15 @@ function Products({ user }) {
       fetchProducts();
 
       setNewProduct({
-        name: "",
-        description: "",
-        price: "",
-        original_price: "",
-        image: null,
-        imageUrl: "",
-        stock: ""
-      });
+  name: "",
+  description: "",
+  price: "",
+  original_price: "",
+  bill_price: "",
+  image: null,
+  imageUrl: "",
+  stock: ""
+});
 
       alert("Product Added Successfully");
 
@@ -98,6 +101,7 @@ function Products({ user }) {
       formData.append("description", editProduct.description);
       formData.append("price", editProduct.price);
       formData.append("original_price", editProduct.original_price);
+      formData.append("bill_price", editProduct.bill_price);
       formData.append("stock", editProduct.stock);
 
       if (editProduct.image instanceof File) {
@@ -232,6 +236,13 @@ function Products({ user }) {
             value={newProduct.original_price}
             onChange={e => setNewProduct({ ...newProduct, original_price: e.target.value })}
           />
+
+          <input
+  type="number"
+  placeholder="Bill Price"
+  value={newProduct.bill_price}
+  onChange={e => setNewProduct({ ...newProduct, bill_price: e.target.value })}
+/>
 
 
           <input
@@ -388,6 +399,13 @@ function Products({ user }) {
                   }
                 />
 
+                <input
+  type="number"
+  value={editProduct.bill_price || ""}
+  onChange={(e) =>
+    setEditProduct({ ...editProduct, bill_price: e.target.value })
+  }
+/>
 
                 <input
                   type="number"
@@ -428,15 +446,34 @@ function Products({ user }) {
               <>
                 <h3>{selectedProduct.name}</h3>
                 <p>{selectedProduct.description}</p>
-                {user?.role === "admin" && selectedProduct.original_price && (
-  <p style={{ textDecoration: "line-through", color: "#94a3b8" }}>
-    Original Price: ₹{selectedProduct.original_price}
-  </p>
+                {/* CUSTOMER VIEW */}
+{user?.role === "customer" && (
+  <>
+    {selectedProduct.original_price && (
+      <p style={{
+        textDecoration: "line-through",
+        color: "#94a3b8"
+      }}>
+        ₹{selectedProduct.original_price}
+      </p>
+    )}
+
+    <h3 style={{ color: "#22c55e" }}>
+      ₹{selectedProduct.price}
+    </h3>
+  </>
 )}
 
-<h3 style={{ color: "#38bdf8" }}>
-  ₹{selectedProduct.price}
-</h3>
+{/* ADMIN VIEW */}
+{user?.role === "admin" && (
+  <div style={{ marginTop: "10px" }}>
+    <p>MRP: ₹{selectedProduct.original_price}</p>
+    <p>Discounted Price: ₹{selectedProduct.price}</p>
+    <p style={{ fontWeight: "bold" }}>
+      Bill Price: ₹{selectedProduct.bill_price}
+    </p>
+  </div>
+)}
 
                 <p>Stock: {selectedProduct.stock}</p>
 
