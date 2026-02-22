@@ -346,7 +346,10 @@ function MyOrders({ user }) {
     }}
   >
     <strong>Cancellation Reason:</strong>
-    <div style={{ marginTop: "6px" }}>
+    <div style={{ 
+  marginTop: "6px",
+  whiteSpace: "pre-line"
+}}>
       {order.cancel_reason}
     </div>
   </div>
