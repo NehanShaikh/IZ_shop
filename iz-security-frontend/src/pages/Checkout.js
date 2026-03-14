@@ -138,6 +138,7 @@ function Checkout({ user }) {
 
         prefill: {
           name: name,
+          email: user.email,
           contact: phone
         },
 
