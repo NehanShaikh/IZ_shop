@@ -92,7 +92,7 @@ function Checkout({ user }) {
       const paymentData = await paymentRes.json();
 
       const options = {
-        key: "rzp_test_SGR2OuhuHLx71x",
+        key: "rzp_live_SL6tzv7DB288FS",
         amount: paymentData.amount,
         currency: "INR",
         name: "IZ Security System",
