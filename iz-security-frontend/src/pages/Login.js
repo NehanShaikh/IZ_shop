@@ -71,6 +71,9 @@ function Login({ setUser }) {
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
+      provider.setCustomParameters({
+  prompt: "select_account"
+});
       const result = await signInWithPopup(auth, provider);
       await saveUser(result.user);
       navigate("/");
