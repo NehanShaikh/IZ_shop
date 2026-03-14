@@ -129,6 +129,13 @@ function Checkout({ user }) {
           }
         },
 
+        modal: {
+  ondismiss: function () {
+    alert("Payment cancelled");
+    setProcessing(false);
+  }
+},
+
         prefill: {
           name: name,
           contact: phone
